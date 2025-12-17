@@ -3,7 +3,7 @@ from fastapi import FastAPI, Query, Path, HTTPException
 import requests
 
 BASE_API_URL = "https://apitcg.com/api"
-API_KEY = "0e2f13f05b5fd140a8cc5eccb2abbc1dc72c9485b46a79c4b2dda9e9284100f4"  # CHANGE TO ENV LATER DUMBASS
+API_KEY = "0e2f13f05b5fd140a8cc5eccb2abbc1dc72c9485b46a79c4b2dda9e9284100f4"  # change later
 
 app = FastAPI()
 
@@ -11,7 +11,7 @@ app = FastAPI()
 # urls in format of 'https://apitcg.com/api/$GAME/cards?$ATTRIBUTE='
 
 
-x@app.get("/{game}/cards")
+@app.get("/{game}/cards")
 def get_cards(
     game: str = Path(..., description="Game type: one-piece, pokemon, yugioh, etc."),
     id: str = Query(..., description="Card name to search")
