@@ -1,0 +1,3 @@
+CREATE USER 'Kieran'@'%' IDENTIFIED BY 'test';
+GRANT ALL PRIVILEGES ON yourdb.* TO 'Kieran'@'%';
+FLUSH PRIVILEGES;
