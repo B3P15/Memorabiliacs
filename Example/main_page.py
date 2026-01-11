@@ -1,4 +1,5 @@
 import streamlit as st
+from collectionAPI import gatherCollectionData
 
 st.title("Hello Streamlit-er 👋")
 st.markdown(
@@ -17,3 +18,6 @@ st.markdown(
 
 if st.button("Send balloons!"):
     st.balloons()
+
+#Ideally, using a correct table name and associated userid, this would generate the entire pokemon collection (including the unwanted info)
+gatherCollectionData("Pokemon", 223)
