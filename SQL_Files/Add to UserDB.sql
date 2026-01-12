@@ -10,8 +10,15 @@
 -- insert into Users(UserID, Username, PersonalDB)
 -- values('Andrew', 'andrewrupp', 'ARuppDB');
 
--- create table Pokemon (
--- CardID varchar(45) not null);
+use aruppdb;
 
--- insert into Pokemon(CardID)
--- values('Card1');
+drop table Pokemon;
+
+create table Pokemon (
+CardID varchar(45) not null);
+
+insert into Pokemon(CardID)
+values('ex2-8'),
+('ex2-30'),
+('base2-1'),
+('dp7-1');
