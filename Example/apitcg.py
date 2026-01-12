@@ -35,3 +35,4 @@ def get_cards(
         )
 
     return response.json()
+
