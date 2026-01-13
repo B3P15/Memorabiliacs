@@ -22,6 +22,9 @@ conn.session.commit()
 test = conn.query('select U.UserID from Users as U;')
 st.write(test)
 
+st.success("Raw insert executed")
+
+
 with open('.streamlit/config.yaml') as file:
      config = yaml.load(file, Loader=SafeLoader)
 
@@ -66,6 +69,7 @@ elif st.session_state["authentication_status"] is None:
 
 
 #widget that registers a new user
+
 try:
      (email,
      username,
@@ -73,17 +77,20 @@ try:
      if email:
           #upon proper user registration, store user information in sql database for use as foreign key
           #include placeholder variables to prevent against SQL injection
-          # conn.session.execute(text('use user_database; insert into users(UserID, Username, PersonalDB) values(:UserID, :Username, :PersonalDB);'), 
-          # params={"UserID":email, "Username":username, "PersonalDB":f"{username}DB"})
-          # conn.session.commit()
-
-          user = User(UserID=email, Username=username, PersonalDB=f"{name}DB")
-
-          conn.session.add(user)
-          conn.session.commit
+          with conn.engine.begin() as connection:
+               connection.execute(
+               text("""
+               INSERT INTO users (UserID, Username, PersonalDB)
+               VALUES (:UserID, :Username, :PersonalDB)
+           """),
+          {
+            "UserID": email,
+            "Username": username,
+            "PersonalDB": f"{username}DB"
+          }
+    )
 
           st.success('User registered successfully')
-          print("Completed")
 except RegisterError as e:
      st.error(e)
 
