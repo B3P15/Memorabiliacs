@@ -1,11 +1,28 @@
 import streamlit as st
 import global_functions as gfuncs
 import temp_backend as db
+import streamlit_authenticator as stauth
+import yaml
+from yaml.loader import SafeLoader
 
+with open('.streamlit/config.yaml') as file:
+     config = yaml.load(file, Loader=SafeLoader)
+
+# Pre-hashing all plain text passwords once
+# stauth.Hasher.hash_passwords(config['credentials'])
+
+authenticator = stauth.Authenticate(
+    config['credentials'],
+    config['cookie']['name'],
+    config['cookie']['key'],
+    config['cookie']['expiry_days']
+)
 collection_page_list = gfuncs.create_page_dict(db.collection_list)
 
 st.title("Collections", text_alignment="center")
 st.space("large")
+
+authenticator.login(location="unrendered")
 
 collection_page = "pages/template.py"
 
