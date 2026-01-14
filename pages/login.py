@@ -74,22 +74,50 @@ try:
      (email,
      username,
      name) = authenticator.register_user(roles=["viewer"], clear_on_submit=True, merge_username_email=True, password_hint=False)
+     UserID = (email.replace('@', '_').replace('.', '_'))
+     Username = username
+     PersonalDB = f"{UserID}db"
+     Password = "Sn@ckal1cious!"
      if email:
           #upon proper user registration, store user information in sql database for use as foreign key
           #include placeholder variables to prevent against SQL injection
-          with conn.engine.begin() as connection:
-               connection.execute(
-               text("""
-               INSERT INTO users (UserID, Username, PersonalDB)
-               VALUES (:UserID, :Username, :PersonalDB)
-           """),
-          {
-            "UserID": email,
-            "Username": username,
-            "PersonalDB": f"{username}DB"
-          }
-    )
 
+          with conn.engine.begin() as connection:
+
+               # 1. Create user (safe to rerun)
+               connection.execute(text("""
+                    CREATE USER IF NOT EXISTS :user@'%'
+                    IDENTIFIED BY :password
+               """), {
+                    "user": UserID,
+                    "password": Password
+               })
+
+               # 2. Create database
+               connection.execute(text(f"""
+                    CREATE DATABASE IF NOT EXISTS `{PersonalDB}`
+               """))
+
+          with conn.engine.begin() as connection:
+               
+               # 3. Grant privileges
+               connection.execute(text("""
+                    GRANT SELECT, INSERT, UPDATE, DELETE ON `{db}`.*
+                    TO :user@'%%'
+               """.format(db=PersonalDB)), {
+                    "user": UserID
+               })
+
+               # 4. Insert metadata (PROPER PARAM BINDING)
+               connection.execute(text("""
+                    INSERT INTO users (UserID, Username, PersonalDB)
+                    VALUES (:userid, :username, :personaldb)
+               """), {
+                    "userid": UserID,
+                    "username": Username,
+                    "personaldb": PersonalDB
+               })
+               
           st.success('User registered successfully')
 except RegisterError as e:
      st.error(e)
