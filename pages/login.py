@@ -17,12 +17,6 @@ from streamlit_authenticator.utilities import (CredentialsError,
                                                UpdateError)
 
 conn = st.connection('mysql', type='sql')
-conn.session.execute(text("use user_database;"))
-conn.session.commit()
-test = conn.query('select U.UserID from Users as U;')
-st.write(test)
-
-st.success("Raw insert executed")
 newUser:bool = False
 
 with open('.streamlit/config.yaml') as file:
@@ -82,10 +76,12 @@ try:
           newUser = True
           st.success('User registered successfully')
           #include placeholder variables to prevent against SQL injection
+
           #update the config file!
           with open('.streamlit/config.yaml', 'w') as file:
                yaml.dump(config, file, default_flow_style=False, allow_unicode=True)
 
+          #save the hashed password to store in the database.
           with open('.streamlit/config.yaml') as file:
                config = yaml.load(file, Loader=SafeLoader)
                Password = config["credentials"]["usernames"][username]["password"]
@@ -129,13 +125,3 @@ except RegisterError as e:
 with open('.streamlit/config.yaml', 'w') as file:
      yaml.dump(config, file, default_flow_style=False, allow_unicode=True)
 
-#callback=st.switch_page("pages/home_page.py")
-# with st.container(horizontal=True, horizontal_alignment="center"):
-#     username = st.text_input(label="Username")
-#     password = st.text_input(label="Password", type="password")
-
-# if st.button("Login"):
-#     if username == "" or password == "":
-#             st.error("Enter both a Username and a Password to login.")
-#     elif username != "" and password != "":
-#         st.switch_page("pages/home_page.py")
