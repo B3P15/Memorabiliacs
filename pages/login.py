@@ -46,7 +46,7 @@ authenticator = stauth.Authenticate(
     config['credentials'],
     config['cookie']['name'],
     config['cookie']['key'],
-    config['cookie']['expiry_days']
+    config['cookie']['expiry_days'],
 )
 
 st.title("Welcome Memorabiliac!", text_alignment="center")
@@ -73,13 +73,13 @@ elif st.session_state["authentication_status"] is None:
 try:
      (email,
      username,
-     name) = authenticator.register_user(roles=["viewer"], clear_on_submit=True, merge_username_email=True, password_hint=False)
-     UserID = (email.replace('@', '_').replace('.', '_'))
-     Username = username
-     PersonalDB = f"{UserID}db"
-     Password = "Sn@ckal1cious!"
+     name) = authenticator.register_user(roles=["viewer"], clear_on_submit=True, merge_username_email=True, password_hint=False, captcha=False)
      if email:
           #upon proper user registration, store user information in sql database for use as foreign key
+          UserID = (email.replace('@', '_').replace('.', '_'))
+          Username = username
+          PersonalDB = f"{UserID}db"
+          Password = "Sn@ckal1cious!"
           #include placeholder variables to prevent against SQL injection
 
           with conn.engine.begin() as connection:
@@ -97,13 +97,11 @@ try:
                connection.execute(text(f"""
                     CREATE DATABASE IF NOT EXISTS `{PersonalDB}`
                """))
-
-          with conn.engine.begin() as connection:
                
                # 3. Grant privileges
                connection.execute(text("""
                     GRANT SELECT, INSERT, UPDATE, DELETE ON `{db}`.*
-                    TO :user@'%%'
+                    TO :user@'%'
                """.format(db=PersonalDB)), {
                     "user": UserID
                })
