@@ -23,7 +23,7 @@ test = conn.query('select U.UserID from Users as U;')
 st.write(test)
 
 st.success("Raw insert executed")
-
+newUser:bool = False
 
 with open('.streamlit/config.yaml') as file:
      config = yaml.load(file, Loader=SafeLoader)
@@ -79,9 +79,16 @@ try:
           UserID = (email.replace('@', '_').replace('.', '_'))
           Username = username
           PersonalDB = f"{UserID}db"
-          Password = "Sn@ckal1cious!"
+          newUser = True
+          st.success('User registered successfully')
           #include placeholder variables to prevent against SQL injection
+          #update the config file!
+          with open('.streamlit/config.yaml', 'w') as file:
+               yaml.dump(config, file, default_flow_style=False, allow_unicode=True)
 
+          with open('.streamlit/config.yaml') as file:
+               config = yaml.load(file, Loader=SafeLoader)
+               Password = config["credentials"]["usernames"][username]["password"]
           with conn.engine.begin() as connection:
 
                # 1. Create user (safe to rerun)
@@ -116,10 +123,8 @@ try:
                     "personaldb": PersonalDB
                })
                
-          st.success('User registered successfully')
 except RegisterError as e:
      st.error(e)
-
 #update the config file!
 with open('.streamlit/config.yaml', 'w') as file:
      yaml.dump(config, file, default_flow_style=False, allow_unicode=True)
