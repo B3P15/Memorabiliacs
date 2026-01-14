@@ -28,27 +28,29 @@ collection_page = "pages/template.py"
 
 with st.container(horizontal=True, horizontal_alignment="center"):
 
+    @st.dialog("Edit") 
+    def collection_edit_display(coll):
+        # will return to, can't remove from self included dictionary
+        with st.container(horizontal=True, horizontal_alignment="center"):
+            st.subheader(f"Rename {coll}?", text_alignment="center")
+            temp_coll_rename = st.text_input(" ")
+            if st.button ("Rename", key=f"rename_{coll}", width="content"):
+                gfuncs.rename(coll, temp_coll_rename, db.collection_list)
+                st.rerun()
+
     for coll in db.collection_list:
-        
-        @st.dialog("Delete") # center?
-        def collection_edit_display():
-            # will return to, can't remove from self included dictionary
-            with st.container(horizontal=True, horizontal_alignment="center"):
-                st.subheader(f"Are you sure you want to delete {coll}?", text_alignment="center")
-                if st.button("Yes", key="delete_coll"):
-                    db.collection_list.remove(coll)
-                if st.button("No", key="close"):
-                    # temp, returns to main page to remove popups
-                    st.switch_page("pages/home_page.py")
 
         with st.container(width="content", horizontal_alignment="center"):
             st.subheader(f"{coll}", text_alignment="center")
             if st.button("View Collection", key=f"{coll}_link"):
-                # st.switch_page(f"pages/{collection_page_list[coll]}.py")
                 db.current_coll = coll
                 st.switch_page(collection_page)
             if st.button("Edit", key=f"edit_{coll}"):
-                collection_edit_display()
+                collection_edit_display(coll)
+                pass
+            if st.button("Remove", key=f"remove_{coll}", width="content"):
+                    db.collection_list.remove(coll)
+                    st.rerun()
 
             st.space("medium")
         
@@ -60,10 +62,10 @@ with st.container(horizontal=True, horizontal_alignment="center"):
         name = st.text_input("Name the Collection")
         coll_type = st.text_input("Give Collection Type") # will be dropdown
         if st.button("Add", key="makePage") and name is not None and coll_type is not None:
+            db.collection_list.append(name.title())
             coll_name = gfuncs.snake_name(name.strip())
-            db.collection_list.append(coll_name)
             db.current_coll = coll_name
-            st.switch_page(collection_page)
+            st.rerun()
         
 
     with st.container(width="content", horizontal_alignment="center"):

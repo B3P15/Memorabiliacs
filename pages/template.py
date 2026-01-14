@@ -19,7 +19,8 @@ if (db.current_coll == "Vinyls"):
             db.vinyl_names.append(name.strip())
             db.vinyl_pictures.append(picture_link.strip())
             db.vinyl_list = dict(zip(db.vinyl_names, db.vinyl_pictures))
-            st.switch_page("pages/template.py")
+            # st.switch_page("pages/template.py")
+            st.rerun()
         else:
             pass
     
@@ -42,13 +43,25 @@ if (db.current_coll == "Vinyls"):
                     st.switch_page("pages/template.py")
 
     with st.container(horizontal=True, horizontal_alignment="right", vertical_alignment="bottom"):
-        if st.button("Add Vinyl"):
+        if st.button(f"Add to {db.current_coll}"):
             add_vinyl()
             pass
 
 
 # above but mugs
 if (db.current_coll == "Mugs"):
+    
+    @st.dialog("Add Mug")
+    def add_vinyl():
+        st.subheader("We're working on it :)")
+    #     name = st.text_input("Name of Mug")
+    #     picture_link = st.text_input("URL of a picture of the mug")
+    #     if st.button("Add to collection") and name != '' and picture_link != '':
+            
+    #         st.rerun()
+    #     else:
+    #         pass
+    
     with st.container(horizontal=True, horizontal_alignment="center"):
         for mug in db.mug_list:
 
@@ -61,4 +74,9 @@ if (db.current_coll == "Mugs"):
                 st.image(f"pictures/{db.mug_list[mug]}.jpeg", width=150)
                 if st.button(f"{mug}", width=150):
                     mug_display()
+                
+    with st.container(horizontal=True, horizontal_alignment="right", vertical_alignment="bottom"):
+        if st.button(f"Add to {db.current_coll}"):
+            add_vinyl()
+            pass
 

@@ -16,3 +16,8 @@ def create_page_dict(page_list: list[str]) -> list[str]:
 
 def snake_name(name: str) -> str:
     return name.lower().replace(" ", "_")
+
+def rename(old:str, new:str, l:list[str]):
+    for i in range(len(l)):
+        if l[i] == old:
+            l[i] = new
