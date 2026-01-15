@@ -67,7 +67,7 @@ if (db.current_coll == "Mugs"):
 
             @st.dialog(f"{mug}")
             def mug_display():
-                st.image(db.mug_list[mug], width=500)
+                st.image(f"pictures/{db.mug_list[mug]}.jpeg", width=150)
                 st.text(f"Mug name: {mug}", text_alignment="center")
 
             with st.container(width="content", horizontal_alignment="left"):

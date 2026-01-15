@@ -1,8 +1,8 @@
 [theme]
 base="dark"
-backgroundColor="#525252"
-textColor="#10f010"
-font="Comic Sans MS"
+backgroundColor="#CACACA"
+textColor="#4caeff"
+font="Arial MS"
 
 [client]
 showSidebarNavigation = false
