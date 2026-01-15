@@ -1,1 +1,3 @@
 Example/.streamlit/secrets.toml
+.streamlit/*
+*.pyc
