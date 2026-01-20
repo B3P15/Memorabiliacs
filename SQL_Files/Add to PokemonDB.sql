@@ -1,4 +1,4 @@
-use PokemonTCG;
+--use PokemonTCG;
 
 create table Cards ( 
   CardID varchar(45) not null, 
