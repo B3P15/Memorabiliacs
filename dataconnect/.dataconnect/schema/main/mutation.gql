@@ -1,0 +1,236 @@
+extend type Mutation {
+  """
+  ✨ Insert a single `Card` into the table and return its key. Columns not specified in `data` will receive defaults (e.g. `null`).
+  """
+  card_insert(
+    """
+    Data object to insert into the table.
+    """
+    data: Card_Data!
+  ): Card_KeyOutput! @fdc_generated(from: "Card", purpose: INSERT_SINGLE)
+  """
+  ✨ Insert a single `Mug` into the table and return its key. Columns not specified in `data` will receive defaults (e.g. `null`).
+  """
+  mug_insert(
+    """
+    Data object to insert into the table.
+    """
+    data: Mug_Data!
+  ): Mug_KeyOutput! @fdc_generated(from: "Mug", purpose: INSERT_SINGLE)
+  """
+  ✨ Insert `Card` objects into the table and return their keys. Columns not specified in `data` will receive defaults (e.g. `null`).
+  """
+  card_insertMany(
+    """
+    List of data objects to insert into the table.
+    """
+    data: [Card_Data!]!
+  ): [Card_KeyOutput!]! @fdc_generated(from: "Card", purpose: INSERT_MULTIPLE)
+  """
+  ✨ Insert `Mug` objects into the table and return their keys. Columns not specified in `data` will receive defaults (e.g. `null`).
+  """
+  mug_insertMany(
+    """
+    List of data objects to insert into the table.
+    """
+    data: [Mug_Data!]!
+  ): [Mug_KeyOutput!]! @fdc_generated(from: "Mug", purpose: INSERT_MULTIPLE)
+  """
+  ✨ Insert or update a single `Card` into the table, based on the primary key. Returns the key of the newly inserted or existing updated `Card`.
+  """
+  card_upsert(
+    """
+    Data object to insert or update if it already exists.
+    """
+    data: Card_Data!
+  ): Card_KeyOutput! @fdc_generated(from: "Card", purpose: UPSERT_SINGLE)
+  """
+  ✨ Insert or update a single `Mug` into the table, based on the primary key. Returns the key of the newly inserted or existing updated `Mug`.
+  """
+  mug_upsert(
+    """
+    Data object to insert or update if it already exists.
+    """
+    data: Mug_Data!
+  ): Mug_KeyOutput! @fdc_generated(from: "Mug", purpose: UPSERT_SINGLE)
+  """
+  ✨ Insert or update `Card` objects into the table, based on the primary key. Returns the key of the newly inserted or existing updated `Card`.
+  """
+  card_upsertMany(
+    """
+    List of data objects to insert or update if it already exists.
+    """
+    data: [Card_Data!]!
+  ): [Card_KeyOutput!]! @fdc_generated(from: "Card", purpose: UPSERT_MULTIPLE)
+  """
+  ✨ Insert or update `Mug` objects into the table, based on the primary key. Returns the key of the newly inserted or existing updated `Mug`.
+  """
+  mug_upsertMany(
+    """
+    List of data objects to insert or update if it already exists.
+    """
+    data: [Mug_Data!]!
+  ): [Mug_KeyOutput!]! @fdc_generated(from: "Mug", purpose: UPSERT_MULTIPLE)
+  """
+  ✨ Update a single `Card` based on `id`, `key` or `first`, setting columns specified in `data`. Returns the key of the updated `Card` or `null` if not found.
+  """
+  card_update(
+    """
+    The unique ID of the object.
+    """
+    id: String
+
+    """
+    ✨ `_expr` server value variant of `id` (The unique ID of the object.)
+    """
+    id_expr: String_Expr
+
+    """
+    The key used to identify the object.
+    """
+    key: Card_Key
+
+    """
+    Fetch the first row based on the filters and ordering.
+    """
+    first: Card_FirstRow
+
+    """
+    Data object containing fields to be updated.
+    """
+    data: Card_Data!
+  ): Card_KeyOutput @fdc_generated(from: "Card", purpose: UPDATE_SINGLE)
+  """
+  ✨ Update a single `Mug` based on `id`, `key` or `first`, setting columns specified in `data`. Returns the key of the updated `Mug` or `null` if not found.
+  """
+  mug_update(
+    """
+    The unique ID of the object.
+    """
+    id: UUID
+
+    """
+    The key used to identify the object.
+    """
+    key: Mug_Key
+
+    """
+    Fetch the first row based on the filters and ordering.
+    """
+    first: Mug_FirstRow
+
+    """
+    Data object containing fields to be updated.
+    """
+    data: Mug_Data!
+  ): Mug_KeyOutput @fdc_generated(from: "Mug", purpose: UPDATE_SINGLE)
+  """
+  ✨ Update `Card` objects matching `where` conditions (or `all`, if true) according to `data`. Returns the number of rows updated.
+  """
+  card_updateMany(
+    """
+    Filter condition to specify which rows to update.
+    """
+    where: Card_Filter
+
+    """
+    Set to true to update all rows.
+    """
+    all: Boolean = false
+
+    """
+    Data object containing fields to update.
+    """
+    data: Card_Data!
+  ): Int! @fdc_generated(from: "Card", purpose: UPDATE_MULTIPLE)
+  """
+  ✨ Update `Mug` objects matching `where` conditions (or `all`, if true) according to `data`. Returns the number of rows updated.
+  """
+  mug_updateMany(
+    """
+    Filter condition to specify which rows to update.
+    """
+    where: Mug_Filter
+
+    """
+    Set to true to update all rows.
+    """
+    all: Boolean = false
+
+    """
+    Data object containing fields to update.
+    """
+    data: Mug_Data!
+  ): Int! @fdc_generated(from: "Mug", purpose: UPDATE_MULTIPLE)
+  """
+  ✨ Delete a single `Card` based on `id`, `key` or `first` and return its key (or `null` if not found).
+  """
+  card_delete(
+    """
+    The unique ID of the object.
+    """
+    id: String
+
+    """
+    ✨ `_expr` server value variant of `id` (The unique ID of the object.)
+    """
+    id_expr: String_Expr
+
+    """
+    The key used to identify the object.
+    """
+    key: Card_Key
+
+    """
+    Fetch the first row based on the filters and ordering.
+    """
+    first: Card_FirstRow
+  ): Card_KeyOutput @fdc_generated(from: "Card", purpose: DELETE_SINGLE)
+  """
+  ✨ Delete a single `Mug` based on `id`, `key` or `first` and return its key (or `null` if not found).
+  """
+  mug_delete(
+    """
+    The unique ID of the object.
+    """
+    id: UUID
+
+    """
+    The key used to identify the object.
+    """
+    key: Mug_Key
+
+    """
+    Fetch the first row based on the filters and ordering.
+    """
+    first: Mug_FirstRow
+  ): Mug_KeyOutput @fdc_generated(from: "Mug", purpose: DELETE_SINGLE)
+  """
+  ✨ Delete `Card` objects matching `where` conditions (or `all`, if true). Returns the number of rows deleted.
+  """
+  card_deleteMany(
+    """
+    Filter condition to specify which rows to delete.
+    """
+    where: Card_Filter
+
+    """
+    Set to true to delete all rows.
+    """
+    all: Boolean = false
+  ): Int! @fdc_generated(from: "Card", purpose: DELETE_MULTIPLE)
+  """
+  ✨ Delete `Mug` objects matching `where` conditions (or `all`, if true). Returns the number of rows deleted.
+  """
+  mug_deleteMany(
+    """
+    Filter condition to specify which rows to delete.
+    """
+    where: Mug_Filter
+
+    """
+    Set to true to delete all rows.
+    """
+    all: Boolean = false
+  ): Int! @fdc_generated(from: "Mug", purpose: DELETE_MULTIPLE)
+}

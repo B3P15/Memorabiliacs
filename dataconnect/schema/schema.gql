@@ -1,0 +1,14 @@
+#Mugs
+type Mug @table(name: "mug", key: "id") {
+  id: UUID! @col(name: "id") @default(expr: "uuidV4()")
+  title: String! @col(name: "name")
+  url: String!
+  description: String
+}
+
+type Card @table(name:"cards", key:"id"){
+  id: String! @col(name:"cardid")
+  cardname: String!
+  typing: String!
+  hp: Int!
+}

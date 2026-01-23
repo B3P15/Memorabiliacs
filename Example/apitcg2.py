@@ -35,11 +35,8 @@ def get_cards2(
     for i in range(20):
         futureList.append(session.get(url, headers=headers, params=params))
     for future in as_completed(futureList):
-        responseList.append(future.result().json()["data"][0]["images"]["small"])
+        image_url = future.result().json()["data"][0]["images"]["small"]
+        responseList.append(image_url)
 
     return(responseList)
-
-
-id_list = ["base1-3", "base3-15", "bw8"]
-print(get_cards2("pokemon", id_list[0]))
 

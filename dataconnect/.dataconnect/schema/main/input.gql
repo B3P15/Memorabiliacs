@@ -1,0 +1,430 @@
+"""
+✨ `Card_KeyOutput` returns the primary key fields of table type `Card`.
+
+It has the same format as `Card_Key`, but is only used as mutation return value.
+"""
+scalar Card_KeyOutput
+"""
+✨ `Mug_KeyOutput` returns the primary key fields of table type `Mug`.
+
+It has the same format as `Mug_Key`, but is only used as mutation return value.
+"""
+scalar Mug_KeyOutput
+"""
+✨ Generated data input type for table 'Card'. It includes all necessary fields for creating or upserting rows into table.
+"""
+input Card_Data {
+  """
+  ✨ Generated from Field `Card`.`id` of type `String!`
+  """
+  id: String
+  """
+  ✨ `_expr` server value variant of `id` (✨ Generated from Field `Card`.`id` of type `String!`)
+  """
+  id_expr: String_Expr
+  """
+  ✨ Generated from Field `Card`.`cardname` of type `String!`
+  """
+  cardname: String
+  """
+  ✨ `_expr` server value variant of `cardname` (✨ Generated from Field `Card`.`cardname` of type `String!`)
+  """
+  cardname_expr: String_Expr
+  """
+  ✨ Generated from Field `Card`.`hp` of type `Int!`
+  """
+  hp: Int
+  """
+  ✨ `_expr` server value variant of `hp` (✨ Generated from Field `Card`.`hp` of type `Int!`)
+  """
+  hp_expr: Int_Expr
+  """
+  ✨ `_update` server value variant of `hp` (✨ Generated from Field `Card`.`hp` of type `Int!`)
+  """
+  hp_update: [Int_Update!]
+  """
+  ✨ Generated from Field `Card`.`typing` of type `String!`
+  """
+  typing: String
+  """
+  ✨ `_expr` server value variant of `typing` (✨ Generated from Field `Card`.`typing` of type `String!`)
+  """
+  typing_expr: String_Expr
+}
+"""
+✨ Generated filter input type for table 'Card'. This input allows filtering objects using various conditions. Use `_or`, `_and`, and `_not` to compose complex filters.
+"""
+input Card_Filter {
+  """
+  Apply multiple filter conditions using `AND` logic.
+  """
+  _and: [Card_Filter!]
+  """
+  Negate the result of the provided filter condition.
+  """
+  _not: Card_Filter
+  """
+  Apply multiple filter conditions using `OR` logic.
+  """
+  _or: [Card_Filter!]
+  """
+  ✨ Generated from Field `Card`.`id` of type `String!`
+  """
+  id: String_Filter
+  """
+  ✨ Generated from Field `Card`.`cardname` of type `String!`
+  """
+  cardname: String_Filter
+  """
+  ✨ Generated from Field `Card`.`hp` of type `Int!`
+  """
+  hp: Int_Filter
+  """
+  ✨ Generated from Field `Card`.`typing` of type `String!`
+  """
+  typing: String_Filter
+}
+"""
+✨ Generated first-row input type for table 'Card'. This input selects the first row matching the filter criteria, ordered according to the specified conditions.
+"""
+input Card_FirstRow {
+  """
+  Order the result by the specified fields.
+  """
+  orderBy: [Card_Order!]
+  """
+  Filters rows based on the specified conditions.
+  """
+  where: Card_Filter
+}
+"""
+✨ Generated having input type for table 'Card'. This input allows you to filter groups during aggregate queries using various conditions. Use `_or`, `_and`, and `_not` to compose complex filters.
+"""
+input Card_Having {
+  """
+  Apply multiple Having conditions using `AND` logic.
+  """
+  _and: [Card_Having!]
+  """
+  Whether to apply DISTINCT to the aggregate function.
+  """
+  _distinct: Boolean
+  """
+  Negate the result of the provided Having condition.
+  """
+  _not: Card_Having
+  """
+  Apply multiple Having conditions using `OR` logic.
+  """
+  _or: [Card_Having!]
+  """
+  ✨ Generated from Field `Card`.`_count` of type `Int!`
+  """
+  _count: Int_Filter
+  """
+  ✨ Generated from Field `Card`.`cardname_count` of type `Int!`
+  """
+  cardname_count: Int_Filter
+  """
+  ✨ Generated from Field `Card`.`hp_count` of type `Int!`
+  """
+  hp_count: Int_Filter
+  """
+  ✨ Generated from Field `Card`.`id_count` of type `Int!`
+  """
+  id_count: Int_Filter
+  """
+  ✨ Generated from Field `Card`.`typing_count` of type `Int!`
+  """
+  typing_count: Int_Filter
+  """
+  ✨ Generated from Field `Card`.`hp_sum` of type `Int`
+  """
+  hp_sum: Int_Filter
+  """
+  ✨ Generated from Field `Card`.`hp_avg` of type `Float`
+  """
+  hp_avg: Float_Filter
+  """
+  ✨ Generated from Field `Card`.`hp_min` of type `Int`
+  """
+  hp_min: Int_Filter
+  """
+  ✨ Generated from Field `Card`.`hp_max` of type `Int`
+  """
+  hp_max: Int_Filter
+}
+"""
+✨ Generated key input type for table 'Card'. It represents the primary key fields used to uniquely identify a row in the table.
+"""
+input Card_Key {
+  """
+  ✨ Generated from Field `Card`.`id` of type `String!`
+  """
+  id: String
+  """
+  ✨ `_expr` server value variant of `id` (✨ Generated from Field `Card`.`id` of type `String!`)
+  """
+  id_expr: String_Expr
+}
+"""
+✨ Generated list filter input type for table 'Card'. This input applies filtering logic based on the count or existence of related objects that matches certain criteria.
+"""
+input Card_ListFilter {
+  """
+  The desired number of objects that match the condition (defaults to at least one).
+  """
+  count: Int_Filter = {gt:0}
+  """
+  Condition of the related objects to filter for.
+  """
+  exist: Card_Filter
+}
+"""
+✨ Generated order input type for table 'Card'. This input defines the sorting order of rows in query results based on one or more fields.
+"""
+input Card_Order {
+  """
+  ✨ Generated from Field `Card`.`id` of type `String!`
+  """
+  id: OrderDirection
+  """
+  ✨ Generated from Field `Card`.`cardname` of type `String!`
+  """
+  cardname: OrderDirection
+  """
+  ✨ Generated from Field `Card`.`hp` of type `Int!`
+  """
+  hp: OrderDirection
+  """
+  ✨ Generated from Field `Card`.`typing` of type `String!`
+  """
+  typing: OrderDirection
+  """
+  ✨ Generated from Field `Card`.`_count` of type `Int!`
+  """
+  _count: OrderDirection
+  """
+  ✨ Generated from Field `Card`.`cardname_count` of type `Int!`
+  """
+  cardname_count: OrderDirection
+  """
+  ✨ Generated from Field `Card`.`hp_count` of type `Int!`
+  """
+  hp_count: OrderDirection
+  """
+  ✨ Generated from Field `Card`.`id_count` of type `Int!`
+  """
+  id_count: OrderDirection
+  """
+  ✨ Generated from Field `Card`.`typing_count` of type `Int!`
+  """
+  typing_count: OrderDirection
+  """
+  ✨ Generated from Field `Card`.`hp_sum` of type `Int`
+  """
+  hp_sum: OrderDirection
+  """
+  ✨ Generated from Field `Card`.`hp_avg` of type `Float`
+  """
+  hp_avg: OrderDirection
+  """
+  ✨ Generated from Field `Card`.`hp_min` of type `Int`
+  """
+  hp_min: OrderDirection
+  """
+  ✨ Generated from Field `Card`.`hp_max` of type `Int`
+  """
+  hp_max: OrderDirection
+}
+"""
+✨ Generated data input type for table 'Mug'. It includes all necessary fields for creating or upserting rows into table.
+"""
+input Mug_Data {
+  """
+  ✨ Generated from Field `Mug`.`id` of type `UUID!`
+  """
+  id: UUID
+  """
+  ✨ `_expr` server value variant of `id` (✨ Generated from Field `Mug`.`id` of type `UUID!`)
+  """
+  id_expr: UUID_Expr
+  """
+  ✨ Generated from Field `Mug`.`description` of type `String`
+  """
+  description: String
+  """
+  ✨ `_expr` server value variant of `description` (✨ Generated from Field `Mug`.`description` of type `String`)
+  """
+  description_expr: String_Expr
+  """
+  ✨ Generated from Field `Mug`.`title` of type `String!`
+  """
+  title: String
+  """
+  ✨ `_expr` server value variant of `title` (✨ Generated from Field `Mug`.`title` of type `String!`)
+  """
+  title_expr: String_Expr
+  """
+  ✨ Generated from Field `Mug`.`url` of type `String!`
+  """
+  url: String
+  """
+  ✨ `_expr` server value variant of `url` (✨ Generated from Field `Mug`.`url` of type `String!`)
+  """
+  url_expr: String_Expr
+}
+"""
+✨ Generated filter input type for table 'Mug'. This input allows filtering objects using various conditions. Use `_or`, `_and`, and `_not` to compose complex filters.
+"""
+input Mug_Filter {
+  """
+  Apply multiple filter conditions using `AND` logic.
+  """
+  _and: [Mug_Filter!]
+  """
+  Negate the result of the provided filter condition.
+  """
+  _not: Mug_Filter
+  """
+  Apply multiple filter conditions using `OR` logic.
+  """
+  _or: [Mug_Filter!]
+  """
+  ✨ Generated from Field `Mug`.`id` of type `UUID!`
+  """
+  id: UUID_Filter
+  """
+  ✨ Generated from Field `Mug`.`description` of type `String`
+  """
+  description: String_Filter
+  """
+  ✨ Generated from Field `Mug`.`title` of type `String!`
+  """
+  title: String_Filter
+  """
+  ✨ Generated from Field `Mug`.`url` of type `String!`
+  """
+  url: String_Filter
+}
+"""
+✨ Generated first-row input type for table 'Mug'. This input selects the first row matching the filter criteria, ordered according to the specified conditions.
+"""
+input Mug_FirstRow {
+  """
+  Order the result by the specified fields.
+  """
+  orderBy: [Mug_Order!]
+  """
+  Filters rows based on the specified conditions.
+  """
+  where: Mug_Filter
+}
+"""
+✨ Generated having input type for table 'Mug'. This input allows you to filter groups during aggregate queries using various conditions. Use `_or`, `_and`, and `_not` to compose complex filters.
+"""
+input Mug_Having {
+  """
+  Apply multiple Having conditions using `AND` logic.
+  """
+  _and: [Mug_Having!]
+  """
+  Whether to apply DISTINCT to the aggregate function.
+  """
+  _distinct: Boolean
+  """
+  Negate the result of the provided Having condition.
+  """
+  _not: Mug_Having
+  """
+  Apply multiple Having conditions using `OR` logic.
+  """
+  _or: [Mug_Having!]
+  """
+  ✨ Generated from Field `Mug`.`_count` of type `Int!`
+  """
+  _count: Int_Filter
+  """
+  ✨ Generated from Field `Mug`.`description_count` of type `Int!`
+  """
+  description_count: Int_Filter
+  """
+  ✨ Generated from Field `Mug`.`id_count` of type `Int!`
+  """
+  id_count: Int_Filter
+  """
+  ✨ Generated from Field `Mug`.`title_count` of type `Int!`
+  """
+  title_count: Int_Filter
+  """
+  ✨ Generated from Field `Mug`.`url_count` of type `Int!`
+  """
+  url_count: Int_Filter
+}
+"""
+✨ Generated key input type for table 'Mug'. It represents the primary key fields used to uniquely identify a row in the table.
+"""
+input Mug_Key {
+  """
+  ✨ Generated from Field `Mug`.`id` of type `UUID!`
+  """
+  id: UUID
+  """
+  ✨ `_expr` server value variant of `id` (✨ Generated from Field `Mug`.`id` of type `UUID!`)
+  """
+  id_expr: UUID_Expr
+}
+"""
+✨ Generated list filter input type for table 'Mug'. This input applies filtering logic based on the count or existence of related objects that matches certain criteria.
+"""
+input Mug_ListFilter {
+  """
+  The desired number of objects that match the condition (defaults to at least one).
+  """
+  count: Int_Filter = {gt:0}
+  """
+  Condition of the related objects to filter for.
+  """
+  exist: Mug_Filter
+}
+"""
+✨ Generated order input type for table 'Mug'. This input defines the sorting order of rows in query results based on one or more fields.
+"""
+input Mug_Order {
+  """
+  ✨ Generated from Field `Mug`.`id` of type `UUID!`
+  """
+  id: OrderDirection
+  """
+  ✨ Generated from Field `Mug`.`description` of type `String`
+  """
+  description: OrderDirection
+  """
+  ✨ Generated from Field `Mug`.`title` of type `String!`
+  """
+  title: OrderDirection
+  """
+  ✨ Generated from Field `Mug`.`url` of type `String!`
+  """
+  url: OrderDirection
+  """
+  ✨ Generated from Field `Mug`.`_count` of type `Int!`
+  """
+  _count: OrderDirection
+  """
+  ✨ Generated from Field `Mug`.`description_count` of type `Int!`
+  """
+  description_count: OrderDirection
+  """
+  ✨ Generated from Field `Mug`.`id_count` of type `Int!`
+  """
+  id_count: OrderDirection
+  """
+  ✨ Generated from Field `Mug`.`title_count` of type `Int!`
+  """
+  title_count: OrderDirection
+  """
+  ✨ Generated from Field `Mug`.`url_count` of type `Int!`
+  """
+  url_count: OrderDirection
+}

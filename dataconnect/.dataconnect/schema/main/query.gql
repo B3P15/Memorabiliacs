@@ -1,0 +1,113 @@
+extend type Query {
+  """
+  ✨ Look up a single `Card` based on `id`, `key` or `first` and return selected fields (or `null` if not found).
+  """
+  card(
+    """
+    The unique ID of the object.
+    """
+    id: String
+
+    """
+    ✨ `_expr` server value variant of `id` (The unique ID of the object.)
+    """
+    id_expr: String_Expr
+
+    """
+    The key used to identify the object.
+    """
+    key: Card_Key
+
+    """
+    Fetch the first row based on the filters and ordering.
+    """
+    first: Card_FirstRow
+  ): Card @fdc_generated(from: "Card", purpose: QUERY_SINGLE)
+  """
+  ✨ Look up a single `Mug` based on `id`, `key` or `first` and return selected fields (or `null` if not found).
+  """
+  mug(
+    """
+    The unique ID of the object.
+    """
+    id: UUID
+
+    """
+    The key used to identify the object.
+    """
+    key: Mug_Key
+
+    """
+    Fetch the first row based on the filters and ordering.
+    """
+    first: Mug_FirstRow
+  ): Mug @fdc_generated(from: "Mug", purpose: QUERY_SINGLE)
+  """
+  ✨ List `Card` objects in the table and return selected fields, optionally filtered by `where` conditions
+  """
+  cards(
+    """
+    Filter condition to narrow down the query results.
+    """
+    where: Card_Filter
+
+    """
+    Order the query results by specific fields.
+    """
+    orderBy: [Card_Order!]
+
+    """
+    Number of rows to skip before starting to return the results.
+    """
+    offset: Int
+
+    """
+    Maximum number of rows to return (defaults to 100 rows).
+    """
+    limit: Int = 100
+
+    """
+    Set to true to return distinct results.
+    """
+    distinct: Boolean = false
+
+    """
+    Filter condition to apply to the groups of aggregate queries.
+    """
+    having: Card_Having
+  ): [Card!]! @fdc_generated(from: "Card", purpose: QUERY_MULTIPLE)
+  """
+  ✨ List `Mug` objects in the table and return selected fields, optionally filtered by `where` conditions
+  """
+  mugs(
+    """
+    Filter condition to narrow down the query results.
+    """
+    where: Mug_Filter
+
+    """
+    Order the query results by specific fields.
+    """
+    orderBy: [Mug_Order!]
+
+    """
+    Number of rows to skip before starting to return the results.
+    """
+    offset: Int
+
+    """
+    Maximum number of rows to return (defaults to 100 rows).
+    """
+    limit: Int = 100
+
+    """
+    Set to true to return distinct results.
+    """
+    distinct: Boolean = false
+
+    """
+    Filter condition to apply to the groups of aggregate queries.
+    """
+    having: Mug_Having
+  ): [Mug!]! @fdc_generated(from: "Mug", purpose: QUERY_MULTIPLE)
+}
