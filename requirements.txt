@@ -1,0 +1,7 @@
+﻿fastapi==0.104.1
+google-cloud-firestore==2.14.0
+internetarchive==3.5.0
+requests==2.31.0
+requests-futures==1.0.1
+streamlit==1.28.1
+tmdbsimple==2.9.1

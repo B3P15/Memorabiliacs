@@ -2,3 +2,6 @@ Example/.streamlit/secrets.toml
 .streamlit/*
 *.pyc
 *.log
+node_modules/
+__pycache__/
+.firebase

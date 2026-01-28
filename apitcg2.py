@@ -15,7 +15,7 @@ app = FastAPI()
 @app.get("/{game}/cards")
 def get_cards2(
     game: str = Path(..., description="Game type: one-piece, pokemon, yugioh, etc."),
-    id: str = Query(..., description="Card name to search")
+    id: list[str] = Query(..., description="Card name(s) to search")
 ):
     url = f"{BASE_API_URL}/{game}/cards"
 
@@ -23,20 +23,36 @@ def get_cards2(
         "x-api-key": API_KEY
     }
 
-    params = {
-        "id": id
-    }
 
     futureList = []
 
     responseList = []
     session = FuturesSession()
     # first request is started in background
-    for i in range(20):
+    for i in range(len(id)-1):
+        params = {
+        "id": id[i]}
         futureList.append(session.get(url, headers=headers, params=params))
     for future in as_completed(futureList):
+        #create the dictionary with the id, name, type, hp, and image url
+        try:
+            card_hp = future.result().json()["data"][0]["hp"]
+        except (KeyError, TypeError):
+            card_hp = 0
+        try:
+            card_text = future.result().json()["data"][0]["flavorText"]
+        except (KeyError, TypeError):
+            card_text = ""
+        card_name = future.result().json()["data"][0]["name"]
+        card_id = future.result().json()["data"][0]["id"]
         image_url = future.result().json()["data"][0]["images"]["small"]
-        responseList.append(image_url)
+        responseList.append({
+            "id": card_id,
+            "flavorText": card_text,
+            "hp": card_hp,
+            "name": card_name,
+            "image": image_url
+        })
 
     return(responseList)
 
