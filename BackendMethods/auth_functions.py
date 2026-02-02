@@ -88,7 +88,10 @@ def sign_in(email: str, password: str, db) -> None:
                 if not user_ref.get().exists:
                     data = {
                         'email': email,
-                        'username': email
+                        'username': email,
+                        'base' : 'dark',
+                        'backgroundColor' : '#cacaca',
+                        'textColor' : '#4caeff'
                     }
                     user_ref.set(data)
                     user_ref.collection('Collections').document('DefaultCollection').set({'name': 'Default'})
