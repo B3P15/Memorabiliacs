@@ -19,6 +19,9 @@ authenticator = stauth.Authenticate(
 )
 collection_page_list = gfuncs.create_page_dict(db.collection_list)
 
+if st.button("Settings"):
+    st.switch_page("pages/settings.py")
+
 st.title("Collections", text_alignment="center")
 st.space("large")
 
