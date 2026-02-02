@@ -1,7 +1,7 @@
 [theme]
 base="dark"
-backgroundColor="#CACACA"
-textColor="#4caeff"
+backgroundColor="#aaa6a6"
+textColor="#0000ff"
 font="Arial MS"
 
 [client]
