@@ -1,6 +1,8 @@
 import internetarchive
 import streamlit as st
 import tmdbsimple as tmdb
+import rebrick
+import json
 from fastapi import FastAPI, Query, Path, HTTPException
 from requests_futures.sessions import FuturesSession
 from concurrent.futures import as_completed
@@ -208,3 +210,34 @@ def generate_login_template(db):
     elif 'auth_warning' in st.session_state:
         auth_notification.warning(st.session_state.auth_warning)
         del st.session_state.auth_warning
+
+
+REBRICK_API_KEY = st.secrets["REBRICK_API_KEY"]
+
+def search_minifigs_rebrickable(query, max_results: int = 10):
+    """Search Rebrickable for minifigs matching `query` (query can be part of any attribute present in the json, such as name or minifig_id).
+
+    Returns a list of dicts with keys: name, minifig_id,  image_url
+
+    """
+    rebrick.init(REBRICK_API_KEY)
+    try:
+        resp = rebrick.lego.get_minifigs(query)
+        data = json.loads(resp.read())
+    except Exception:
+        return []
+
+    items = []
+    if isinstance(data, dict):
+        items = data.get('results')
+  
+
+    results = []
+    for item in items[:max_results]:
+        results.append({
+            'name': item.get('name'),
+            'minifig_id': item.get('set_num') or item.get('set'),
+            'image_url': item.get('set_img_url'),
+        })
+
+    return results
