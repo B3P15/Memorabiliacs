@@ -6,6 +6,7 @@ import json
 import os
 
 import streamlit as st
+import global_functions as gfuncs
 from google.cloud import firestore
 from BackendMethods.auth_functions import (
     create_account,
@@ -37,4 +38,5 @@ if 'user_info' not in st.session_state:
 ## Logged in --------------------------------------------------------------------------------------
 ## -------------------------------------------------------------------------------------------------
 else:
+    gfuncs.login_color_flag = 0
     st.switch_page("pages/home_page.py")

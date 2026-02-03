@@ -1,4 +1,4 @@
-
+login_color_flag = 0
 
 def create_page_dict(page_list: list[str]) -> list[str]:
     
