@@ -285,11 +285,11 @@ else:
             
             if not collection_doc_data:
                 st.error(f"❌ Collection document '{collection_doc}' not found")
-            elif "Cards" not in collection_doc_data:
+            elif "items" not in collection_doc_data:
                 st.info(f"📭 No Cards field found in {collection_doc}. Start adding some!")
             else:
                 # Get the list of card references
-                card_references = collection_doc_data.get("Cards", [])
+                card_references = collection_doc_data.get("items", [])
                 
                 if not card_references:
                     st.info(f"📭 No cards found in the {collection_doc}. Start adding some!")
@@ -351,8 +351,6 @@ else:
 
     # Footer
     st.divider()
-    st.write(generate_collection("PokemonCollection", db))
+    st.write(generate_collection("Pokemon", db))
     if st.button("🔄 Refresh Data"):
         st.rerun()
-
-
