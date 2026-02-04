@@ -84,11 +84,13 @@ def sign_in(email: str, password: str, db) -> None:
             
             # Add user to database if they don't already exist
             try:
+                result_list = email.split('@')
+                
                 user_ref = db.collection('Users').document(user_info['localId'])
                 if not user_ref.get().exists:
                     data = {
                         'email': email,
-                        'username': email,
+                        'username': result_list[0],
                         'base' : 'dark',
                         'backgroundColor' : '#cacaca',
                         'textColor' : '#4caeff'
