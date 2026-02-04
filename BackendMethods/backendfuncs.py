@@ -236,8 +236,37 @@ def search_minifigs_rebrickable(query, max_results: int = 10):
     for item in items[:max_results]:
         results.append({
             'name': item.get('name'),
-            'minifig_id': item.get('set_num') or item.get('set'),
+            'minifig_id': item.get('set_num'),
             'image_url': item.get('set_img_url'),
+        })
+
+    return results
+
+def search_sets_rebrickable(query, max_results: int = 10):
+    """Search Rebrickable for sets matching `query`.
+
+    Returns a list of dicts with keys: name, set_id, image_url, num_parts, year
+    """
+    rebrick.init(REBRICK_API_KEY)
+    try:
+        resp = rebrick.lego.get_sets(query)
+        data = json.loads(resp.read())
+    except Exception:
+        return []
+
+    items = []
+    # this was from a unneccesarry check but it works so keeping it
+    if isinstance(data, dict):
+        items = data.get('results') 
+
+    results = []
+    for item in items[:max_results]:
+        results.append({
+            'name': item.get('name'),
+            'set_id': item.get('set_num'),
+            'image_url': item.get('set_img_url'),
+            'num_parts': item.get('num_parts'),
+            'year': item.get('year'),
         })
 
     return results
