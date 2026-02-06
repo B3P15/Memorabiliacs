@@ -1,6 +1,6 @@
 .streamlit/secrets.toml
 .streamlit/config.yaml
-__pycache__/*.pyc
+__pycache__
 Example/__pycache__
 
 
