@@ -66,7 +66,14 @@ tmdb.API_KEY = st.secrets["TMDB_API_KEY"]
 
 tmdb.REQUESTS_TIMEOUT = (2, 5)  # seconds, for connect and read specifically 
 
-def search_movies(query, max_results=10):
+def search_movies(query:str, max_results:int=10):
+    """Search TMDB for movies matching `query`.
+
+        query(str): the query string to search for
+        max_results (int): Default is 10. Maximum number of results to return
+        Returns a list of dicts with keys: title, release_date, overview, poster_path, tmdb_id
+    """
+
     search = tmdb.Search()
     response = search.movie(query=query)
     results = []
@@ -84,9 +91,9 @@ def search_movies(query, max_results=10):
 def search_internetarchive(creators: str = "", title: str = "", max_results: int = 10):
     """Search Internet Archive for audio items filtered to Vinyl or CD formats.
 
-    creators: comma-separated list of creators to search (OR'd together)
-    title: title or comma-separated titles to search (OR'd together)
-    max_results: maximum number of results to return (default 10)
+    creators(str): comma-separated list of creators to search (OR'd together)
+    title(str): title or comma-separated titles to search (OR'd together)
+    max_results(int): maximum number of results to return (default 10)
     Returns a list of dicts with keys: identifier, title, creator, thumbnail, format
     """
     query_parts = []
