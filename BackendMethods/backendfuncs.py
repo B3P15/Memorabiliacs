@@ -73,8 +73,8 @@ def search_movies(query, max_results=10):
             'title': movie.get('title'),
             'release_date': movie.get('release_date'),
             'overview': movie.get('overview'),
-            'poster_path': f"https://image.tmdb.org/t/p/w500{movie['poster_path']}" if movie.get('poster_path') else None,
-            'tmdb_id': movie.get('id')
+            'image': f"https://image.tmdb.org/t/p/w500{movie['poster_path']}" if movie.get('poster_path') else None,
+            'id': movie.get('id')
         })
     return results
 
@@ -123,10 +123,10 @@ def search_internetarchive(creators: str = "", title: str = "", max_results: int
         fmt = result.get('format', '')
         thumb_url = f"https://archive.org/download/{identifier}/__ia_thumb.jpg" if identifier else None
         results.append({
-            'identifier': identifier,
+            'id': identifier,
             'title': name,
             'creator': creator,
-            'thumbnail': thumb_url,
+            'image': thumb_url,
             'format': fmt,
         })
 
