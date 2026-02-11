@@ -11,7 +11,6 @@ APITCG_API_KEY = st.secrets["APITCG_API_KEY"]  # change later
 
 app = FastAPI()
 
-
 # urls in format of 'https://apitcg.com/api/$GAME/cards?$ATTRIBUTE='
 
 #Faster version of get_cards using asynchronous gets and future responses
@@ -59,9 +58,7 @@ def get_cards2(
 
     return(responseList)
 
-
 tmdb.API_KEY = st.secrets["TMDB_API_KEY"]
-
 tmdb.REQUESTS_TIMEOUT = (2, 5)  # seconds, for connect and read specifically 
 
 def search_movies(query, max_results=10):
@@ -77,7 +74,6 @@ def search_movies(query, max_results=10):
             'id': movie.get('id')
         })
     return results
-
 
 def search_internetarchive(creators: str = "", title: str = "", max_results: int = 10):
     """Search Internet Archive for audio items filtered to Vinyl or CD formats.
@@ -132,9 +128,6 @@ def search_internetarchive(creators: str = "", title: str = "", max_results: int
 
     return results
 
-
-
-
 #make a method to generate a specific collection (list of dictionaries) based on
 #the input that will be the name of the collection. 
 def generate_collection(collection_name: str, db):
@@ -161,6 +154,21 @@ def generate_collection(collection_name: str, db):
         return items_data
     else:
         return []
+
+def create_collection(collection_name: str, collection_type: str, db):
+    """Generate a collection of items from the database based on the collection name.
+
+    collection_name: Name of the collection to retrieve
+    db: Firestore database instance
+    Returns a list of items (data dictionaries) referenced in the specified collection
+    """
+    user_id = st.session_state.user_info['localId']
+    fullName = collection_name.title() + f"_{collection_type}"
+    collection_ref = db.collection('Users').document(user_id).collection('Collections').document(fullName)
+    collection_doc = collection_ref.get()
+    if collection_doc.exists:
+        return True
+    db.collection('Users').document(user_id).collection('Collections').document(fullName).set({})
 
 #setup templates for login stuff
 def generate_login_template(db):
