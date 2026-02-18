@@ -7,6 +7,8 @@ from fastapi import FastAPI, Query, Path, HTTPException
 from requests_futures.sessions import FuturesSession
 from concurrent.futures import as_completed
 from BackendMethods.auth_functions import create_account, sign_in, reset_password
+from algoliasearch.search.client import SearchClient
+from algoliasearch.search.models.search_params_object import SearchParamsObject
 
 BASE_API_URL = "https://apitcg.com/api"
 APITCG_API_KEY = st.secrets["APITCG_API_KEY"]  # change later
@@ -288,3 +290,51 @@ def search_sets_rebrickable(query, max_results: int = 10):
         })
 
     return results
+
+
+def search_algolia(query: str, index_name: str, max_results: int = 10):
+    """Search an Algolia index for items matching `query`.
+    
+    query(str): the search query
+    index_name(str): the Algolia index name to search
+    max_results(int): maximum number of results to return (default 10)
+    
+    Returns a list of dicts with filtered attributes. For "PokemonSearchResults" index,
+    returns: id, name, image, flavorText, and HP
+    """
+    try:
+        algolia_conf = st.secrets.get("algolia", {})
+        app_id = algolia_conf.get("app_id")
+        search_key = algolia_conf.get("search_key")
+        
+        if not (app_id and search_key):
+            raise ValueError("Algolia credentials (app_id, search_key) missing in Streamlit secrets")
+        
+        client = SearchClient(app_id, search_key)
+        response = client.search_single_index(
+                        index_name=index_name,
+                        search_params=SearchParamsObject(
+                        query=query,
+                        hits_per_page=max_results
+                        )
+                    )
+        hits = response.hits
+        
+        # Check if this is the PokemonSearchResults index
+        if index_name == "PokemonSearchResults":
+            results = []
+            for hit in hits:
+                results.append({
+                    "id": getattr(hit, 'id', getattr(hit, 'objectID', None)),
+                    "name": getattr(hit, 'name', None),
+                    "image": getattr(hit, 'image', None),
+                    "flavorText": getattr(hit, 'flavorText', None),
+                    "HP": getattr(hit, 'HP', getattr(hit, 'hp', None))
+                })
+            return results
+        else:
+            return hits
+            
+    except Exception as e:
+        st.error(f"Algolia search failed: {e}")
+        return []
