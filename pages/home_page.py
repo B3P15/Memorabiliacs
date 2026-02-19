@@ -58,11 +58,13 @@ else:
         @st.dialog("Edit") 
         def editCollection(coll):
             with st.container(horizontal=True, horizontal_alignment="center"):
-                st.subheader(f"Rename {coll}?", text_alignment="center")
-                coll_rename = st.text_input("")
-                if st.button ("Rename", key=f"rename_{coll}", width="content"):
-                    
-                    st.rerun()
+                st.subheader(f"Rename {coll.id.split("_")[0]}?", text_alignment="center")
+                coll_rename = st.text_input(" ")
+                if st.button ("Rename", key=f"rename_{coll.id.split("_")[0]}", width="content"):
+                    if backEnd.renameCollection(coll, coll_rename, db):
+                        st.error("Collection name already exist")
+                    else: 
+                        st.rerun()
 
         # Add collection dialog for adding a new collection to the db
         @st.dialog("Add")
@@ -79,7 +81,7 @@ else:
         @st.dialog("Remove") 
         def removeCollection(coll):
             with st.container(horizontal=True, horizontal_alignment="center"):
-                st.subheader(f"Are you sure you want to remove \"{coll}\"?", text_alignment="center")
+                st.subheader(f"Are you sure you want to remove \"{coll.split("_")[0]}\"?", text_alignment="center")
                 if st.button("Yes", key=f"confirmRemove", width="content"):
                     ref = db.collection("Users").document(user_id).collection("Collections").document(coll)
                     ref.delete()
@@ -100,10 +102,10 @@ else:
                             st.switch_page(collection_page)
 
                         if st.button("Edit", key=f"edit_{collInfo[0]}"):
-                            editCollection(collInfo[0])
+                            editCollection(doc)
 
                         if st.button("Remove", key=f"remove_{collInfo[0]}", width="content"):
-                            removeCollection(collInfo[0])
+                            removeCollection(doc.id)
 
                         st.space("medium")
                     st.space("small")

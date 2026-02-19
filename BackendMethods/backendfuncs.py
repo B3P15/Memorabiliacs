@@ -128,8 +128,8 @@ def search_internetarchive(creators: str = "", title: str = "", max_results: int
 
     return results
 
-#make a method to generate a specific collection (list of dictionaries) based on
-#the input that will be the name of the collection. 
+# make a method to generate a specific collection (list of dictionaries) based on
+# the input that will be the name of the collection. 
 def generate_collection(collection_name: str, db):
     """Generate a collection of items from the database based on the collection name.
 
@@ -141,20 +141,22 @@ def generate_collection(collection_name: str, db):
     collection_ref = db.collection('Users').document(user_id).collection('Collections').document(collection_name)
     collection_doc = collection_ref.get()
     if collection_doc.exists:
-        items_refs = collection_doc.to_dict().get('Cards', [])
+        items_refs = collection_doc.to_dict().get('items')
         # Dereference each DocumentReference to get the actual data
-        items_data = []
-        for ref in items_refs:
-            try:
-                doc = ref.get()
-                if doc.exists:
-                    items_data.append(doc.to_dict())
-            except Exception as e:
-                st.error(f"Error dereferencing item: {e}")
-        return items_data
+        # items_data = []
+        # for ref in items_refs:
+        #     # try:
+        #     #     doc = ref.get()
+        #     #     if doc.exists:
+        #     #         items_data.append(doc.to_dict())
+        #     # except Exception as e:
+        #     #     st.error(f"Error dereferencing item: {e}")
+        # return items_data
+        return items_refs
     else:
         return []
 
+# created new document in db
 def create_collection(collection_name: str, collection_type: str, db):
     """Generate a collection of items from the database based on the collection name.
 
@@ -163,12 +165,64 @@ def create_collection(collection_name: str, collection_type: str, db):
     Returns a list of items (data dictionaries) referenced in the specified collection
     """
     user_id = st.session_state.user_info['localId']
+
+    # generates db collection name
     fullName = collection_name.title() + f"_{collection_type}"
-    collection_ref = db.collection('Users').document(user_id).collection('Collections').document(fullName)
-    collection_doc = collection_ref.get()
-    if collection_doc.exists:
+
+    # check if name already exists in the database
+    if checkForCollName(collection_name, db):
         return True
+    
+    # created new collection
+    db.collection('Users').document(user_id).collection('Collections').document(fullName).set({"items":[]})
+
+# renames a collection
+def renameCollection(collection_name:str, new_collection:str, db):
+    """Renames a collection, by use of creating a new collection and moving the data
+    
+    collection_name: name of original collection
+    new_collection: new name for collection
+    db: database
+    """
+    user_id = st.session_state.user_info['localId']
+    
+    # gets reference and type of collection
+    collection_ref_OLD = db.collection('Users').document(user_id).collection('Collections').document(collection_name.id)
+    coll_Info = collection_ref_OLD.get().id.split("_")
+    data = generate_collection(collection_name.id, db)
+    # print(data)
+
+    # checks if new name already exists in the database
+    if checkForCollName(new_collection, db):
+        return True
+
+    # created new collection to move data to
+    fullName = f"{new_collection.title()}_{coll_Info[1]}"
     db.collection('Users').document(user_id).collection('Collections').document(fullName).set({})
+    items = {"items":[]}
+    for coll in data:
+        items['items'].append(coll)
+    db.collection('Users').document(user_id).collection('Collections').document(fullName).set(items, merge=True)
+
+    collection_ref_OLD.delete()
+
+def checkForCollName(collection_name:str, db) -> bool:
+    """Checks if the provided name is in the database
+    
+    collection_name: name checking for
+    db: database
+    """
+    user_id = st.session_state.user_info['localId']
+
+    collections = list(db.collection("Users").document(user_id).collections())
+
+    for coll in collections:
+        for doc in list(coll.stream()):
+            collName = doc.id.split("_")
+            if collName[0] == collection_name:
+                return True
+    return False
+    
 
 #setup templates for login stuff
 def generate_login_template(db):
