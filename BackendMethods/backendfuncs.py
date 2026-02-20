@@ -1,10 +1,14 @@
 import internetarchive
 import streamlit as st
 import tmdbsimple as tmdb
+import rebrick
+import json
 from fastapi import FastAPI, Query, Path, HTTPException
 from requests_futures.sessions import FuturesSession
 from concurrent.futures import as_completed
 from BackendMethods.auth_functions import create_account, sign_in, reset_password
+from algoliasearch.search.client import SearchClient
+from algoliasearch.search.models.search_params_object import SearchParamsObject
 
 BASE_API_URL = "https://apitcg.com/api"
 APITCG_API_KEY = st.secrets["APITCG_API_KEY"]  # change later
@@ -64,7 +68,14 @@ tmdb.API_KEY = st.secrets["TMDB_API_KEY"]
 
 tmdb.REQUESTS_TIMEOUT = (2, 5)  # seconds, for connect and read specifically 
 
-def search_movies(query, max_results=10):
+def search_movies(query:str, max_results:int=10):
+    """Search TMDB for movies matching `query`.
+
+        query(str): the query string to search for
+        max_results (int): Default is 10. Maximum number of results to return
+        Returns a list of dicts with keys: title, release_date, overview, poster_path, tmdb_id
+    """
+
     search = tmdb.Search()
     response = search.movie(query=query)
     results = []
@@ -85,9 +96,9 @@ def extract_titles(movie_list):
 def search_internetarchive(creators: str = "", title: str = "", max_results: int = 10):
     """Search Internet Archive for audio items filtered to Vinyl or CD formats.
 
-    creators: comma-separated list of creators to search (OR'd together)
-    title: title or comma-separated titles to search (OR'd together)
-    max_results: maximum number of results to return (default 10)
+    creators(str): comma-separated list of creators to search (OR'd together)
+    title(str): title or comma-separated titles to search (OR'd together)
+    max_results(int): maximum number of results to return (default 10)
     Returns a list of dicts with keys: identifier, title, creator, thumbnail, format
     """
     query_parts = []
@@ -151,7 +162,7 @@ def generate_collection(collection_name: str, db):
     collection_ref = db.collection('Users').document(user_id).collection('Collections').document(collection_name)
     collection_doc = collection_ref.get()
     if collection_doc.exists:
-        items_refs = collection_doc.to_dict().get('Cards', [])
+        items_refs = collection_doc.to_dict().get('items', [])
         # Dereference each DocumentReference to get the actual data
         items_data = []
         for ref in items_refs:
@@ -174,40 +185,159 @@ def generate_login_template(db):
         label='Do you have an account?',
         options=('Yes', 'No', 'I forgot my password')
     )
-    auth_form = col2.form(key='Authentication form', clear_on_submit=False)
-    email = auth_form.text_input(label='Email')
-    password = (
-        auth_form.text_input(label='Password', type='password')
-        if do_you_have_an_account in {'Yes', 'No'}
-        else auth_form.empty()
-    )
     auth_notification = col2.empty()
 
-    if (do_you_have_an_account == 'Yes' and
-            auth_form.form_submit_button(
-                label='Sign In', use_container_width=True, type='primary')):
-        with auth_notification, st.spinner('Signing in'):
-            sign_in(email, password, db)
 
-    # Create Account
-    elif (do_you_have_an_account == 'No' and
-            auth_form.form_submit_button(
-                label='Create Account', use_container_width=True, type='primary')):
-        with auth_notification, st.spinner('Creating account'):
-            create_account(email, password)
+    if (do_you_have_an_account == 'Yes'):
+        fields = {'Form name':'Login', 'Username':'Username', 'Password':'Password',
+                        'Login':'Login'}
 
-    # Password Reset
-    elif (do_you_have_an_account == 'I forgot my password' and
-            auth_form.form_submit_button(
-                label='Send Password Reset Email',
-                use_container_width=True, type='primary')):
-        with auth_notification, st.spinner('Sending password reset link'):
-            reset_password(email)
+        login_form = st.form(key="Login", clear_on_submit=True)
+        login_form.subheader('Login' if 'Form name' not in fields else fields['Form name'])
+        email = login_form.text_input('Username' if 'Username' not in fields
+                                                    else fields['Username'], autocomplete='off')
+        password = login_form.text_input('Password' if 'Password' not in fields
+                                                        else fields['Password'], type='password',
+                                                        autocomplete='off')
+        if login_form.form_submit_button('Login' if 'Login' not in fields
+                                                    else fields['Login']):
+            with auth_notification, st.spinner('Signing in'):
+                sign_in(email, password, db)
 
-    # Authentication success and warning messages
+    elif (do_you_have_an_account == 'No'):
+        fields = {'Form name':'Create Account', 'Username':'Username', 'Password':'Password',
+                        'Create Account':'Create Account'}
+        create_account_form = st.form(key="Create Account", clear_on_submit=True)
+        create_account_form.subheader('Create Account' if 'Form name' not in fields else fields['Form name'])
+        email = create_account_form.text_input('Username' if 'Username' not in fields
+                                                    else fields['Username'], autocomplete='off')
+        password = create_account_form.text_input('Password' if 'Password' not in fields
+                                                        else fields['Password'], type='password',
+                                                        autocomplete='off')
+        if create_account_form.form_submit_button('Create Account' if 'Create Account' not in fields
+                                                    else fields['Create Account']):
+            with auth_notification, st.spinner('Creating account'):
+                create_account(email, password)
+    elif (do_you_have_an_account == 'I forgot my password'):
+        fields = {'Form name':'Reset Password', 'Username':'Username',
+                        'Send Password Reset Email':'Send Password Reset Email'}
+        reset_password_form = st.form(key="Reset Password", clear_on_submit=True)
+        reset_password_form.subheader('Reset Password' if 'Form name' not in fields else fields['Form name'])
+        email = reset_password_form.text_input('Username' if 'Username' not in fields
+                                                    else fields['Username'], autocomplete='off')
+        if reset_password_form.form_submit_button('Send Password Reset Email' if
+                        'Send Password Reset Email' not in fields
+                                                    else fields['Send Password Reset Email']):
+            with auth_notification, st.spinner('Sending password reset link'):
+                reset_password(email)
     if 'auth_success' in st.session_state:
         auth_notification.success(st.session_state.auth_success)
         del st.session_state.auth_success
-    elif 'auth_warning' in st.session_state:
-        auth_notification.warning(st.session_state.auth_warning)
-        del st.session_state.auth_warning
+
+
+REBRICK_API_KEY = st.secrets["REBRICK_API_KEY"]
+
+def search_minifigs_rebrickable(query, max_results: int = 10):
+    """Search Rebrickable for minifigs matching `query` (query can be part of any attribute present in the json, such as name or minifig_id).
+
+    Returns a list of dicts with keys: name, minifig_id,  image_url
+
+    """
+    rebrick.init(REBRICK_API_KEY)
+    try:
+        resp = rebrick.lego.get_minifigs(query)
+        data = json.loads(resp.read())
+    except Exception:
+        return []
+
+    items = []
+    if isinstance(data, dict):
+        items = data.get('results')
+  
+
+    results = []
+    for item in items[:max_results]:
+        results.append({
+            'name': item.get('name'),
+            'minifig_id': item.get('set_num'),
+            'image_url': item.get('set_img_url'),
+        })
+
+    return results
+
+def search_sets_rebrickable(query, max_results: int = 10):
+    """Search Rebrickable for sets matching `query`.
+
+    Returns a list of dicts with keys: name, set_id, image_url, num_parts, year
+    """
+    rebrick.init(REBRICK_API_KEY)
+    try:
+        resp = rebrick.lego.get_sets(query)
+        data = json.loads(resp.read())
+    except Exception:
+        return []
+
+    items = []
+    # this was from a unneccesarry check but it works so keeping it
+    if isinstance(data, dict):
+        items = data.get('results') 
+
+    results = []
+    for item in items[:max_results]:
+        results.append({
+            'name': item.get('name'),
+            'set_id': item.get('set_num'),
+            'image_url': item.get('set_img_url'),
+            'num_parts': item.get('num_parts'),
+            'year': item.get('year'),
+        })
+
+    return results
+
+
+def search_algolia(query: str, index_name: str, max_results: int = 10):
+    """Search an Algolia index for items matching `query`.
+    
+    query(str): the search query
+    index_name(str): the Algolia index name to search
+    max_results(int): maximum number of results to return (default 10)
+    
+    Returns a list of dicts with filtered attributes. For "PokemonSearchResults" index,
+    returns: id, name, image, flavorText, and HP
+    """
+    try:
+        algolia_conf = st.secrets.get("algolia", {})
+        app_id = algolia_conf.get("app_id")
+        search_key = algolia_conf.get("search_key")
+        
+        if not (app_id and search_key):
+            raise ValueError("Algolia credentials (app_id, search_key) missing in Streamlit secrets")
+        
+        client = SearchClient(app_id, search_key)
+        response = client.search_single_index(
+                        index_name=index_name,
+                        search_params=SearchParamsObject(
+                        query=query,
+                        hits_per_page=max_results
+                        )
+                    )
+        hits = response.hits
+        
+        # Check if this is the PokemonSearchResults index
+        if index_name == "PokemonSearchResults":
+            results = []
+            for hit in hits:
+                results.append({
+                    "id": getattr(hit, 'id', getattr(hit, 'objectID', None)),
+                    "name": getattr(hit, 'name', None),
+                    "image": getattr(hit, 'image', None),
+                    "flavorText": getattr(hit, 'flavorText', None),
+                    "HP": getattr(hit, 'HP', getattr(hit, 'hp', None))
+                })
+            return results
+        else:
+            return hits
+            
+    except Exception as e:
+        st.error(f"Algolia search failed: {e}")
+        return []

@@ -18,6 +18,8 @@ from BackendMethods.backendfuncs import (
     generate_login_template,
     extract_titles
 )
+from algoliasearch.search.client import SearchClientSync
+from algoliasearch.search.models.search_params_object import SearchParamsObject
 
 from BackendMethods.grab_info import (
     List
@@ -59,7 +61,7 @@ else:
     st.header("Search Media")
     search_type = st.selectbox(
         "What would you like to search for?",
-        options=("Vinyl & CDs", "Movies"),
+        options=("Vinyl & CDs", "Movies", "Pokemon Cards"),
     )
 
     if search_type == "Vinyl & CDs":
@@ -190,6 +192,89 @@ else:
                     st.checkbox("Add to Movies", key=checkbox_key, on_change=_add_movie)
 
 
+    elif search_type == "Pokemon Cards":
+        with st.form(key="algolia_search_form", clear_on_submit=False):
+            pokemon_query = st.text_input("Search for a Pokemon card")
+            pokemon_search_submitted = st.form_submit_button("Search Pokemon")
+
+        if pokemon_search_submitted:
+            with st.spinner("Searching Pokemon (Algolia)..."):
+                try:
+                    algolia_conf = st.secrets.get("algolia", {})
+                    app_id = algolia_conf.get("app_id")
+                    search_key = algolia_conf.get("search_key")
+                    index_name = algolia_conf.get("index_name")
+
+                    if not (app_id and search_key and index_name):
+                        raise ValueError("Algolia credentials (app_id, search_key, index_name) missing in Streamlit secrets")
+
+                    client = SearchClientSync(app_id, search_key)
+                    response = client.search_single_index(
+                        index_name=index_name,
+                        search_params=SearchParamsObject(
+                        query=pokemon_query,
+                        hits_per_page=10
+                        )
+                    )
+                    hits = response.hits
+                except Exception as e:
+                    st.error(f"Algolia search failed: {e}")
+                    hits = []
+
+            st.session_state["pokemon_results"] = hits
+
+        pokemon_results = st.session_state.get("pokemon_results", [])
+        if pokemon_results:
+            st.markdown("### Top Pokemon results")
+            cols = st.columns(2)
+            for idx, item in enumerate(pokemon_results):
+                with cols[idx % 2]:
+                    if getattr(item, 'image', None):
+                        st.image(item.image, width=200)
+                    name = getattr(item, 'name', getattr(item, 'title', 'No name'))
+                    st.write(f"**{name}**")
+                    if getattr(item, 'set', None):
+                        st.write(item.set)
+                    if getattr(item, 'hp', None):
+                        st.write(f"HP: {item.hp}")
+                    if getattr(item, 'flavorText', None):
+                        st.write(f"*{item.flavorText}*")
+                    st.write(f"ID: {item.id}")
+
+                    checkbox_key = f"pokemon_add_{item.id}"
+                    def _add_pokemon(item=item, checkbox_key=checkbox_key):
+                        try:
+                            user_id = st.session_state.user_info["localId"]
+                            pokemon_id = str(item.id)
+
+                            pokemon_collection_ref = db.collection("Pokemon")
+                            if not pokemon_collection_ref.document(pokemon_id).get().exists:
+                                pass
+
+                            pokemon_ref = db.collection("Pokemon").document(pokemon_id)
+                            pokemon_ref.set(item)
+
+                            user_collections = (
+                                db.collection("Users")
+                                .document(user_id)
+                                .collection("Collections")
+                                .document("PokemonCollection")
+                            )
+                            user_collections.set({"items": []}, merge=True)
+                            user_collections.update({
+                                "items": firestore.ArrayUnion([pokemon_ref])
+                            })
+
+                            name = getattr(item, 'name', getattr(item, 'title', 'Pokemon'))
+                            st.success(f"Added '{name}' to PokemonCollection!")
+                        except Exception as e:
+                            st.error(f"Failed to add to collection: {e}")
+                        finally:
+                            st.session_state[checkbox_key] = False
+
+                    st.checkbox("Add to PokemonCollection", key=checkbox_key, on_change=_add_pokemon)
+
+
     # Page layout
     # st.set_page_config(page_title="Pokemon Collection", layout="wide")
 
@@ -289,11 +374,11 @@ else:
             
             if not collection_doc_data:
                 st.error(f"❌ Collection document '{collection_doc}' not found")
-            elif "Cards" not in collection_doc_data:
+            elif "items" not in collection_doc_data:
                 st.info(f"📭 No Cards field found in {collection_doc}. Start adding some!")
             else:
                 # Get the list of card references
-                card_references = collection_doc_data.get("Cards", [])
+                card_references = collection_doc_data.get("items", [])
                 
                 if not card_references:
                     st.info(f"📭 No cards found in the {collection_doc}. Start adding some!")
@@ -355,7 +440,7 @@ else:
 
     # Footer
     st.divider()
-    st.write(generate_collection("PokemonCollection", db))
+    st.write(generate_collection("Pokemon", db))
     if st.button("🔄 Refresh Data"):
         st.rerun()
 
