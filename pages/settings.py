@@ -1,6 +1,7 @@
 import streamlit as st
 import global_functions as gfuncs
 from google.cloud import firestore
+import BackendMethods.auth_functions as authFuncs
 from BackendMethods.backendfuncs import (
     get_cards2,
     search_internetarchive,
@@ -26,9 +27,15 @@ else:
 
     user_id = st.session_state.user_info["localId"]
 
+    with st.container(horizontal=True, vertical_alignment="top"):
+        with st.container(horizontal_alignment="left", vertical_alignment="top"):
+            if st.button("Home"):
+                st.switch_page("pages/home_page.py")
+        with st.container(horizontal_alignment="right", vertical_alignment="top"):
+            if st.button("Logout"):
+                authFuncs.sign_out()
+                st.switch_page("pages/login.py")
 
-    if st.button("Home"):
-        st.switch_page("pages/home_page.py")
 
     st.title("Settings", text_alignment="center")
 
