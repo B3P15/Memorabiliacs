@@ -47,7 +47,7 @@ else:
     ## -------------------------------------------------------------------------------------------------
     ## Main Page Setup ---------------------------------------------------------------------------------
     ## -------------------------------------------------------------------------------------------------
-    st.title(f"Your Collections\n Hello {st.session_state.user_info["email"]}", text_alignment="center")
+    st.title(f"Your Collections\n Hello {st.session_state.user_info['email']}", text_alignment="center")
     # DEGUB:{st.session_state.user_info}
     st.space("large")
 
@@ -58,9 +58,9 @@ else:
         @st.dialog("Edit") 
         def editCollection(coll):
             with st.container(horizontal=True, horizontal_alignment="center"):
-                st.subheader(f"Rename {coll.id.split("_")[0]}?", text_alignment="center")
+                st.subheader(f"Rename {coll.id.split('_')[0]}?", text_alignment="center")
                 coll_rename = st.text_input(" ")
-                if st.button ("Rename", key=f"rename_{coll.id.split("_")[0]}", width="content"):
+                if st.button ("Rename", key=f"rename_{coll.id.split('_')[0]}", width="content"):
                     if backEnd.renameCollection(coll, coll_rename, db):
                         st.error("Collection name already exist")
                     else: 
@@ -81,7 +81,7 @@ else:
         @st.dialog("Remove") 
         def removeCollection(coll):
             with st.container(horizontal=True, horizontal_alignment="center"):
-                st.subheader(f"Are you sure you want to remove \"{coll.split("_")[0]}\"?", text_alignment="center")
+                st.subheader(f"Are you sure you want to remove \"{coll.split('_')[0]}\"?", text_alignment="center")
                 if st.button("Yes", key=f"confirmRemove", width="content"):
                     ref = db.collection("Users").document(user_id).collection("Collections").document(coll)
                     ref.delete()
@@ -93,7 +93,7 @@ else:
         # iterate through collections
         for coll in collections:
             for doc in list(coll.stream()):
-                collInfo = doc.id.split("_")
+                collInfo = doc.id.split('_')
                 if not collInfo[0] == "DefaultCollection":
                     with st.container(width="content", horizontal_alignment="center"):
                         st.subheader(f"{collInfo[0]}", text_alignment="center")
