@@ -2,7 +2,7 @@
 base="light"
 backgroundColor="#b1a8a8"
 textColor="#1733f7"
-font="Arial MS"
+font="sans-serif"
 
 [client]
 showSidebarNavigation = false
