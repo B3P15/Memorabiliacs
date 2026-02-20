@@ -1,0 +1,8 @@
+[theme]
+base="dark"
+backgroundColor="#aaa6a6"
+textColor="#0000ff"
+font="Arial MS"
+
+[client]
+showSidebarNavigation = false
