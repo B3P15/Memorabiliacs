@@ -1,0 +1,12 @@
+﻿google-cloud-firestore==2.14.0
+requests==2.31.0
+tmdbsimple==2.9.1
+rebrick==0.4.0
+algoliasearch
+streamlit
+google.cloud
+firestore
+internetarchive
+tmdbsimple
+fastapi
+requests_futures
