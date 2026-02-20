@@ -1,76 +1,118 @@
 import streamlit as st
+from google.cloud import firestore
 import global_functions as gfuncs
-import temp_backend as db
-import streamlit_authenticator as stauth
-import yaml
-from yaml.loader import SafeLoader
+import BackendMethods.auth_functions as authFuncs
+import BackendMethods.backendfuncs as backEnd
 
-with open('.streamlit/config.yaml') as file:
-     config = yaml.load(file, Loader=SafeLoader)
+# Connects to db
+try:
+    db = firestore.Client.from_service_account_info(st.secrets["firebase"])
+except Exception as e:
+    st.error(f"Failed to initialize Firestore: {e}")
+    st.stop()
 
-# Pre-hashing all plain text passwords once
-# stauth.Hasher.hash_passwords(config['credentials'])
+# user sign-in check
+if 'user_info' not in st.session_state:
+    st.switch_page("pages/login.py")
+## -------------------------------------------------------------------------------------------------
+## Logged in ---------------------------------------------------------------------------------------
+## -------------------------------------------------------------------------------------------------
+else:
+    # Add user controll buttons at top
+    with st.container(horizontal=True, vertical_alignment="top"):
+        with st.container(horizontal_alignment="left", vertical_alignment="top"):
+            if st.button("Logout"):
+                authFuncs.sign_out()
+                st.switch_page("pages/login.py")
 
-authenticator = stauth.Authenticate(
-    config['credentials'],
-    config['cookie']['name'],
-    config['cookie']['key'],
-    config['cookie']['expiry_days']
-)
-collection_page_list = gfuncs.create_page_dict(db.collection_list)
+        with st.container(horizontal_alignment="right", vertical_alignment="top"):
+            if st.button("Settings"):
+                st.switch_page("pages/settings.py")
+    
+    # variables
+    conf_file = ".streamlit/config.toml"
+    collection_page = "pages/collectionView.py"
+    user_id = st.session_state.user_info["localId"]
+    user_data_dict = db.collection("Users").document(user_id).get().to_dict()
+    collections = list(db.collection("Users").document(user_id).collections())
+    
+    # Updates user configs
+    gfuncs.update_config_val(conf_file, "base", user_data_dict["base"])
+    gfuncs.update_config_val(conf_file, "backgroundColor", user_data_dict["backgroundColor"])
+    gfuncs.update_config_val(conf_file, "textColor", user_data_dict["textColor"])
+    if gfuncs.login_color_flag == 0:
+        gfuncs.login_color_flag = 1
+        st.rerun()
 
-st.title("Collections", text_alignment="center")
-st.space("large")
+    ## -------------------------------------------------------------------------------------------------
+    ## Main Page Setup ---------------------------------------------------------------------------------
+    ## -------------------------------------------------------------------------------------------------
+    st.title(f"Your Collections\n Hello {st.session_state.user_info["email"]}", text_alignment="center")
+    # DEGUB:{st.session_state.user_info}
+    st.space("large")
 
-authenticator.login(location="unrendered")
+    # Center section for collections
+    with st.container(horizontal=True, horizontal_alignment="center"):
 
-collection_page = "pages/template.py"
+        # Edit dialog to change the name of the collection
+        @st.dialog("Edit") 
+        def editCollection(coll):
+            with st.container(horizontal=True, horizontal_alignment="center"):
+                st.subheader(f"Rename {coll.id.split("_")[0]}?", text_alignment="center")
+                coll_rename = st.text_input(" ")
+                if st.button ("Rename", key=f"rename_{coll.id.split("_")[0]}", width="content"):
+                    if backEnd.renameCollection(coll, coll_rename, db):
+                        st.error("Collection name already exist")
+                    else: 
+                        st.rerun()
 
-with st.container(horizontal=True, horizontal_alignment="center"):
-
-    @st.dialog("Edit") 
-    def collection_edit_display(coll):
-        # will return to, can't remove from self included dictionary
-        with st.container(horizontal=True, horizontal_alignment="center"):
-            st.subheader(f"Rename {coll}?", text_alignment="center")
-            temp_coll_rename = st.text_input(" ")
-            if st.button ("Rename", key=f"rename_{coll}", width="content"):
-                gfuncs.rename(coll, temp_coll_rename, db.collection_list)
-                st.rerun()
-
-    for coll in db.collection_list:
-
-        with st.container(width="content", horizontal_alignment="center"):
-            st.subheader(f"{coll}", text_alignment="center")
-            if st.button("View Collection", key=f"{coll}_link"):
-                db.current_coll = coll
-                st.switch_page(collection_page)
-            if st.button("Edit", key=f"edit_{coll}"):
-                collection_edit_display(coll)
-                pass
-            if st.button("Remove", key=f"remove_{coll}", width="content"):
-                    db.collection_list.remove(coll)
+        # Add collection dialog for adding a new collection to the db
+        @st.dialog("Add")
+        def addCollection():
+            name = st.text_input("Name the Collection")
+            collType = st.text_input("Give Collection Type") # will be dropdown
+            if st.button("Add", key="makeColl") and name is not None and collType is not None:
+                if backEnd.create_collection(name, collType, db):
+                    st.error("Collection name already exist")
+                else:
                     st.rerun()
 
-            st.space("medium")
-        
-        st.space("small")
-    
-    # add collection
-    @st.dialog("Add")
-    def addCollection():
-        name = st.text_input("Name the Collection")
-        coll_type = st.text_input("Give Collection Type") # will be dropdown
-        if st.button("Add", key="makePage") and name is not None and coll_type is not None:
-            db.collection_list.append(name.title())
-            coll_name = gfuncs.snake_name(name.strip())
-            db.current_coll = coll_name
-            st.rerun()
-        
+        # Remove collection dialog to remove a collection from the db
+        @st.dialog("Remove") 
+        def removeCollection(coll):
+            with st.container(horizontal=True, horizontal_alignment="center"):
+                st.subheader(f"Are you sure you want to remove \"{coll.split("_")[0]}\"?", text_alignment="center")
+                if st.button("Yes", key=f"confirmRemove", width="content"):
+                    ref = db.collection("Users").document(user_id).collection("Collections").document(coll)
+                    ref.delete()
+                    st.rerun()
+                
+                if st.button("No", key=f"cancelRemove", width="content"):
+                    st.rerun()
 
-    with st.container(width="content", horizontal_alignment="center"):
-        if st.button("Add Collection", key="add"):
+        # iterate through collections
+        for coll in collections:
+            for doc in list(coll.stream()):
+                collInfo = doc.id.split("_")
+                if not collInfo[0] == "DefaultCollection":
+                    with st.container(width="content", horizontal_alignment="center"):
+                        st.subheader(f"{collInfo[0]}", text_alignment="center")
+
+                        if st.button("View Collection", key=f"{collInfo[0]}_link"):
+                            st.switch_page(collection_page)
+
+                        if st.button("Edit", key=f"edit_{collInfo[0]}"):
+                            editCollection(doc)
+
+                        if st.button("Remove", key=f"remove_{collInfo[0]}", width="content"):
+                            removeCollection(doc.id)
+
+                        st.space("medium")
+                    st.space("small")
+
+    # Container in bottom right for add button
+    with st.container(horizontal=True, horizontal_alignment="right"):
+        # add collection button
+        if st.button("Add Collection"):
             addCollection()
-            pass
-
-        # st.space("medium")
+    
