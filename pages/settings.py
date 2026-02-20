@@ -1,12 +1,14 @@
 import streamlit as st
 import global_functions as gfuncs
 from google.cloud import firestore
+import BackendMethods.auth_functions as authFuncs
 from BackendMethods.backendfuncs import (
     get_cards2,
     search_internetarchive,
     generate_collection,
     search_movies,
-    generate_login_template
+    generate_login_template,
+    setCollection
 )
 
 try:
@@ -26,9 +28,16 @@ else:
 
     user_id = st.session_state.user_info["localId"]
 
+    with st.container(horizontal=True, vertical_alignment="top"):
+        with st.container(horizontal_alignment="left", vertical_alignment="top"):
+            if st.button("Home"):
+                st.switch_page("pages/home_page.py")
+        with st.container(horizontal_alignment="right", vertical_alignment="top"):
+            if st.button("Logout"):
+                setCollection("")
+                authFuncs.sign_out()
+                st.switch_page("pages/login.py")
 
-    if st.button("Home"):
-        st.switch_page("pages/home_page.py")
 
     st.title("Settings", text_alignment="center")
 
@@ -37,6 +46,7 @@ else:
     current_theme = gfuncs.read_config_val(conf_file, "base")
     current_background_color = gfuncs.read_config_val(conf_file, "backgroundColor")
     current_text_color = gfuncs.read_config_val(conf_file, "textColor")
+    current_font = gfuncs.read_config_val(conf_file, "font")
 
 
 
@@ -48,15 +58,18 @@ else:
 
         background_color_choice = st.color_picker("Select the background color: ", current_background_color)
         text_color_choice = st.color_picker("Select the text color: ", current_text_color)
+        font_choice = st.selectbox("Select the font: ", ("serif", "sans-serif"), index=0 if current_font == "serif" else 1)
 
     with st.container(horizontal_alignment="right", vertical_alignment="bottom"):
         if st.button("Save Changes"):
             gfuncs.update_config_val(conf_file, "base", "dark" if theme_choice=="dark" else "light")
             gfuncs.update_config_val(conf_file, "backgroundColor", background_color_choice)
             gfuncs.update_config_val(conf_file, "textColor", text_color_choice)
+            gfuncs.update_config_val(conf_file, "font", font_choice)
             newdb.collection("Users").document(user_id).set({"base" : theme_choice, 
                                                             "backgroundColor" : background_color_choice, 
-                                                            "textColor" : text_color_choice},
+                                                            "textColor" : text_color_choice,
+                                                            "font" : font_choice},
                                                             merge=True)
             st.rerun()
 

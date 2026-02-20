@@ -1,3 +1,6 @@
+import streamlit as st
+import BackendMethods.auth_functions as authFuncs
+
 login_color_flag = 0
 
 def create_page_dict(page_list: list[str]) -> list[str]:
@@ -44,3 +47,13 @@ def read_config_val(conf:str, var:str) -> str:
                 result_list = line.split('"')
 
     return result_list[1]
+
+def page_initialization():
+    st.set_page_config(layout="wide")
+    with st.container(horizontal=True, vertical_alignment="top"):
+        with st.container(horizontal_alignment="left", vertical_alignment="top"):
+            if st.button("Home"):
+                st.switch_page("pages/home_page.py")
+        with st.container(horizontal_alignment="right", vertical_alignment="top"):
+            if st.button("Settings"):
+                st.switch_page("pages/settings.py")

@@ -23,6 +23,7 @@ from BackendMethods.backendfuncs import (
     generate_login_template
 )
 
+gfuncs.page_initialization()
 # Initialize Firestore client
 # The credentials are grabbed from Streamlit secrets
 try:

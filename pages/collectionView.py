@@ -1,82 +1,85 @@
 import streamlit as st
-import temp_backend as db
+from google.cloud import firestore
+import global_functions as gfuncs
+import BackendMethods.auth_functions as authFuncs
+import BackendMethods.backendfuncs as backEnd
 
-if st.button("Home"):
-    st.switch_page("pages/home_page.py")
+# Connects to db
+try:
+    db = firestore.Client.from_service_account_info(st.secrets["firebase"])
+except Exception as e:
+    st.error(f"Failed to initialize Firestore: {e}")
+    st.stop()
 
-st.title(db.current_coll, text_alignment="center")
+# user sign-in check
+if 'user_info' not in st.session_state:
+    st.switch_page("pages/login.py")
+## -------------------------------------------------------------------------------------------------
+## Logged in ---------------------------------------------------------------------------------------
+## -------------------------------------------------------------------------------------------------
+else:
+    gfuncs.page_initialization()
 
-st.set_page_config(layout="wide")
+    user_id = st.session_state.user_info["localId"]
+    collectionData = backEnd.generate_collection(backEnd.CURR_COLL, db)
 
+    st.title(backEnd.CURR_COLL.split("_")[0], text_alignment="center")
+    st.space("large")
 
-# temp hard code for vinyls
-if (db.current_coll == "Vinyls"):
-    @st.dialog("Add Vinyl")
-    def add_vinyl():
-        name = st.text_input("Title of vinyl")
-        picture_link = st.text_input("URL of a picture of the album cover")
-        if st.button("Add to collection") and name != '' and picture_link != '':
-            db.vinyl_names.append(name.strip())
-            db.vinyl_pictures.append(picture_link.strip())
-            db.vinyl_list = dict(zip(db.vinyl_names, db.vinyl_pictures))
-            # st.switch_page("pages/template.py")
-            st.rerun()
-        else:
-            pass
-    
     with st.container(horizontal=True, horizontal_alignment="center"):
-        for vinyl in db.vinyl_list:
+        # Edit dialog to change the name of the collection
+        # @st.dialog("Edit") 
+        # def editCollection(coll):
+        #     with st.container(horizontal=True, horizontal_alignment="center"):
+        #         st.subheader(f"Rename {coll.id.split("_")[0]}?", text_alignment="center")
+        #         coll_rename = st.text_input(" ")
+        #         if st.button ("Rename", key=f"rename_{coll.id.split("_")[0]}", width="content"):
+        #             if backEnd.renameCollection(coll, coll_rename, db):
+        #                 st.error("Collection name already exist")
+        #             else: 
+        #                 st.rerun()
 
-            @st.dialog(f"{vinyl}")
-            def vinyl_display():
-                st.image(db.vinyl_list[vinyl], width=500)
-                st.text(f"Album name: {vinyl}", text_alignment="center")
+        # # Add collection dialog for adding a new collection to the db
+        # @st.dialog("Add")
+        # def addCollection():
+        #     name = st.text_input("Name the Collection")
+        #     collType = st.text_input("Give Collection Type") # will be dropdown
+        #     if st.button("Add", key="makeColl") and name is not None and collType is not None:
+        #         if backEnd.create_collection(name, collType, db):
+        #             st.error("Collection name already exist")
+        #         else:
+        #             st.rerun()
 
-            with st.container(width="content", horizontal_alignment="left"):
-                st.image(db.vinyl_list[vinyl], width=200)
-                if st.button(f"{vinyl}", width=200):
-                    vinyl_display()
-                if st.button("Remove", key=f"remove_{vinyl}", width=200):
-                    db.vinyl_names.remove(vinyl)
-                    db.vinyl_pictures.remove(db.vinyl_list[vinyl])
-                    db.vinyl_list = dict(zip(db.vinyl_names, db.vinyl_pictures))
-                    st.switch_page("pages/template.py")
-
-    with st.container(horizontal=True, horizontal_alignment="right", vertical_alignment="bottom"):
-        if st.button(f"Add to {db.current_coll}"):
-            add_vinyl()
-            pass
-
-
-# above but mugs
-if (db.current_coll == "Mugs"):
-    
-    @st.dialog("Add Mug")
-    def add_vinyl():
-        st.subheader("We're working on it :)")
-    #     name = st.text_input("Name of Mug")
-    #     picture_link = st.text_input("URL of a picture of the mug")
-    #     if st.button("Add to collection") and name != '' and picture_link != '':
-            
-    #         st.rerun()
-    #     else:
-    #         pass
-    
-    with st.container(horizontal=True, horizontal_alignment="center"):
-        for mug in db.mug_list:
-
-            @st.dialog(f"{mug}")
-            def mug_display():
-                st.image(f"pictures/{db.mug_list[mug]}.jpeg", width=150)
-                st.text(f"Mug name: {mug}", text_alignment="center")
-
-            with st.container(width="content", horizontal_alignment="left"):
-                st.image(f"pictures/{db.mug_list[mug]}.jpeg", width=150)
-                if st.button(f"{mug}", width=150):
-                    mug_display()
+        # # Remove collection dialog to remove a collection from the db
+        # @st.dialog("Remove") 
+        # def removeCollection(coll):
+        #     with st.container(horizontal=True, horizontal_alignment="center"):
+        #         st.subheader(f"Are you sure you want to remove \"{coll.split("_")[0]}\"?", text_alignment="center")
+        #         if st.button("Yes", key=f"confirmRemove", width="content"):
+        #             ref = db.collection("Users").document(user_id).collection("Collections").document(coll)
+        #             ref.delete()
+        #             st.rerun()
                 
-    with st.container(horizontal=True, horizontal_alignment="right", vertical_alignment="bottom"):
-        if st.button(f"Add to {db.current_coll}"):
-            add_vinyl()
-            pass
+        #         if st.button("No", key=f"cancelRemove", width="content"):
+        #             st.rerun()
 
+        # iterate through collections
+        for data in collectionData:
+            with st.container(width="content", horizontal_alignment="center"):
+                st.subheader(f"{data["Name"]}", text_alignment="center")
+
+                for key in data.keys():
+                    stuff = ""
+                    if key != "Name":
+                        stuff += f"{key}: {data[key]}"
+                    
+                    st.subheader(stuff, text_alignment="center")
+
+                st.space("medium")
+            st.space("small")
+
+    # # Container in bottom right for add button
+    # with st.container(horizontal=True, horizontal_alignment="right"):
+    #     # add collection button
+    #     if st.button("Add Collection"):
+    #         addCollection()

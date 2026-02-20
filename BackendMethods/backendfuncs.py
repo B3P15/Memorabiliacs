@@ -12,6 +12,8 @@ APITCG_API_KEY = st.secrets["APITCG_API_KEY"]  # change later
 
 app = FastAPI()
 
+CURR_COLL = ""
+
 # urls in format of 'https://apitcg.com/api/$GAME/cards?$ATTRIBUTE='
 
 #Faster version of get_cards using asynchronous gets and future responses
@@ -143,16 +145,6 @@ def generate_collection(collection_name: str, db):
     collection_doc = collection_ref.get()
     if collection_doc.exists:
         items_refs = collection_doc.to_dict().get('items')
-        # Dereference each DocumentReference to get the actual data
-        # items_data = []
-        # for ref in items_refs:
-        #     # try:
-        #     #     doc = ref.get()
-        #     #     if doc.exists:
-        #     #         items_data.append(doc.to_dict())
-        #     # except Exception as e:
-        #     #     st.error(f"Error dereferencing item: {e}")
-        # return items_data
         return items_refs
     else:
         return []
@@ -171,7 +163,7 @@ def create_collection(collection_name: str, collection_type: str, db):
     fullName = collection_name.title() + f"_{collection_type}"
 
     # check if name already exists in the database
-    if checkForCollName(collection_name, db):
+    if checkForCollName(collection_name.title(), db):
         return True
     
     # created new collection
@@ -194,7 +186,7 @@ def renameCollection(collection_name:str, new_collection:str, db):
     # print(data)
 
     # checks if new name already exists in the database
-    if checkForCollName(new_collection, db):
+    if checkForCollName(new_collection.title(), db):
         return True
 
     # created new collection to move data to
@@ -224,6 +216,9 @@ def checkForCollName(collection_name:str, db) -> bool:
                 return True
     return False
     
+def setCollection(collection:str):
+    global CURR_COLL
+    CURR_COLL = collection
 
 #setup templates for login stuff
 def generate_login_template(db):
