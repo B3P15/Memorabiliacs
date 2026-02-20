@@ -28,11 +28,14 @@ def access_secret_version():
     return payload_dict
 
 st.secrets = access_secret_version()
+from google.cloud import firestore
 
 BASE_API_URL = "https://apitcg.com/api"
 APITCG_API_KEY = st.secrets["APITCG_API_KEY"]  # change later
 
 app = FastAPI()
+
+CURR_COLL = ""
 
 # urls in format of 'https://apitcg.com/api/$GAME/cards?$ATTRIBUTE='
 
@@ -165,16 +168,6 @@ def generate_collection(collection_name: str, db):
     collection_doc = collection_ref.get()
     if collection_doc.exists:
         items_refs = collection_doc.to_dict().get('items')
-        # Dereference each DocumentReference to get the actual data
-        # items_data = []
-        # for ref in items_refs:
-        #     # try:
-        #     #     doc = ref.get()
-        #     #     if doc.exists:
-        #     #         items_data.append(doc.to_dict())
-        #     # except Exception as e:
-        #     #     st.error(f"Error dereferencing item: {e}")
-        # return items_data
         return items_refs
     else:
         return []
@@ -246,6 +239,9 @@ def checkForCollName(collection_name:str, db) -> bool:
                 return True
     return False
     
+def setCollection(collection:str):
+    global CURR_COLL
+    CURR_COLL = collection
 
 #setup templates for login stuff
 def generate_login_template(db):
@@ -304,3 +300,36 @@ def generate_login_template(db):
     if 'auth_success' in st.session_state:
         auth_notification.success(st.session_state.auth_success)
         del st.session_state.auth_success
+# checkbox_key = f"item_add_{item.get('tmdb_id')}"
+# def add_item(item, checkbox_key, db):
+#     try:
+#         user_id = st.session_state.user_info["localId"]
+#         item_id = str(item["tmdb_id"])
+
+#         # Ensure item collection exists by creating a metadata doc if needed
+#         item_collection_ref = db.collection("Movies")
+#         if not item_collection_ref.document(item_id).get().exists:
+#             # Create the collection by adding the first item
+#             pass
+        
+#         movie_ref = db.collection("Movies").document(item_id)
+#         movie_ref.set(item)
+
+#         user_collections = (
+#             db.collection("Users")
+#             .document(user_id)
+#             .collection("Collections")
+#             .document("Movies")
+#         )
+#         user_collections.set({"items": []}, merge=True)
+#         user_collections.update({
+#             "items": firestore.ArrayUnion([movie_ref])
+#         })
+
+#         st.success(f"Added '{item.get('title')}' to Collection")
+#     except Exception as e:
+#         st.error(f"Failed to add to collection: {e}")
+#     finally:
+#         st.session_state[checkbox_key] = False
+
+# st.checkbox("Add to Collection", key=checkbox_key, on_change=add_item)
