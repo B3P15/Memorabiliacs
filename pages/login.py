@@ -20,8 +20,10 @@ from BackendMethods.backendfuncs import (
     search_internetarchive,
     generate_collection,
     search_movies,
-    generate_login_template
+    generate_login_template,
+    access_secret_version,
 )
+st.secrets = access_secret_version()
 
 gfuncs.page_initialization()
 # Initialize Firestore client

@@ -5,6 +5,29 @@ from fastapi import FastAPI, Query, Path, HTTPException
 from requests_futures.sessions import FuturesSession
 from concurrent.futures import as_completed
 from BackendMethods.auth_functions import create_account, sign_in, reset_password
+import toml
+from google.cloud import secretmanager
+
+def access_secret_version():
+    """
+    Access the payload for a secret version.
+    """
+    # Create the Secret Manager client.
+    client = secretmanager.SecretManagerServiceClient()
+
+    # Build the resource name of the secret version.
+    name = "projects/memorabiliacs-ec1bd/secrets/Streamlit_secrets/versions/latest"
+
+    # Access the secret version.
+    response = client.access_secret_version(request={"name": name})
+
+    # Decode the payload.
+    # Note: The secret value is returned as a bytes object.
+    payload = response.payload.data.decode("UTF-8")
+    payload_dict = toml.loads(payload)
+    return payload_dict
+
+st.secrets = access_secret_version()
 
 BASE_API_URL = "https://apitcg.com/api"
 APITCG_API_KEY = st.secrets["APITCG_API_KEY"]  # change later
