@@ -5,6 +5,7 @@ import rebrick
 import json
 from fastapi import FastAPI, Query, Path, HTTPException
 from requests_futures.sessions import FuturesSession
+import requests
 from concurrent.futures import as_completed
 from BackendMethods.auth_functions import create_account, sign_in, reset_password
 from algoliasearch.search.client import SearchClient
@@ -341,3 +342,23 @@ def search_algolia(query: str, index_name: str, max_results: int = 10):
     except Exception as e:
         st.error(f"Algolia search failed: {e}")
         return []
+
+def test_upc_api(upc_code: str):
+    headers = {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+    'Accept-Encoding': 'gzip,deflate'
+    }
+    resp = requests.get(f'https://api.upcitemdb.com/prod/trial/lookup?upc={upc_code}', headers=headers)
+    data = json.loads(resp.text)
+    if 'items' in data and len(data['items']) > 0:
+        item = data['items'][0]
+        results = {
+            'title': item['title'],
+            'description': item['description'],
+            'ean': item['ean'],
+            'image': item['images'][0]  # Get the first image if available
+        }
+    else:
+        raise ValueError("No items found for the provided UPC code.")
+    return results

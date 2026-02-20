@@ -16,14 +16,12 @@ from BackendMethods.backendfuncs import (
     generate_collection,
     search_movies,
     generate_login_template,
-    extract_titles
+    extract_titles,
+    test_upc_api
 )
 from algoliasearch.search.client import SearchClientSync
 from algoliasearch.search.models.search_params_object import SearchParamsObject
 
-from BackendMethods.grab_info import (
-    List
-)
 # Initialize Firestore client
 # The credentials are grabbed from Streamlit secrets
 try:
@@ -61,7 +59,7 @@ else:
     st.header("Search Media")
     search_type = st.selectbox(
         "What would you like to search for?",
-        options=("Vinyl & CDs", "Movies", "Pokemon Cards"),
+        options=("Vinyl & CDs", "Movies", "Pokemon Cards", "UPC"),
     )
 
     if search_type == "Vinyl & CDs":
@@ -141,6 +139,25 @@ else:
                     st.error(f"Search failed: {e}")
                     results = []
             st.session_state["tmdb_results"] = results
+    elif search_type == "UPC":
+        upc_query = st.text_input("Enter UPC code")
+        if st.button("Search UPC"):
+            with st.spinner("Searching UPC..."):
+                try:
+                    st.markdown("UPC search results:")
+                    cols = st.columns(2)
+                    upc_result = test_upc_api(upc_query)
+                    # for idx, result in enumerate(upc_result):
+                    with cols[0]:
+                        if upc_result["image"]:
+                            st.image(upc_result["image"], width=200)
+                        st.write(f"**{upc_result.get('title', 'No title')}**")
+                        if upc_result["description"]:
+                            st.write(f"Description: {upc_result['description']}")
+                    st.write(f"Item ean: {upc_result['ean']}")
+
+                except Exception as e:
+                    st.error(f"UPC search failed: {e}")
 
         tmdb_results = st.session_state.get("tmdb_results", [])
         if tmdb_results:
@@ -148,8 +165,8 @@ else:
             cols = st.columns(2)
             for idx, movie in enumerate(tmdb_results):
                 with cols[idx % 2]:
-                    if movie.get("poster_path"):
-                        st.image(movie["poster_path"], width=200)
+                    if movie.get("image"):
+                        st.image(movie["image"], width=200)
                     st.write(f"**{movie.get('title', 'No title')}**")
                     if movie.get("release_date"):
                         st.write(f"Release: {movie.get('release_date')}")
@@ -455,6 +472,3 @@ else:
 # for card in range(587, len(pokemonData[0]-1)):
 #     db.collection("Pokemon").document(pokemonData.card['id']).set(card)
 #     sleep(0.2)
-
-titles = extract_titles(search_movies(20))
-print(titles)

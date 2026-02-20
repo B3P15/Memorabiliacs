@@ -7,3 +7,5 @@ streamlit==1.28.1
 tmdbsimple==2.9.1
 rebrick==0.4.0
 algoliasearch
+streamlit==1.52.2
+google-cloud-firestore==2.14.0
