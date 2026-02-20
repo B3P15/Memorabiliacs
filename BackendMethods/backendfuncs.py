@@ -28,8 +28,6 @@ def access_secret_version():
     return payload_dict
 
 st.secrets = access_secret_version()
-from google.cloud import firestore
-
 BASE_API_URL = "https://apitcg.com/api"
 APITCG_API_KEY = st.secrets["APITCG_API_KEY"]  # change later
 
