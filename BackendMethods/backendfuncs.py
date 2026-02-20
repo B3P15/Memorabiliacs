@@ -5,6 +5,7 @@ from fastapi import FastAPI, Query, Path, HTTPException
 from requests_futures.sessions import FuturesSession
 from concurrent.futures import as_completed
 from BackendMethods.auth_functions import create_account, sign_in, reset_password
+from google.cloud import firestore
 
 BASE_API_URL = "https://apitcg.com/api"
 APITCG_API_KEY = st.secrets["APITCG_API_KEY"]  # change later
@@ -276,3 +277,37 @@ def generate_login_template(db):
     if 'auth_success' in st.session_state:
         auth_notification.success(st.session_state.auth_success)
         del st.session_state.auth_success
+
+# checkbox_key = f"item_add_{item.get('tmdb_id')}"
+# def add_item(item, checkbox_key, db):
+#     try:
+#         user_id = st.session_state.user_info["localId"]
+#         item_id = str(item["tmdb_id"])
+
+#         # Ensure item collection exists by creating a metadata doc if needed
+#         item_collection_ref = db.collection("Movies")
+#         if not item_collection_ref.document(item_id).get().exists:
+#             # Create the collection by adding the first item
+#             pass
+        
+#         movie_ref = db.collection("Movies").document(item_id)
+#         movie_ref.set(item)
+
+#         user_collections = (
+#             db.collection("Users")
+#             .document(user_id)
+#             .collection("Collections")
+#             .document("Movies")
+#         )
+#         user_collections.set({"items": []}, merge=True)
+#         user_collections.update({
+#             "items": firestore.ArrayUnion([movie_ref])
+#         })
+
+#         st.success(f"Added '{item.get('title')}' to Collection")
+#     except Exception as e:
+#         st.error(f"Failed to add to collection: {e}")
+#     finally:
+#         st.session_state[checkbox_key] = False
+
+# st.checkbox("Add to Collection", key=checkbox_key, on_change=add_item)
