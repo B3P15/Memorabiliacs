@@ -170,7 +170,7 @@ def create_collection(collection_name: str, collection_type: str, db):
     fullName = collection_name.title() + f"_{collection_type}"
 
     # check if name already exists in the database
-    if checkForCollName(collection_name, db):
+    if checkForCollName(collection_name.title(), db):
         return True
     
     # created new collection
@@ -193,7 +193,7 @@ def renameCollection(collection_name:str, new_collection:str, db):
     # print(data)
 
     # checks if new name already exists in the database
-    if checkForCollName(new_collection, db):
+    if checkForCollName(new_collection.title(), db):
         return True
 
     # created new collection to move data to
