@@ -32,7 +32,7 @@ def get_cards2(
     responseList = []
     session = FuturesSession()
     # first request is started in background
-    for i in range(len(id)-1):
+    for i in range(len(id)):
         params = {
         "id": id[i]}
         futureList.append(session.get(url, headers=headers, params=params))
@@ -77,6 +77,9 @@ def search_movies(query, max_results=10):
             'tmdb_id': movie.get('id')
         })
     return results
+
+def extract_titles(movie_list):
+    return [movie["title"] for movie in movie_list if "title" in movie]
 
 
 def search_internetarchive(creators: str = "", title: str = "", max_results: int = 10):

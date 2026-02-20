@@ -1,6 +1,6 @@
 import json
 import os
-
+from time import sleep
 import streamlit as st
 from google.cloud import firestore
 from BackendMethods.auth_functions import (
@@ -15,9 +15,13 @@ from BackendMethods.backendfuncs import (
     search_internetarchive,
     generate_collection,
     search_movies,
-    generate_login_template
+    generate_login_template,
+    extract_titles
 )
 
+from BackendMethods.grab_info import (
+    List
+)
 # Initialize Firestore client
 # The credentials are grabbed from Streamlit secrets
 try:
@@ -107,20 +111,20 @@ else:
                                 db.collection("Users")
                                 .document(user_id)
                                 .collection("Collections")
-                                .document("MusicCollection")
+                                .document("Music")
                             )
                             user_collections.set({"items": []}, merge=True)
                             user_collections.update({
                                 "items": firestore.ArrayUnion([music_ref])
                             })
 
-                            st.success(f"Added '{item.get('title')}' to MusicCollection!")
+                            st.success(f"Added '{item.get('title')}' to Music")
                         except Exception as e:
                             st.error(f"Failed to add to collection: {e}")
                         finally:
                             st.session_state[checkbox_key] = False
 
-                    st.checkbox("Add to MusicCollection", key=checkbox_key, on_change=_add_music)
+                    st.checkbox("Add to Music", key=checkbox_key, on_change=_add_music)
 
     elif search_type == "Movies":
         with st.form(key="tmdb_search_form", clear_on_submit=False):
@@ -170,24 +174,24 @@ else:
                                 db.collection("Users")
                                 .document(user_id)
                                 .collection("Collections")
-                                .document("MovieCollection")
+                                .document("Movies")
                             )
                             user_collections.set({"items": []}, merge=True)
                             user_collections.update({
                                 "items": firestore.ArrayUnion([movie_ref])
                             })
 
-                            st.success(f"Added '{movie.get('title')}' to MovieCollection!")
+                            st.success(f"Added '{movie.get('title')}' to Movies")
                         except Exception as e:
                             st.error(f"Failed to add to collection: {e}")
                         finally:
                             st.session_state[checkbox_key] = False
 
-                    st.checkbox("Add to MovieCollection", key=checkbox_key, on_change=_add_movie)
+                    st.checkbox("Add to Movies", key=checkbox_key, on_change=_add_movie)
 
 
     # Page layout
-    st.set_page_config(page_title="Pokemon Collection", layout="wide")
+    # st.set_page_config(page_title="Pokemon Collection", layout="wide")
 
     st.title("🎴 My Pokemon Collection")
 
@@ -356,3 +360,16 @@ else:
         st.rerun()
 
 
+# pokemonData = get_cards2("pokemon", List[0])
+
+
+# for card in pokemonData:
+#     db.collection("Pokemon").document(card['id']).set(card)
+#     sleep(0.2)
+
+# for card in range(587, len(pokemonData[0]-1)):
+#     db.collection("Pokemon").document(pokemonData.card['id']).set(card)
+#     sleep(0.2)
+
+titles = extract_titles(search_movies(20))
+print(titles)

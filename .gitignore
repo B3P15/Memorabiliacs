@@ -5,3 +5,4 @@ Example/.streamlit/secrets.toml
 node_modules/
 __pycache__/
 .firebase
+BackendMethods/Pokemon_Cards
