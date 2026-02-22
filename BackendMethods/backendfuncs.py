@@ -163,13 +163,10 @@ def generate_collection(collection_name: str, db):
     """
     user_id = st.session_state.user_info['localId']
     collection_ref = db.collection('Users').document(user_id).collection('Collections').document(collection_name)
-    collection_doc = collection_ref.get()
-    if collection_doc.exists:
-        items_refs = collection_doc.to_dict().get('items')
-        return items_refs
-    else:
-        return []
-
+    snapshot = collection_ref.get()
+    data = snapshot.to_dict()
+    return collection_name, data
+        
 # created new document in db
 def create_collection(collection_name: str, collection_type: str, db):
     """Generate a collection of items from the database based on the collection name.
@@ -298,36 +295,4 @@ def generate_login_template(db):
     if 'auth_success' in st.session_state:
         auth_notification.success(st.session_state.auth_success)
         del st.session_state.auth_success
-# checkbox_key = f"item_add_{item.get('tmdb_id')}"
-# def add_item(item, checkbox_key, db):
-#     try:
-#         user_id = st.session_state.user_info["localId"]
-#         item_id = str(item["tmdb_id"])
 
-#         # Ensure item collection exists by creating a metadata doc if needed
-#         item_collection_ref = db.collection("Movies")
-#         if not item_collection_ref.document(item_id).get().exists:
-#             # Create the collection by adding the first item
-#             pass
-        
-#         movie_ref = db.collection("Movies").document(item_id)
-#         movie_ref.set(item)
-
-#         user_collections = (
-#             db.collection("Users")
-#             .document(user_id)
-#             .collection("Collections")
-#             .document("Movies")
-#         )
-#         user_collections.set({"items": []}, merge=True)
-#         user_collections.update({
-#             "items": firestore.ArrayUnion([movie_ref])
-#         })
-
-#         st.success(f"Added '{item.get('title')}' to Collection")
-#     except Exception as e:
-#         st.error(f"Failed to add to collection: {e}")
-#     finally:
-#         st.session_state[checkbox_key] = False
-
-# st.checkbox("Add to Collection", key=checkbox_key, on_change=add_item)

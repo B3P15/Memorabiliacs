@@ -11,6 +11,18 @@ except Exception as e:
     st.error(f"Failed to initialize Firestore: {e}")
     st.stop()
 
+def add_reference(real_doc_id, item_doc_id):
+    real_doc_ref = db.collection(backEnd.CURR_COLL).document(real_doc_id)
+    print(backEnd.CURR_COLL)
+    pokemon_ref = db.collection("Pokemon").document(item_doc_id)
+
+    real_doc_ref.set(
+        {item_doc_id: pokemon_ref},
+    )
+    print("Done")
+    print(item_doc_id)
+    
+
 # user sign-in check
 if 'user_info' not in st.session_state:
     st.switch_page("pages/login.py")
@@ -64,22 +76,31 @@ else:
         #             st.rerun()
 
         # iterate through collections
-        for data in collectionData:
-            with st.container(width="content", horizontal_alignment="center"):
-                st.subheader(f"{data["Name"]}", text_alignment="center")
+        # index tacker
+        for id, ref in collectionData[1].items():
+            doc = ref.get()
+            if doc.exists:
+                info = doc.to_dict()    
+                with st.container(width="content", horizontal_alignment="center"):
+                    st.subheader(f"{info['name']}", text_alignment="center")
 
-                for key in data.keys():
-                    stuff = ""
-                    if key != "Name":
-                        stuff += f"{key}: {data[key]}"
-                    
-                    st.subheader(stuff, text_alignment="center")
+                    for key in info.keys():
+                        stuff = ""
+                        if key != info['name']:
+                            stuff += f"{key}: {info[key]}"
+                        
+                        st.subheader(stuff, text_alignment="center")
 
-                st.space("medium")
-            st.space("small")
+                    st.space("medium")
+                st.space("small")
 
-    # # Container in bottom right for add button
-    # with st.container(horizontal=True, horizontal_alignment="right"):
-    #     # add collection button
-    #     if st.button("Add Collection"):
-    #         addCollection()
+
+
+    # Container in bottom right for add button
+    
+    with st.container(horizontal=True, horizontal_alignment="right"):
+        # Text box for input
+        item_id = st.text_input("Enter Item ID")
+        # Add to collection button. Must input Id for now
+        if st.button("Add To Collection"):
+            add_reference(collectionData[0], item_id)
