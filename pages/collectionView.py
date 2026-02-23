@@ -9,27 +9,7 @@ try:
     db = firestore.Client.from_service_account_info(st.secrets["firebase"])
 except Exception as e:
     st.error(f"Failed to initialize Firestore: {e}")
-    st.stop()
-
-def add_reference(added_doc_id, item_doc_id):
-    added_doc_ref = db.collection(backEnd.CURR_COLL).document(added_doc_id)
-    print(backEnd.CURR_COLL)
-    pokemon_ref = db.collection("Pokemon").document(item_doc_id)
-    print("#####################################")
-    print(pokemon_ref)
-    print("#####################################")
-    added_doc_ref.set(
-        {item_doc_id: pokemon_ref},
-    )
-    print("Done")
-    print(item_doc_id)
-    print(added_doc_id)
-    print(pokemon_ref.get().to_dict())
-    
-# DISCUSS AT MEETING!
-# There is a better way to store this information. We should be creating the Collections as actual collections, not documents, and then storing the cards or collectivbles
-# as documents within those collections. The way we are doing this currently feels inefficient and is hard to work with I think. Also need to be able to get Collection type
-    
+    st.stop()    
 
 # user sign-in check
 if 'user_info' not in st.session_state:
@@ -95,7 +75,7 @@ else:
 
                     for key in info.keys():
                         stuff = ""
-                        if key != info['name'] and key != info['image']:
+                        if key != info['name'] or key != info['image']:
                             stuff += f"{key}: {info[key]}"
                         
                         st.subheader(stuff, text_alignment="center")
@@ -110,6 +90,14 @@ else:
     with st.container(horizontal=True, horizontal_alignment="right"):
         # Text box for input
         item_id = st.text_input("Enter Item ID")
+        new_string = ""
+        for i in range(len(item_id)):
+            if item_id[i] == "-":
+                 new_string+="_"
+            else:
+                new_string+=item_id[i]
         # Add to collection button. Must input Id for now
         if st.button("Add To Collection"):
-            add_reference(collectionData[0], item_id)
+            backEnd.add_reference(db, user_id, new_string, item_id)
+        if st.button("Remove From Collection"):
+            backEnd.delete_reference(db, user_id, new_string)

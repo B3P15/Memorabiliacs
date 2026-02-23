@@ -6,7 +6,7 @@ from requests_futures.sessions import FuturesSession
 from concurrent.futures import as_completed
 from BackendMethods.auth_functions import create_account, sign_in, reset_password
 import toml
-from google.cloud import secretmanager
+from google.cloud import secretmanager, firestore
 
 def access_secret_version():
     """
@@ -216,6 +216,16 @@ def renameCollection(collection_name:str, new_collection:str, db):
     db.collection('Users').document(user_id).collection('Collections').document(fullName).set(items, merge=True)
 
     collection_ref_OLD.delete()
+
+def add_reference(db, user_id, item_doc_id, actual_item_id):
+    pokemon_ref = db.collection("Pokemon").document(actual_item_id)
+    db.collection('Users').document(user_id).collection('Collections').document(CURR_COLL).set({item_doc_id: pokemon_ref}, merge=True)
+    st.rerun()
+    
+def delete_reference(db, user_id, item_doc_id):
+    delete = db.collection('Users').document(user_id).collection('Collections').document(CURR_COLL)
+    delete.update({item_doc_id: firestore.DELETE_FIELD})
+    st.rerun()
 
 def checkForCollName(collection_name:str, db) -> bool:
     """Checks if the provided name is in the database
