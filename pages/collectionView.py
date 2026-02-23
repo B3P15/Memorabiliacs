@@ -11,16 +11,24 @@ except Exception as e:
     st.error(f"Failed to initialize Firestore: {e}")
     st.stop()
 
-def add_reference(real_doc_id, item_doc_id):
-    real_doc_ref = db.collection(backEnd.CURR_COLL).document(real_doc_id)
+def add_reference(added_doc_id, item_doc_id):
+    added_doc_ref = db.collection(backEnd.CURR_COLL).document(added_doc_id)
     print(backEnd.CURR_COLL)
     pokemon_ref = db.collection("Pokemon").document(item_doc_id)
-
-    real_doc_ref.set(
+    print("#####################################")
+    print(pokemon_ref)
+    print("#####################################")
+    added_doc_ref.set(
         {item_doc_id: pokemon_ref},
     )
     print("Done")
     print(item_doc_id)
+    print(added_doc_id)
+    print(pokemon_ref.get().to_dict())
+    
+# DISCUSS AT MEETING!
+# There is a better way to store this information. We should be creating the Collections as actual collections, not documents, and then storing the cards or collectivbles
+# as documents within those collections. The way we are doing this currently feels inefficient and is hard to work with I think. Also need to be able to get Collection type
     
 
 # user sign-in check
@@ -83,10 +91,11 @@ else:
                 info = doc.to_dict()    
                 with st.container(width="content", horizontal_alignment="center"):
                     st.subheader(f"{info['name']}", text_alignment="center")
+                    st.image(info['image'], 100)
 
                     for key in info.keys():
                         stuff = ""
-                        if key != info['name']:
+                        if key != info['name'] and key != info['image']:
                             stuff += f"{key}: {info[key]}"
                         
                         st.subheader(stuff, text_alignment="center")
