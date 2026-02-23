@@ -59,6 +59,10 @@ def page_initialization():
         with st.container(horizontal_alignment="left", vertical_alignment="top"):
             if st.button("Home"):
                 st.switch_page("pages/home_page.py")
+        with st.container(horizontal_alignment="center", vertical_alignment="top"):
+            if st.button("Search"):
+                st.switch_page("pages/search.py")
         with st.container(horizontal_alignment="right", vertical_alignment="top"):
             if st.button("Settings"):
                 st.switch_page("pages/settings.py")
+        

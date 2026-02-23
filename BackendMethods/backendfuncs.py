@@ -1,11 +1,16 @@
 import internetarchive
 import streamlit as st
 import tmdbsimple as tmdb
+import rebrick
+import json
 from fastapi import FastAPI, Query, Path, HTTPException
 from requests_futures.sessions import FuturesSession
+import requests
+import toml
 from concurrent.futures import as_completed
 from BackendMethods.auth_functions import create_account, sign_in, reset_password
-import toml
+from algoliasearch.search.client import SearchClientSync
+from algoliasearch.search.models.search_params_object import SearchParamsObject
 from google.cloud import secretmanager, firestore
 
 def access_secret_version():
@@ -163,10 +168,13 @@ def generate_collection(collection_name: str, db):
     """
     user_id = st.session_state.user_info['localId']
     collection_ref = db.collection('Users').document(user_id).collection('Collections').document(collection_name)
-    snapshot = collection_ref.get()
-    data = snapshot.to_dict()
-    return collection_name, data
-        
+    collection_doc = collection_ref.get()
+    if collection_doc.exists:
+        items_refs = collection_doc.to_dict().get('items')
+        return items_refs
+    else:
+        return []
+
 # created new document in db
 def create_collection(collection_name: str, collection_type: str, db):
     """Generate a collection of items from the database based on the collection name.
@@ -306,3 +314,129 @@ def generate_login_template(db):
         auth_notification.success(st.session_state.auth_success)
         del st.session_state.auth_success
 
+REBRICK_API_KEY = st.secrets["REBRICK_API_KEY"]
+
+def search_minifigs_rebrickable(query, max_results: int = 10):
+    """Search Rebrickable for minifigs matching `query` (query can be part of any attribute present in the json, such as name or minifig_id).
+
+    Returns a list of dicts with keys: name, minifig_id,  image_url
+
+    """
+    rebrick.init(REBRICK_API_KEY)
+    try:
+        resp = rebrick.lego.get_minifigs(query)
+        data = json.loads(resp.read())
+    except Exception:
+        return []
+
+    items = []
+    if isinstance(data, dict):
+        items = data.get('results')
+  
+
+    results = []
+    for item in items[:max_results]:
+        results.append({
+            'name': item.get('name'),
+            'minifig_id': item.get('set_num'),
+            'image_url': item.get('set_img_url'),
+        })
+
+    return results
+
+def search_sets_rebrickable(query, max_results: int = 10):
+    """Search Rebrickable for sets matching `query`.
+
+    Returns a list of dicts with keys: name, set_id, image_url, num_parts, year
+    """
+    rebrick.init(REBRICK_API_KEY)
+    try:
+        resp = rebrick.lego.get_sets(query)
+        data = json.loads(resp.read())
+    except Exception:
+        return []
+
+    items = []
+    # this was from a unneccesarry check but it works so keeping it
+    if isinstance(data, dict):
+        items = data.get('results') 
+
+    results = []
+    for item in items[:max_results]:
+        results.append({
+            'name': item.get('name'),
+            'set_id': item.get('set_num'),
+            'image_url': item.get('set_img_url'),
+            'num_parts': item.get('num_parts'),
+            'year': item.get('year'),
+        })
+
+    return results
+
+
+def search_algolia(query: str, index_name: str, max_results: int = 10):
+    """Search an Algolia index for items matching `query`.
+    
+    query(str): the search query
+    index_name(str): the Algolia index name to search
+    max_results(int): maximum number of results to return (default 10)
+    
+    Returns a list of dicts with filtered attributes. For "PokemonSearchResults" index,
+    returns: id, name, image, flavorText, and HP
+    """
+    try:
+        algolia_conf = st.secrets.get("algolia", {})
+        app_id = algolia_conf.get("app_id")
+        search_key = algolia_conf.get("search_key")
+        
+        if not (app_id and search_key):
+            raise ValueError("Algolia credentials (app_id, search_key) missing in Streamlit secrets")
+        
+        client = SearchClientSync(app_id, search_key)
+        response = client.search_single_index(
+                        index_name=index_name,
+                        search_params=SearchParamsObject(
+                        query=query,
+                        hits_per_page=max_results
+                        )
+                    )
+        hits = response.hits
+        
+        # Check if this is the PokemonSearchResults index
+        if index_name == "PokemonSearchResults":
+            results = []
+            for hit in hits:
+                results.append({
+                    "id": getattr(hit, 'id', getattr(hit, 'id', None)),
+                    "name": getattr(hit, 'name', None),
+                    "image": getattr(hit, 'image', None),
+                    "flavorText": getattr(hit, 'flavorText', None),
+                    "HP": getattr(hit, 'HP', getattr(hit, 'hp', None))
+                })
+            return results
+        else:
+            return hits
+            
+    except Exception as e:
+        st.error(f"Algolia search failed: {e}")
+        return []
+
+def test_upc_api(upc_code: str):
+    headers = {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+    'Accept-Encoding': 'gzip,deflate'
+    }
+    resp = requests.get(f'https://api.upcitemdb.com/prod/trial/lookup?upc={upc_code}', headers=headers)
+    data = json.loads(resp.text)
+    if 'items' in data and len(data['items']) > 0:
+        item = data['items'][0]
+        results = {
+            'title': item['title'],
+            'description': item['description'],
+            'ean': item['ean'],
+            'image': item['images'][0]  # Get the first image if available
+        }
+    else:
+        raise ValueError("No items found for the provided UPC code.")
+    return results
