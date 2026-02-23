@@ -25,7 +25,7 @@ def rename(old:str, new:str, l:list[str]):
         if l[i] == old:
             l[i] = new
 
-def update_config_val(conf:str, var:str, new:str):
+def update_config_val(conf:str, var:str, new:str) -> None:
     with open(conf, "r") as f:
         config_lines = f.readlines()
 
@@ -37,6 +37,11 @@ def update_config_val(conf:str, var:str, new:str):
 
     with open(conf, "w") as f:
         f.writelines(config_lines)
+
+def update_settings(conf:str, diction:dict) -> None:
+    for setting in diction:
+        if setting != "theme":
+            update_config_val(conf, setting, diction[setting])
 
 def read_config_val(conf:str, var:str) -> str:
     with open(conf, "r") as f:

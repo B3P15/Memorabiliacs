@@ -94,7 +94,8 @@ def sign_in(email: str, password: str, db) -> None:
                         'base' : 'dark',
                         'backgroundColor' : '#cacaca',
                         'textColor' : '#4caeff',
-                        'font' : 'sans-serif'
+                        'font' : 'sans-serif',
+                        'theme' : 'original'
                     }
                     user_ref.set(data)
                     user_ref.collection('Collections').document('DefaultCollection').set({'name': 'Default'})

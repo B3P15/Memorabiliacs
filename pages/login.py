@@ -25,7 +25,7 @@ from BackendMethods.backendfuncs import (
 )
 st.secrets = access_secret_version()
 
-gfuncs.page_initialization()
+st.set_page_config(layout="wide")
 # Initialize Firestore client
 # The credentials are grabbed from Streamlit secrets
 try:
