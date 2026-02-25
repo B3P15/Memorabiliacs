@@ -4,6 +4,14 @@ import global_functions as gfuncs
 import BackendMethods.auth_functions as authFuncs
 import BackendMethods.backendfuncs as backEnd
 
+
+
+# messing around with scanning and image uploading for upc, isbn should be removed but the rest I believe are good
+
+#import global_functions as gfuncs
+
+st.session_state["last_code"] = ""
+
 # user sign-in check
 if 'user_info' not in st.session_state:
     st.switch_page("pages/login.py")
@@ -21,7 +29,7 @@ except Exception as e:
 else:
     gfuncs.page_initialization()
 # This is straight from kieran's ui in apitesting, placeholder
-    st.title("Search for Collectables!", text_alignment="center")
+    st.subheader("Search for Collectables!", text_alignment="center")
     # DEGUB:{st.session_state.user_info}
     st.space("large")
     search_type = st.selectbox(
@@ -107,26 +115,73 @@ else:
     #                results = []
     #        st.session_state["tmdb_results"] = results
     if search_type == "UPC":
-        upc_query = st.text_input("Enter UPC code")
-        if st.button("Search UPC"):
-            with st.spinner("Searching UPC..."):
-                try:
-                    st.markdown("UPC search results:")
-                    cols = st.columns(2)
-                    upc_result = backEnd.test_upc_api(upc_query)
-                    # for idx, result in enumerate(upc_result):
-                    with cols[0]:
-                       if upc_result["image"]:
-                           st.image(upc_result["image"], width=200)
-                       st.write(f"**{upc_result.get('title', 'No title')}**")
-                       if upc_result["description"]:
-                           st.write(f"Description: {upc_result['description']}")
-                    st.write(f"Item ean: {upc_result['ean']}")
+        input_mode = st.radio("Input source", options=["Upload", "Camera"], horizontal=True)
+        enhanced = st.toggle("Enhanced decode (slower)", value=False)
+        uploaded = None
 
-                except Exception as e:
-                    st.error(f"UPC search failed: {e}")
+        if input_mode == "Camera":
+            uploaded = st.camera_input("Scan barcode")
+        else:
+            uploaded = st.file_uploader("Upload barcode image", type=["png", "jpg", "jpeg"])
+
+        if not backEnd.PYZBAR_AVAILABLE:
+            st.error("Barcode decoding is unavailable. Install 'pyzbar' and the system 'zbar' library.")
+            st.stop()
+
+        decoded: list[dict[str, str]] = []
+        if uploaded is not None:
+            try:
+                image = backEnd._load_image(uploaded)
+                decoded = backEnd._decode_barcodes(image)
+                if enhanced and not decoded:
+                    decoded = backEnd._decode_with_enhancements(image)
+            except Exception as exc:
+                st.error(f"Failed to read image: {exc}")
+
+        if decoded:
+            supported_codes = backEnd._extract_supported_codes(decoded)
+            if supported_codes:
+                st.success("Supported code(s) detected")
+                options = [f"{item['code']} ({item['label']})" for item in supported_codes]
+                selected = st.selectbox("Detected codes", options=options)
+                st.session_state["last_code"] = selected.split(" ")[0]
+            else:
+                st.warning("Barcode detected, but no UPC/EAN/ISBN code found.")
+        elif uploaded is not None:
+            st.warning("No barcode detected. Try a clearer image with the code centered.")
+
+        st.divider()
+        upc_query = st.text_input("Enter UPC code", value=st.session_state.get("last_code", ""))
+        if upc_query:
+            normalized = backEnd._normalize_payload(upc_query)
+            if len(normalized) == 10 and normalized[:-1].isdigit() and normalized[-1] in "Xx":
+                code = normalized[:-1] + "X"
+                label = backEnd._classify_code(code, "ISBN10")
+                st.success(f"{label} ready for use: {code}")
+            elif normalized.isdigit() and len(normalized) in {8, 12, 13}:
+                label = backEnd._classify_code(normalized, "")
+                st.success(f"{label} ready for use: {normalized}")
+            else:
+                st.info("Enter a valid UPC (8/12), EAN (8/13), or ISBN (10/13).")
+            if st.button("Search UPC"):
+                with st.spinner("Searching UPC..."):
+                    try:
+                        st.markdown("UPC search results:")
+                        cols = st.columns(2)
+                        upc_result = backEnd.test_upc_api(upc_query)
+                        # for idx, result in enumerate(upc_result):
+                        with cols[0]:
+                            if upc_result["image"]:
+                                st.image(upc_result["image"], width=200)
+                            st.write(f"**{upc_result.get('title', 'No title')}**")
+                            if upc_result["description"]:
+                                st.write(f"Description: {upc_result['description']}")
+                            st.write(f"Item ean: {upc_result['ean']}")
+
+                    except Exception as e:
+                        st.error(f"UPC search failed: {e}")
     elif search_type == "Pokemon Cards":
-        CURR_COLL = "Pokemon"
+        backEnd.CURR_COLL = "Pokemon"
         with st.form(key="algolia_search_form", clear_on_submit=False):
             pokemon_query = st.text_input("Search for a Pokemon card")
             pokemon_search_submitted = st.form_submit_button("Search Pokemon")
@@ -148,12 +203,20 @@ else:
 
             st.session_state["pokemon_results"] = hits
 
+
             pokemon_results = st.session_state.get("pokemon_results", [])
             if pokemon_results:
                 st.markdown("### Top Pokemon results")
                 cols = st.columns(2)
                 for idx, item in enumerate(pokemon_results):
                     with cols[idx % 2]:
+                        
+                        def add_pokemon_button(item_id):
+                            proper_id = item_id.replace("-", "_")
+                            print(proper_id, item_id)
+                            backEnd.add_reference_search(db, user_id, proper_id, item_id)
+                            st.success(f"Added '{name}' to your Pokemon collection!")
+                        
                         if item.get("image"):
                             st.image(item["image"], width=200)
                         name = item.get('name', item.get('title', 'No name'))
@@ -165,8 +228,11 @@ else:
                         if item.get('flavorText'):
                             st.write(f"*{item['flavorText']}*")
                         st.write(f"ID: {item['id']}")
-                        if st.button("Add to Pokemon Collection", key=f"add_{item['id']}"):
-                            backEnd.add_reference(db, user_id, item['id'], item['id'])
-                            st.success(f"Added '{name}' to your Pokemon collection!")
+                        item_id = item['id']
+                        st.button("Add to Pokemon Collection", key=f"add_{item['id']}", on_click=add_pokemon_button, kwargs={"item_id": item_id})
+
+                            
+
+                            
     else:
         st.info("Search functionality for this category is coming soon!")
