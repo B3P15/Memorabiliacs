@@ -2,7 +2,7 @@
 requests==2.31.0
 tmdbsimple==2.9.1
 rebrick==0.4.0
-algoliasearch
+algoliasearch==4.36.1
 streamlit
 google.cloud
 firestore
