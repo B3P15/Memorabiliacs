@@ -7,6 +7,14 @@ import BackendMethods.backendfuncs as backEnd
 # user sign-in check
 if 'user_info' not in st.session_state:
     st.switch_page("pages/login.py")
+
+try:
+    db = firestore.Client.from_service_account_info(st.secrets["firebase"])
+    user_id = st.session_state.user_info["localId"]
+except Exception as e:
+    st.error(f"Failed to initialize Firestore: {e}")
+    st.stop()    
+
 ## -------------------------------------------------------------------------------------------------
 ## Logged in ---------------------------------------------------------------------------------------
 ## -------------------------------------------------------------------------------------------------
@@ -118,6 +126,7 @@ else:
                 except Exception as e:
                     st.error(f"UPC search failed: {e}")
     elif search_type == "Pokemon Cards":
+        CURR_COLL = "Pokemon"
         with st.form(key="algolia_search_form", clear_on_submit=False):
             pokemon_query = st.text_input("Search for a Pokemon card")
             pokemon_search_submitted = st.form_submit_button("Search Pokemon")
@@ -156,5 +165,8 @@ else:
                         if item.get('flavorText'):
                             st.write(f"*{item['flavorText']}*")
                         st.write(f"ID: {item['id']}")
+                        if st.button("Add to Pokemon Collection", key=f"add_{item['id']}"):
+                            backEnd.add_reference(db, user_id, item['id'], item['id'])
+                            st.success(f"Added '{name}' to your Pokemon collection!")
     else:
         st.info("Search functionality for this category is coming soon!")
