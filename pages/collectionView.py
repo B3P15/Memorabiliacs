@@ -22,11 +22,14 @@ else:
 
     user_id = st.session_state.user_info["localId"]
     collectionData = backEnd.generate_collection(backEnd.CURR_COLL, db)
+    st.space("small")
+    st.subheader(backEnd.CURR_COLL.split("_")[0], text_alignment="center")
+    st.space("small")
 
-    st.title(backEnd.CURR_COLL.split("_")[0], text_alignment="center")
-    st.space("large")
+    # view selection radio buttons
+    view_mode = st.radio("Display mode", ["grid", "column"], horizontal=True)
 
-    with st.container(horizontal=True, horizontal_alignment="center"):
+    
         # Edit dialog to change the name of the collection
         # @st.dialog("Edit") 
         # def editCollection(coll):
@@ -63,23 +66,39 @@ else:
         #         if st.button("No", key=f"cancelRemove", width="content"):
         #             st.rerun()
 
-        # iterate through collections
-        # index tacker
-        for id, ref in collectionData[1].items():
-            doc = ref.get()
-            if doc.exists:
-                info = doc.to_dict()    
-                with st.container(width="content", horizontal_alignment="center"):
-                    st.subheader(f"{info['name']}", text_alignment="center")
-                    st.image(info['image'], 100)
+        # iterate through collections and collect item info
+    items = []
+    for id, ref in collectionData.items():
+        if id == "Info":
+            continue
+        doc = ref.get()
+        if doc.exists:
+            info = doc.to_dict()
+            items.append(info)
 
-                    for key in info.keys():
-                        stuff = ""
-                        if key != info['name'] or key != info['image']:
-                            stuff += f"{key}: {info[key]}"
-                        
-                        st.subheader(stuff, text_alignment="center")
-
+    # display either grid or column view
+    if view_mode == "grid":
+        with st.container(horizontal=True, horizontal_alignment="center", width="stretch"):
+            cols = st.columns(3, width="stretch")  # grid view
+            for idx, info in enumerate(items):
+                col = cols[idx % 3]
+                with col.container(horizontal_alignment="center"):
+                    st.subheader(f"{info.get('name','')}", text_alignment="center")
+                    st.image(info.get('image',''), width="content")
+                    for key, val in info.items():
+                        if key not in ("name", "image"):
+                            st.write(f"{key}: {val}")
+                    st.space("medium")
+    else:
+        with st.container(horizontal=False, horizontal_alignment="center", width="stretch"):
+            cols = st.columns([0.2,0.8,0.2], width="stretch")  # column view (default)
+            for info in items:
+                with cols[1].container(width="stretch", horizontal_alignment="center"):
+                    st.subheader(f"{info.get('name','')}", text_alignment="center")
+                    st.image(info.get('image',''), width=300)
+                    for key, val in info.items():
+                        if key not in ("name", "image"):
+                            st.markdown(f"<p style='text-align: center;'>{key}: {val}</p>", unsafe_allow_html=True)
                     st.space("medium")
                 st.space("small")
 

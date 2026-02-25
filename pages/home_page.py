@@ -38,9 +38,10 @@ else:
     ## -------------------------------------------------------------------------------------------------
     ## Main Page Setup ---------------------------------------------------------------------------------
     ## -------------------------------------------------------------------------------------------------
-    st.title(f"Your Collections\n Hello {st.session_state.user_info['email']}", text_alignment="center")
+    st.space("small")
+    st.subheader(f"Your Collections\n Hello {st.session_state.user_info['email']}", text_alignment="center")
     # DEGUB:{st.session_state.user_info}
-    st.space("large")
+    st.space("small")
 
     # Center section for collections
     with st.container(horizontal=True, horizontal_alignment="center"):

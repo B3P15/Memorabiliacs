@@ -34,6 +34,7 @@ except Exception as e:
     st.error(f"Failed to initialize Firestore: {e}")
     st.stop()
 
+st.title("Welcome to Memorabiliacs!", text_alignment="center")
 
 if 'user_info' not in st.session_state:
     generate_login_template(db)

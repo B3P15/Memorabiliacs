@@ -55,6 +55,7 @@ def read_config_val(conf:str, var:str) -> str:
 
 def page_initialization():
     st.set_page_config(layout="wide")
+    st.title("Memorabiliacs", text_alignment="center")
     with st.container(horizontal=True, vertical_alignment="top"):
         with st.container(horizontal_alignment="left", vertical_alignment="top"):
             if st.button("Home"):

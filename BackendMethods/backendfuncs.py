@@ -170,7 +170,7 @@ def generate_collection(collection_name: str, db):
     collection_ref = db.collection('Users').document(user_id).collection('Collections').document(collection_name)
     collection_doc = collection_ref.get()
     if collection_doc.exists:
-        items_refs = collection_doc.to_dict().get('items')
+        items_refs = collection_doc.to_dict()
         return items_refs
     else:
         return []
