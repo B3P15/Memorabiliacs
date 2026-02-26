@@ -106,7 +106,7 @@ else:
 
     # Container in bottom right for add button
     
-    with st.container(horizontal=True, horizontal_alignment="right"):
+    with st.container(horizontal=True, horizontal_alignment="right", vertical_alignment="bottom"):
         # Text box for input
         item_id = st.text_input("Enter Item ID")
         new_string = ""

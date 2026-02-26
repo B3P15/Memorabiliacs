@@ -32,10 +32,46 @@ else:
     st.subheader("Search for Collectables!", text_alignment="center")
     # DEGUB:{st.session_state.user_info}
     st.space("large")
-    search_type = st.selectbox(
+    col_left, col_right = st.columns([3, 2])
+
+    # Search type selector (left column)
+    search_type = col_left.selectbox(
         "What would you like to search for?",
         options=("Vinyl & CDs", "Movies", "Pokemon Cards", "UPC", "Lego Sets", "Lego Minifigs"),
     )
+
+    # Collection selector (right column) - list user's collections except DefaultCollection
+    try:
+        collections_docs = list(db.collection('Users').document(user_id).collection('Collections').stream())
+        collections = [doc.id for doc in collections_docs if not doc.id.startswith("DefaultCollection")]
+        display_collections = [name.split("_")[0] for name in collections]
+    except Exception:
+        collections = []
+
+    if not collections:
+        collections = ["(No collections)"]
+
+    # Persist selection in session state
+    default_index = 0
+    if hasattr(backEnd, 'CURR_COLL') and backEnd.CURR_COLL:
+        try:
+            default_index = collections.index(backEnd.CURR_COLL)
+        except Exception:
+            default_index = 0
+
+    selected_collection = col_right.selectbox("Add items to collection:", options=display_collections, index=default_index, key="selected_collection")
+
+    # Set backend current collection for add actions
+    if selected_collection and selected_collection != "(No collections)":
+        try:
+            backEnd.setCollection(collections[display_collections.index(selected_collection)])
+        except Exception:
+            backEnd.CURR_COLL = collections[display_collections.index(selected_collection)]
+    else:
+        try:
+            backEnd.setCollection("")
+        except Exception:
+            backEnd.CURR_COLL = ""
 
     #if search_type == "Vinyl & CDs":
     #    with st.form(key="ia_search_form", clear_on_submit=False):
@@ -181,7 +217,6 @@ else:
                     except Exception as e:
                         st.error(f"UPC search failed: {e}")
     elif search_type == "Pokemon Cards":
-        backEnd.CURR_COLL = "Pokemon_type"
         with st.form(key="algolia_search_form", clear_on_submit=False):
             pokemon_query = st.text_input("Search for a Pokemon card")
             pokemon_search_submitted = st.form_submit_button("Search Pokemon")
@@ -214,8 +249,8 @@ else:
                         def add_pokemon_button(item_id, Cardname):
                             proper_id = item_id.replace("-", "_")
                             backEnd.add_reference_search(db, user_id, proper_id, item_id)
-                            st.success(f"Added '{Cardname}' to your Pokemon collection!")
-                        
+                            st.success(f"Added '{Cardname}' to your {backEnd.CURR_COLL.split('_')[0]} collection!")
+
                         if item.get("image"):
                             st.image(item["image"], width=200)
                         name = item.get('name', item.get('title', 'No name'))
@@ -229,7 +264,7 @@ else:
                         st.write(f"ID: {item['id']}")
                         item_id = item['id']
                         item_name = item['name'] if 'name' in item else item['title'] if 'title' in item else "No name"
-                        st.button("Add to Pokemon Collection", key=f"add_{item['id']}", on_click=add_pokemon_button, kwargs={"item_id": item_id, "Cardname": item_name})
+                        st.button(f"Add to {backEnd.CURR_COLL.split('_')[0]} Collection", key=f"add_{item['id']}", on_click=add_pokemon_button, kwargs={"item_id": item_id, "Cardname": item_name})
 
 
 
