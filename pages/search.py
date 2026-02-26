@@ -34,7 +34,7 @@ else:
     st.space("large")
     search_type = st.selectbox(
         "What would you like to search for?",
-        options=("Vinyl & CDs", "Movies", "Pokemon Cards", "UPC"),
+        options=("Vinyl & CDs", "Movies", "Pokemon Cards", "UPC", "Lego Sets", "Lego Minifigs"),
     )
 
     #if search_type == "Vinyl & CDs":
@@ -230,6 +230,66 @@ else:
                         item_id = item['id']
                         item_name = item['name'] if 'name' in item else item['title'] if 'title' in item else "No name"
                         st.button("Add to Pokemon Collection", key=f"add_{item['id']}", on_click=add_pokemon_button, kwargs={"item_id": item_id, "Cardname": item_name})
+
+
+
+    elif search_type == "Lego Sets":
+        with st.form(key="lego_search_form", clear_on_submit=False):
+            lego_query = st.text_input("Search for a Lego set")
+            lego_search_submitted = st.form_submit_button("Search Lego")
+
+        if lego_search_submitted:
+            with st.spinner("Searching for Lego sets..."):
+                try:
+                    results = backEnd.search_sets_rebrickable(lego_query, max_results=10)
+                except Exception as e:
+                    st.error(f"Lego search failed: {e}")
+                    results = []
+            st.session_state["lego_results"] = results
+
+            lego_results = st.session_state.get("lego_results", [])
+            if lego_results:
+                st.markdown("### Top Lego set results")
+                cols = st.columns(2)
+                for idx, item in enumerate(lego_results):
+                    with cols[idx % 2]:
+                        if item.get("image_url"):
+                            st.image(item["image_url"], width=200)
+                        st.write(f"{item.get('name', 'No name')}")
+                        if item.get('year'):
+                            st.write(f"Year: {item['year']}")
+                        if item.get('theme'):
+                            st.write(f"Theme: {item['theme']}")
+                        if item.get('set_id'):
+                            st.write(f"Set ID: {item['set_id']}")
+                        if item.get('num_parts'):
+                            st.write(f"Part Count: {item['num_parts']}")
+                            
+    elif search_type == "Lego Minifigs":
+        with st.form(key="lego_minifig_search_form", clear_on_submit=False):
+            minifig_query = st.text_input("Search for a Lego minifigure")
+            minifig_search_submitted = st.form_submit_button("Search Lego Minifigs")
+
+        if minifig_search_submitted:
+            with st.spinner("Searching for Lego minifigs..."):
+                try:
+                    results = backEnd.search_minifigs_rebrickable(minifig_query, max_results=10)
+                except Exception as e:
+                    st.error(f"Lego minifig search failed: {e}")
+                    results = []
+            st.session_state["lego_minifig_results"] = results
+
+            lego_minifig_results = st.session_state.get("lego_minifig_results", [])
+            if lego_minifig_results:
+                st.markdown("### Top Lego minifigure results")
+                cols = st.columns(2)
+                for idx, item in enumerate(lego_minifig_results):
+                    with cols[idx % 2]:
+                        if item.get("image_url"):
+                            st.image(item["image_url"], width=200)
+                        st.write(f"{item.get('name', 'No name')}")
+                        if item.get('minifig_id'):
+                            st.write(f"Minifig ID: {item['minifig_id']}")
 
                             
 
