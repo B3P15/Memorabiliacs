@@ -181,7 +181,7 @@ else:
                     except Exception as e:
                         st.error(f"UPC search failed: {e}")
     elif search_type == "Pokemon Cards":
-        backEnd.CURR_COLL = "Pokemon"
+        backEnd.CURR_COLL = "Pokemon_type"
         with st.form(key="algolia_search_form", clear_on_submit=False):
             pokemon_query = st.text_input("Search for a Pokemon card")
             pokemon_search_submitted = st.form_submit_button("Search Pokemon")
@@ -211,11 +211,10 @@ else:
                 for idx, item in enumerate(pokemon_results):
                     with cols[idx % 2]:
                         
-                        def add_pokemon_button(item_id):
+                        def add_pokemon_button(item_id, Cardname):
                             proper_id = item_id.replace("-", "_")
-                            print(proper_id, item_id)
                             backEnd.add_reference_search(db, user_id, proper_id, item_id)
-                            st.success(f"Added '{name}' to your Pokemon collection!")
+                            st.success(f"Added '{Cardname}' to your Pokemon collection!")
                         
                         if item.get("image"):
                             st.image(item["image"], width=200)
@@ -229,7 +228,8 @@ else:
                             st.write(f"*{item['flavorText']}*")
                         st.write(f"ID: {item['id']}")
                         item_id = item['id']
-                        st.button("Add to Pokemon Collection", key=f"add_{item['id']}", on_click=add_pokemon_button, kwargs={"item_id": item_id})
+                        item_name = item['name'] if 'name' in item else item['title'] if 'title' in item else "No name"
+                        st.button("Add to Pokemon Collection", key=f"add_{item['id']}", on_click=add_pokemon_button, kwargs={"item_id": item_id, "Cardname": item_name})
 
                             
 

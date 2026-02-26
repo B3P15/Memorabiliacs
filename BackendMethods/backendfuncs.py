@@ -202,7 +202,7 @@ def create_collection(collection_name: str, collection_type: str, db):
         return True
     
     # created new collection
-    db.collection('Users').document(user_id).collection('Collections').document(fullName).set({"items":[]})
+    db.collection('Users').document(user_id).collection('Collections').document(fullName).set({"Info":[]})
 
 # renames a collection
 def renameCollection(collection_name:str, new_collection:str, db):
@@ -405,6 +405,7 @@ def search_algolia(query: str, index_name: str, max_results: int = 10):
         
         if not (app_id and search_key):
             raise ValueError("Algolia credentials (app_id, search_key) missing in Streamlit secrets")
+        
         
         client = SearchClientSync(app_id, search_key)
         response = client.search_single_index(

@@ -1,8 +1,0 @@
-[theme]
-base="dark"
-backgroundColor="#000000"
-textColor="#bf0000"
-font="sans-serif"
-
-[client]
-showSidebarNavigation = false
