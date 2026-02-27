@@ -212,6 +212,8 @@ else:
                             st.write(f"**{upc_result.get('title', 'No title')}**")
                             if upc_result["description"]:
                                 st.write(f"Description: {upc_result['description']}")
+                            if upc_result["publisher"]:
+                                st.write(f"Publisher: {upc_result['publisher']}")
                             st.write(f"Item ean: {upc_result['ean']}")
 
                     except Exception as e:

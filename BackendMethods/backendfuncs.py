@@ -226,10 +226,9 @@ def renameCollection(collection_name:str, new_collection:str, db):
 
     # created new collection to move data to
     fullName = f"{new_collection.title()}_{coll_Info[1]}"
-    db.collection('Users').document(user_id).collection('Collections').document(fullName).set({})
-    items = {"items":[]}
-    for coll in data:
-        items['items'].append(coll)
+    db.collection('Users').document(user_id).collection('Collections').document(fullName).set(data, merge=True)
+    items = {"Info":[]}
+    
     db.collection('Users').document(user_id).collection('Collections').document(fullName).set(items, merge=True)
 
     collection_ref_OLD.delete()
@@ -449,6 +448,7 @@ def test_upc_api(upc_code: str):
         results = {
             'title': item['title'],
             'description': item['description'],
+            'publisher': item.get('publisher', None),
             'ean': item['ean'],
             'image': item['images'][0]  # Get the first image if available
         }

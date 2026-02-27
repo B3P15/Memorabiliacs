@@ -30,42 +30,6 @@ else:
     view_mode = st.radio("Display mode", ["grid", "column"], horizontal=True)
 
     
-        # Edit dialog to change the name of the collection
-        # @st.dialog("Edit") 
-        # def editCollection(coll):
-        #     with st.container(horizontal=True, horizontal_alignment="center"):
-        #         st.subheader(f"Rename {coll.id.split("_")[0]}?", text_alignment="center")
-        #         coll_rename = st.text_input(" ")
-        #         if st.button ("Rename", key=f"rename_{coll.id.split("_")[0]}", width="content"):
-        #             if backEnd.renameCollection(coll, coll_rename, db):
-        #                 st.error("Collection name already exist")
-        #             else: 
-        #                 st.rerun()
-
-        # # Add collection dialog for adding a new collection to the db
-        # @st.dialog("Add")
-        # def addCollection():
-        #     name = st.text_input("Name the Collection")
-        #     collType = st.text_input("Give Collection Type") # will be dropdown
-        #     if st.button("Add", key="makeColl") and name is not None and collType is not None:
-        #         if backEnd.create_collection(name, collType, db):
-        #             st.error("Collection name already exist")
-        #         else:
-        #             st.rerun()
-
-        # # Remove collection dialog to remove a collection from the db
-        # @st.dialog("Remove") 
-        # def removeCollection(coll):
-        #     with st.container(horizontal=True, horizontal_alignment="center"):
-        #         st.subheader(f"Are you sure you want to remove \"{coll.split("_")[0]}\"?", text_alignment="center")
-        #         if st.button("Yes", key=f"confirmRemove", width="content"):
-        #             ref = db.collection("Users").document(user_id).collection("Collections").document(coll)
-        #             ref.delete()
-        #             st.rerun()
-                
-        #         if st.button("No", key=f"cancelRemove", width="content"):
-        #             st.rerun()
-
         # iterate through collections and collect item info
     items = []
     for id, ref in collectionData.items():
