@@ -62,7 +62,10 @@ else:
         @st.dialog("Add")
         def add_collection():
             name = st.text_input("Name the Collection")
-            collType = st.text_input("Give Collection Type") # will be dropdown
+            # 
+            testList = ["test1", "test2", "test3"]
+            # 
+            collType = st.selectbox("Type", testList)
             if st.button("Add", key="makeColl") and name is not None and collType is not None:
                 if backEnd.create_collection(name, collType, db):
                     st.error("Collection name already exist")
@@ -91,7 +94,7 @@ else:
                         st.subheader(f"{collInfo[0]}", text_alignment="center")
 
                         if st.button("View Collection", key=f"{collInfo[0]}_link"):
-                            backEnd.setCollection(doc.id)
+                            backEnd.set_collection(doc.id)
                             st.switch_page(collection_page)
 
                         if st.button("Edit", key=f"edit_{collInfo[0]}"):

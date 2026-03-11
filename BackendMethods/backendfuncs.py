@@ -17,10 +17,21 @@ from pyzbar import pyzbar
 
 BASE_API_URL = "https://apitcg.com/api"
 APITCG_API_KEY = st.secrets["APITCG_API_KEY"]
+REBRICK_API_KEY = st.secrets["REBRICK_API_KEY"]
+tmdb.API_KEY = st.secrets["TMDB_API_KEY"]
+tmdb.REQUESTS_TIMEOUT = (2, 5)  # seconds, for connect and read specifically 
+CURR_COLL = ""
 
 app = FastAPI()
 
-CURR_COLL = ""
+def set_collection(collection:str):
+    """Sets the collection name for reference across pages
+    
+    collection: full name_type of the collection (doc.id)
+    """
+    global CURR_COLL
+    CURR_COLL = collection
+
 
 # Faster version of get_cards using asynchronous gets and future responses
 @app.get("/{game}/cards")
@@ -67,8 +78,6 @@ def get_cards2(
 
     return(responseList)
 
-tmdb.API_KEY = st.secrets["TMDB_API_KEY"]
-tmdb.REQUESTS_TIMEOUT = (2, 5)  # seconds, for connect and read specifically 
 
 def search_movies(query, max_results=10):
     search = tmdb.Search()
@@ -83,6 +92,7 @@ def search_movies(query, max_results=10):
             'id': movie.get('id')
         })
     return results
+
 
 def search_internetarchive(creators: str = "", title: str = "", max_results: int = 10):
     """Search Internet Archive for audio items filtered to Vinyl or CD formats.
@@ -137,8 +147,7 @@ def search_internetarchive(creators: str = "", title: str = "", max_results: int
 
     return results
 
-# make a method to generate a specific collection (list of dictionaries) based on
-# the input that will be the name of the collection. 
+
 def generate_collection(collection_name: str, db):
     """Generate a collection of items from the database based on the collection name.
 
@@ -155,7 +164,7 @@ def generate_collection(collection_name: str, db):
     else:
         return []
 
-# created new document in db
+
 def create_collection(collection_name: str, collection_type: str, db):
     """Create a collection of items in the database with the specified name and type.
 
@@ -169,13 +178,13 @@ def create_collection(collection_name: str, collection_type: str, db):
     fullName = collection_name.title() + f"_{collection_type}"
 
     # check if name already exists in the database
-    if checkForCollName(collection_name.title(), db):
+    if check_for_coll_name(collection_name.title(), db):
         return True
     
     # created new collection
     db.collection('Users').document(user_id).collection('Collections').document(fullName).set({"Info":[]})
 
-# renames a collection
+
 def rename_collection(collection_name:str, new_collection:str, db):
     """Renames a collection, by use of creating a new collection and moving the data
     
@@ -192,7 +201,7 @@ def rename_collection(collection_name:str, new_collection:str, db):
     # print(data)
 
     # checks if new name already exists in the database
-    if checkForCollName(new_collection.title(), db):
+    if check_for_coll_name(new_collection.title(), db):
         return True
 
     # created new collection to move data to
@@ -204,6 +213,7 @@ def rename_collection(collection_name:str, new_collection:str, db):
 
     collection_ref_OLD.delete()
 
+# ______________________________
 def add_reference_collectionView(db, user_id, item_doc_id, actual_item_id):
     pokemon_ref = db.collection("Pokemon").document(actual_item_id)
     db.collection('Users').document(user_id).collection('Collections').document(CURR_COLL).set({item_doc_id: pokemon_ref}, merge=True)
@@ -217,8 +227,10 @@ def delete_reference(db, user_id, item_doc_id):
     delete = db.collection('Users').document(user_id).collection('Collections').document(CURR_COLL)
     delete.update({item_doc_id: firestore.DELETE_FIELD})
     st.rerun()
+# ______________________________
 
-def checkForCollName(collection_name:str, db) -> bool:
+
+def check_for_coll_name(collection_name:str, db) -> bool:
     """Checks if the provided name is in the database
     
     collection_name: name checking for
@@ -234,12 +246,7 @@ def checkForCollName(collection_name:str, db) -> bool:
             if collName[0] == collection_name:
                 return True
     return False
-    
-def setCollection(collection:str):
-    global CURR_COLL
-    CURR_COLL = collection
 
-REBRICK_API_KEY = st.secrets["REBRICK_API_KEY"]
 
 def search_minifigs_rebrickable(query, max_results: int = 10):
     """Search Rebrickable for minifigs matching `query` (query can be part of any attribute present in the json, such as name or minifig_id).
@@ -268,6 +275,7 @@ def search_minifigs_rebrickable(query, max_results: int = 10):
         })
 
     return results
+
 
 def search_sets_rebrickable(query, max_results: int = 10):
     """Search Rebrickable for sets matching `query`.
@@ -347,6 +355,7 @@ def search_algolia(query: str, index_name: str, max_results: int = 10):
         st.error(f"Algolia search failed: {e}")
         return []
 
+
 def test_upc_api(upc_code: str):
     headers = {
     'Content-Type': 'application/json',
@@ -367,6 +376,7 @@ def test_upc_api(upc_code: str):
     else:
         raise ValueError("No items found for the provided UPC code.")
     return results
+
 
 def _decode_barcodes(image: Image.Image) -> list[dict[str, str]]:
 
