@@ -32,6 +32,17 @@ def set_collection(collection:str):
     global CURR_COLL
     CURR_COLL = collection
 
+def coll_visability(collection_name: str, db):
+    """Checks if the collection is visable for main page
+    
+    coll_name: full id name of collection
+    db: Firestore database
+    Returns bool of visabliy
+    """
+    user_id = st.session_state.user_info['localId']
+    collection_ref = db.collection('Users').document(user_id).collection('Collections').document(collection_name)
+    contents = collection_ref.get().to_dict()
+    return not contents["settings"]["hidden"]
 
 # Faster version of get_cards using asynchronous gets and future responses
 @app.get("/{game}/cards")
@@ -160,7 +171,7 @@ def generate_collection(collection_name: str, db):
     collection_doc = collection_ref.get()
     if collection_doc.exists:
         items_refs = collection_doc.to_dict()
-        return items_refs
+        return items_refs["items"]
     else:
         return []
 

@@ -85,7 +85,7 @@ else:
         # iterate through collections
         for doc in collections.stream():
             collInfo = doc.id.split('_')
-            if not collInfo[0] == "DefaultCollection":
+            if backEnd.coll_visability(doc.id, db):
                 with st.container(width="content", horizontal_alignment="center"):
                     st.subheader(f"{collInfo[0]}", text_alignment="center")
 
@@ -107,4 +107,6 @@ else:
         # add collection button
         if st.button("Add Collection"):
             add_collection()
+
+
     
