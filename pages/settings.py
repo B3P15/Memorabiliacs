@@ -1,15 +1,8 @@
 import streamlit as st
 import BackendMethods.global_functions as gfuncs
 from google.cloud import firestore
-import BackendMethods.auth_functions as authFuncs
-from BackendMethods.backendfuncs import (
-    get_cards2,
-    search_internetarchive,
-    generate_collection,
-    search_movies,
-    generate_login_template,
-    setCollection
-)
+from BackendMethods.auth_functions import *
+from BackendMethods.backendfuncs import *
 
 try:
     newdb = firestore.Client.from_service_account_info(st.secrets["firebase"])
@@ -39,7 +32,7 @@ else:
         with st.container(horizontal_alignment="right", vertical_alignment="top"):
             if st.button("Logout"):
                 setCollection("")
-                authFuncs.sign_out()
+                sign_out()
                 st.switch_page("pages/login.py")
 
 
@@ -113,14 +106,10 @@ else:
     # Background color, text color, and font
     with st.popover("Advanced Settings"):
         with st.container(horizontal_alignment="left", vertical_alignment="top"):
-            if current_base == "dark":
-                base_choice = st.selectbox("Select base theme for app: ", ("Dark", "Light")).lower()
-            else:
-                base_choice = st.selectbox("Select base theme for app: ", ("Light", "Dark")).lower()
-
             background_color_choice = st.color_picker("Select the background color: ", current_background_color)
             text_color_choice = st.color_picker("Select the text color: ", current_text_color)
             font_choice = st.selectbox("Select the font: ", ("serif", "sans-serif"), index=0 if current_font == "serif" else 1)
+            base_choice = gfuncs.base_theme_threshold(text_color_choice)
 
         # Save button both writes to config file to show changes, 
         # and writes changes to database for consistency between states

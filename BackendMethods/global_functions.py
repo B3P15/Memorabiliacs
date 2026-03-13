@@ -51,3 +51,11 @@ def page_initialization():
             if st.button("Settings"):
                 st.switch_page("pages/settings.py")
         
+
+def base_theme_threshold(hex_num:str) -> str:
+    r = int(hex_num[1:3], 16)
+    g = int(hex_num[3:5], 16)
+    b = int(hex_num[5:], 16)
+    brightness = ((r*299)+(g*587)+(b*114))/1000
+    return "dark" if brightness >= 128 else "light"
+
