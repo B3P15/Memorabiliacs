@@ -26,6 +26,7 @@ else:
     user_id = st.session_state.user_info["localId"]
     user_data_dict = db.collection("Users").document(user_id).get().to_dict()
     collections = db.collection("Users").document(user_id).collection("Collections")
+    fullCollections = []
     
     # Updates user configs
     gfuncs.update_config_val(conf_file, "base", user_data_dict["base"])
@@ -49,7 +50,10 @@ else:
         # Edit dialog to change the name of the collection
         @st.dialog("Edit") 
         def edit_collection(coll):
-            with st.container(horizontal=True, horizontal_alignment="center"):
+            itemSettings, rename = st.columns([3,1])
+            with itemSettings:
+                st.subheader("Other settings")
+            with rename:
                 st.subheader(f"Rename {coll.id.split('_')[0]}?", text_alignment="center")
                 coll_rename = st.text_input(" ")
                 if st.button ("Rename", key=f"rename_{coll.id.split('_')[0]}", width="content"):
@@ -57,6 +61,7 @@ else:
                         st.error("Collection name already exist")
                     else: 
                         st.rerun()
+
 
         # Add collection dialog for adding a new collection to the db
         @st.dialog("Add")
@@ -72,8 +77,8 @@ else:
         # Remove collection dialog to remove a collection from the db
         @st.dialog("Remove") 
         def remove_collection(coll):
+            st.subheader(f"Are you sure you want to remove \"{coll.split('_')[0]}\"?", text_alignment="center")
             with st.container(horizontal=True, horizontal_alignment="center"):
-                st.subheader(f"Are you sure you want to remove \"{coll.split('_')[0]}\"?", text_alignment="center")
                 if st.button("Yes", key=f"confirmRemove", width="content"):
                     ref = db.collection("Users").document(user_id).collection("Collections").document(coll)
                     ref.delete()
@@ -85,6 +90,7 @@ else:
         # iterate through collections
         for doc in collections.stream():
             collInfo = doc.id.split('_')
+            if collInfo[0] != "DefaultCollection" : fullCollections.append(doc.id)
             if backEnd.coll_visability(doc.id, db):
                 with st.container(width="content", horizontal_alignment="center"):
                     st.subheader(f"{collInfo[0]}", text_alignment="center")
@@ -108,5 +114,10 @@ else:
         if st.button("Add Collection"):
             add_collection()
 
-
-    
+    with st.sidebar:
+        st.space("small")
+        st.title("All Collections:")
+        for coll in fullCollections:
+            if st.button(f"{coll.split("_")[0]}", type="tertiary"):
+                backEnd.set_collection(coll)
+                st.switch_page(collection_page)
