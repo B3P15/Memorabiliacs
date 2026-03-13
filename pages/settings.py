@@ -1,15 +1,8 @@
 import streamlit as st
 import BackendMethods.global_functions as gfuncs
 from google.cloud import firestore
-import BackendMethods.auth_functions as authFuncs
-from BackendMethods.backendfuncs import (
-    get_cards2,
-    search_internetarchive,
-    generate_collection,
-    search_movies,
-    generate_login_template,
-    setCollection
-)
+from BackendMethods.backendfuncs import *
+from BackendMethods.auth_functions import *
 
 try:
     newdb = firestore.Client.from_service_account_info(st.secrets["firebase"])
