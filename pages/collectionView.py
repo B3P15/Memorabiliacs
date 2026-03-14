@@ -81,7 +81,7 @@ else:
             else:
                 new_string+=item_id[i]
         # Add to collection button. Must input Id for now
-        if st.button(_("Add To Collection")):
+        if st.button(_("Add To Collection"), key="add_to_collection"):
             backEnd.add_reference_collectionView(db, user_id, new_string, item_id)
-        if st.button(_("Remove From Collection")):
+        if st.button(_("Remove From Collection"), key="remove_from_collection"):
             backEnd.delete_reference(db, user_id, new_string)

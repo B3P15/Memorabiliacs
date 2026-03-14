@@ -112,6 +112,6 @@ else:
     # Container in bottom right for add button
     with st.container(horizontal=True, horizontal_alignment="right"):
         # add collection button
-        if st.button(_("Add Collection")):
+        if st.button(_("Add Collection"), key="add_collection_button"):
             add_collection()
     

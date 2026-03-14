@@ -43,13 +43,13 @@ def page_initialization():
     st.title(_("Memorabiliacs"), text_alignment="center")
     with st.container(horizontal=True, vertical_alignment="top"):
         with st.container(horizontal_alignment="left", vertical_alignment="top"):
-            if st.button(_("Home")):
+            if st.button(_("Home"), key="home_button"):
                 st.switch_page("pages/home_page.py")
         with st.container(horizontal_alignment="center", vertical_alignment="top"):
-            if st.button(_("Search")):
+            if st.button(_("Search"), key="search_button"):
                 st.switch_page("pages/search.py")
         with st.container(horizontal_alignment="right", vertical_alignment="top"):
-            if st.button(_("Settings")):
+            if st.button(_("Settings"), key="settings_button"):
                 st.switch_page("pages/settings.py")
         
 

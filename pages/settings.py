@@ -28,10 +28,10 @@ else:
     # does not need a link to settings and we instead want to logout from settings
     with st.container(horizontal=True, vertical_alignment="top"):
         with st.container(horizontal_alignment="left", vertical_alignment="top"):
-            if st.button(_("Home")):
+            if st.button(_("Home"), key="home_button"):
                 st.switch_page("pages/home_page.py")
         with st.container(horizontal_alignment="right", vertical_alignment="top"):
-            if st.button(_("Logout")):
+            if st.button(_("Logout"), key="logout_button"):
                 setCollection("")
                 sign_out()
                 st.switch_page("pages/login.py")
@@ -43,12 +43,13 @@ else:
 
     # Language selector
     with st.container(horizontal_alignment="left", vertical_alignment="top"):
-        language_options = {"English": "en", "Español": "es"}
+        lang_display_to_code = {"English": "en", "Español": "es", "Français": "fr", "中文": "zh_CN", "tlhIngan Hol": "tlh"}
+        code_to_display = {v: k for k, v in lang_display_to_code.items()}
         current_lang = st.session_state.get('language', 'en')
-        current_lang_display = "English" if current_lang == 'en' else "Español"
-        selected_lang = st.selectbox(_("Select Language:"), options=list(language_options.keys()), index=list(language_options.keys()).index(current_lang_display))
+        current_lang_display = code_to_display.get(current_lang, "English")
+        selected_lang = st.selectbox(_("Select Language:"), options=list(lang_display_to_code.keys()), index=list(lang_display_to_code.keys()).index(current_lang_display))
         if selected_lang != current_lang_display:
-            lang_code = language_options[selected_lang]
+            lang_code = lang_display_to_code[selected_lang]
             set_language(lang_code)
             # Save to database
             newdb.collection("Users").document(user_id).set({"language": lang_code}, merge=True)
@@ -110,7 +111,7 @@ else:
     with st.container(horizontal_alignment="left", vertical_alignment="top"):
         color_theme = st.selectbox(_("Select color scheme:"), theme_list, index = theme_list.index(current_theme))
         with st.container(horizontal_alignment="right", vertical_alignment="top"):
-            if st.button(_("Save Theme Choice")):
+            if st.button(_("Save Theme Choice"), key="save_theme_button"):
                 gfuncs.update_settings(conf_file, theme_dict[color_theme])
                 newdb.collection("Users").document(user_id).set(theme_dict[color_theme], merge=True)
                 st.rerun()
@@ -128,7 +129,7 @@ else:
         # Save button both writes to config file to show changes, 
         # and writes changes to database for consistency between states
         with st.container(horizontal_alignment="right", vertical_alignment="bottom"):
-            if st.button(_("Save Changes")):
+            if st.button(_("Save Changes"), key="save_advanced_button"):
                 gfuncs.update_config_val(conf_file, "base", "dark" if base_choice=="dark" else "light")
                 gfuncs.update_config_val(conf_file, "backgroundColor", background_color_choice)
                 gfuncs.update_config_val(conf_file, "textColor", text_color_choice)
