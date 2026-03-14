@@ -4,6 +4,7 @@ import requests
 import streamlit as st
 import toml
 from BackendMethods.translations import _
+import st_yled
 
 ## -------------------------------------------------------------------------------------------------
 ## Secrets Access --------------------------------------------------------------------------------

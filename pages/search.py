@@ -4,6 +4,7 @@ import BackendMethods.global_functions as gfuncs
 import BackendMethods.auth_functions as authFuncs
 import BackendMethods.backendfuncs as backEnd
 from BackendMethods.translations import _
+import st_yled
 
 st.session_state["last_code"] = ""
 
@@ -22,9 +23,10 @@ except Exception as e:
 ## Logged in ---------------------------------------------------------------------------------------
 ## -------------------------------------------------------------------------------------------------
 else:
+    st_yled.init()
     gfuncs.page_initialization()
 # This is straight from kieran's ui in apitesting, placeholder
-    st.subheader(_("Search for Collectables!"), text_alignment="center")
+    st_yled.subheader(_("Search for Collectables!"), text_alignment="center")
     # DEGUB:{st.session_state.user_info}
     st.space("large")
     col_left, col_right = st.columns([3, 2])
@@ -69,8 +71,8 @@ else:
             backEnd.CURR_COLL = ""
 
     if search_type == _("UPC"):
-        input_mode = st.radio(_("Input source"), options=[_("Upload"), _("Camera")], horizontal=True)
-        enhanced = st.toggle(_("Enhanced decode (slower)"), value=False)
+        input_mode = st_yled.radio(_("Input source"), options=[_("Upload"), _("Camera")], horizontal=True)
+        enhanced = st_yled.toggle(_("Enhanced decode (slower)"), value=False)
         uploaded = None
 
         if input_mode == _("Camera"):
@@ -79,7 +81,7 @@ else:
             uploaded = st.file_uploader(_("Upload barcode image"), type=["png", "jpg", "jpeg"])
 
         if not backEnd.PYZBAR_AVAILABLE:
-            st.error(_("Barcode decoding is unavailable. Install 'pyzbar' and the system 'zbar' library."))
+            st_yled.error(_("Barcode decoding is unavailable. Install 'pyzbar' and the system 'zbar' library."))
             st.stop()
 
         decoded: list[dict[str, str]] = []
@@ -90,34 +92,34 @@ else:
                 if enhanced and not decoded:
                     decoded = backEnd._decode_with_enhancements(image)
             except Exception as exc:
-                st.error(f"{_('Failed to read image:')} {exc}")
+                st_yled.error(f"{_('Failed to read image:')} {exc}")
 
         if decoded:
             supported_codes = backEnd._extract_supported_codes(decoded)
             if supported_codes:
-                st.success(_("Supported code(s) detected"))
+                st_yled.success(_("Supported code(s) detected"))
                 options = [f"{item['code']} ({item['label']})" for item in supported_codes]
-                selected = st.selectbox(_("Detected codes"), options=options)
+                selected = st_yled.selectbox(_("Detected codes"), options=options)
                 st.session_state["last_code"] = selected.split(" ")[0]
             else:
-                st.warning("Barcode detected, but no UPC/EAN/ISBN code found.")
+                st_yled.warning("Barcode detected, but no UPC/EAN/ISBN code found.")
         elif uploaded is not None:
-            st.warning("No barcode detected. Try a clearer image with the code centered.")
+            st_yled.warning("No barcode detected. Try a clearer image with the code centered.")
 
         st.divider()
-        upc_query = st.text_input("Enter UPC code", value=st.session_state.get("last_code", ""))
+        upc_query = st_yled.text_input("Enter UPC code", value=st.session_state.get("last_code", ""))
         if upc_query:
             normalized = backEnd._normalize_payload(upc_query)
             if len(normalized) == 10 and normalized[:-1].isdigit() and normalized[-1] in "Xx":
                 code = normalized[:-1] + "X"
                 label = backEnd._classify_code(code, "ISBN10")
-                st.success(f"{label} ready for use: {code}")
+                st_yled.success(f"{label} ready for use: {code}")
             elif normalized.isdigit() and len(normalized) in {8, 12, 13}:
                 label = backEnd._classify_code(normalized, "")
-                st.success(f"{label} ready for use: {normalized}")
+                st_yled.success(f"{label} ready for use: {normalized}")
             else:
                 st.info("Enter a valid UPC (8/12), EAN (8/13), or ISBN (10/13).")
-            if st.button("Search UPC"):
+            if st_yled.button("Search UPC"):
                 with st.spinner("Searching UPC..."):
                     try:
                         st.markdown("UPC search results:")
@@ -135,11 +137,11 @@ else:
                             st.write(f"Item ean: {upc_result['ean']}")
 
                     except Exception as e:
-                        st.error(f"UPC search failed: {e}")
+                        st_yled.error(f"UPC search failed: {e}")
     elif search_type == "Pokemon Cards":
-        with st.form(key="algolia_search_form", clear_on_submit=False):
-            pokemon_query = st.text_input("Search for a Pokemon card")
-            pokemon_search_submitted = st.form_submit_button("Search Pokemon")
+        with st_yled.form(key="algolia_search_form", clear_on_submit=False):
+            pokemon_query = st_yled.text_input("Search for a Pokemon card")
+            pokemon_search_submitted = st_yled.form_submit_button("Search Pokemon")
 
         if pokemon_search_submitted:
             with st.spinner("Searching Pokemon (Algolia)..."):
@@ -169,7 +171,7 @@ else:
                         def add_pokemon_button(item_id, Cardname):
                             proper_id = item_id.replace("-", "_")
                             backEnd.add_reference_search(db, user_id, proper_id, item_id)
-                            st.success(f"Added '{Cardname}' to your {backEnd.CURR_COLL.split('_')[0]} collection!")
+                            st_yled.success(f"Added '{Cardname}' to your {backEnd.CURR_COLL.split('_')[0]} collection!")
 
                         if item.get("image"):
                             st.image(item["image"], width=200)
@@ -184,14 +186,14 @@ else:
                         st.write(f"ID: {item['id']}")
                         item_id = item['id']
                         item_name = item['name'] if 'name' in item else item['title'] if 'title' in item else "No name"
-                        st.button(f"Add to {backEnd.CURR_COLL.split('_')[0]} Collection", key=f"add_{item['id']}", on_click=add_pokemon_button, kwargs={"item_id": item_id, "Cardname": item_name})
+                        st_yled.button(f"Add to {backEnd.CURR_COLL.split('_')[0]} Collection", key=f"add_{item['id']}", on_click=add_pokemon_button, kwargs={"item_id": item_id, "Cardname": item_name})
 
 
 
     elif search_type == "Lego Sets":
-        with st.form(key="lego_search_form", clear_on_submit=False):
-            lego_query = st.text_input("Search for a Lego set")
-            lego_search_submitted = st.form_submit_button("Search Lego")
+        with st_yled.form(key="lego_search_form", clear_on_submit=False):
+            lego_query = st_yled.text_input("Search for a Lego set")
+            lego_search_submitted = st_yled.form_submit_button("Search Lego")
 
         if lego_search_submitted:
             with st.spinner("Searching for Lego sets..."):
@@ -221,9 +223,9 @@ else:
                             st.write(f"Part Count: {item['num_parts']}")
                             
     elif search_type == "Lego Minifigs":
-        with st.form(key="lego_minifig_search_form", clear_on_submit=False):
-            minifig_query = st.text_input("Search for a Lego minifigure")
-            minifig_search_submitted = st.form_submit_button("Search Lego Minifigs")
+        with st_yled.form(key="lego_minifig_search_form", clear_on_submit=False):
+            minifig_query = st_yled.text_input("Search for a Lego minifigure")
+            minifig_search_submitted = st_yled.form_submit_button("Search Lego Minifigs")
 
         if minifig_search_submitted:
             with st.spinner("Searching for Lego minifigs..."):

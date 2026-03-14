@@ -4,6 +4,7 @@ import BackendMethods.global_functions as gfuncs
 import BackendMethods.auth_functions as authFuncs
 import BackendMethods.backendfuncs as backEnd
 from BackendMethods.translations import _
+import st_yled
 
 # Connects to db
 try:
@@ -19,16 +20,17 @@ if 'user_info' not in st.session_state:
 ## Logged in ---------------------------------------------------------------------------------------
 ## -------------------------------------------------------------------------------------------------
 else:
+    st_yled.init()
     gfuncs.page_initialization()
 
     user_id = st.session_state.user_info["localId"]
     collectionData = backEnd.generate_collection(backEnd.CURR_COLL, db)
     st.space("small")
-    st.subheader(backEnd.CURR_COLL.split("_")[0], text_alignment="center")
+    st_yled.subheader(backEnd.CURR_COLL.split("_")[0], text_alignment="center")
     st.space("small")
 
     # view selection radio buttons
-    view_mode = st.radio(_("Display mode"), [_("grid"), _("column")], horizontal=True)
+    view_mode = st_yled.radio(_("Display mode"), [_("grid"), _("column")], horizontal=True)
 
     
         # iterate through collections and collect item info
@@ -48,7 +50,7 @@ else:
             for idx, info in enumerate(items):
                 col = cols[idx % 3]
                 with col.container(horizontal_alignment="center"):
-                    st.subheader(f"{info.get('name','')}", text_alignment="center")
+                    st_yled.subheader(f"{info.get('name','')}", text_alignment="center")
                     st.image(info.get('image',''), width="content")
                     for key, val in info.items():
                         if key not in ("name", "image"):
@@ -59,7 +61,7 @@ else:
             cols = st.columns([0.2,0.8,0.2], width="stretch")  # column view (default)
             for info in items:
                 with cols[1].container(width="stretch", horizontal_alignment="center"):
-                    st.subheader(f"{info.get('name','')}", text_alignment="center")
+                    st_yled.subheader(f"{info.get('name','')}", text_alignment="center")
                     st.image(info.get('image',''), width=300)
                     for key, val in info.items():
                         if key not in ("name", "image"):
@@ -73,7 +75,7 @@ else:
     
     with st.container(horizontal=True, horizontal_alignment="right", vertical_alignment="bottom"):
         # Text box for input
-        item_id = st.text_input(_("Enter Item ID"))
+        item_id = st_yled.text_input(_("Enter Item ID"))
         new_string = ""
         for i in range(len(item_id)):
             if item_id[i] == "-":
@@ -81,7 +83,7 @@ else:
             else:
                 new_string+=item_id[i]
         # Add to collection button. Must input Id for now
-        if st.button(_("Add To Collection"), key="add_to_collection"):
+        if st_yled.button(_("Add To Collection"), key="add_to_collection"):
             backEnd.add_reference_collectionView(db, user_id, new_string, item_id)
-        if st.button(_("Remove From Collection"), key="remove_from_collection"):
+        if st_yled.button(_("Remove From Collection"), key="remove_from_collection"):
             backEnd.delete_reference(db, user_id, new_string)

@@ -11,3 +11,4 @@ tmdbsimple
 fastapi
 requests_futures
 google-cloud-secret-manager
+st-styled

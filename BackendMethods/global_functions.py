@@ -1,6 +1,7 @@
 import streamlit as st
 import BackendMethods.auth_functions as authFuncs
 from BackendMethods.translations import _
+import st_yled
 
 login_color_flag = 0
 
@@ -39,17 +40,18 @@ def read_config_val(conf:str, var:str) -> str:
 # Sets the page width, title, and buttons for home, search, settings
 # To be used at the start of any page
 def page_initialization():
+    st_yled.init()
     st.set_page_config(layout="wide")
-    st.title(_("Memorabiliacs"), text_alignment="center")
+    st_yled.title(_("Memorabiliacs"), text_alignment="center")
     with st.container(horizontal=True, vertical_alignment="top"):
         with st.container(horizontal_alignment="left", vertical_alignment="top"):
-            if st.button(_("Home"), key="home_button"):
+            if st_yled.button(_("Home"), key="home_button"):
                 st.switch_page("pages/home_page.py")
         with st.container(horizontal_alignment="center", vertical_alignment="top"):
-            if st.button(_("Search"), key="search_button"):
+            if st_yled.button(_("Search"), key="search_button"):
                 st.switch_page("pages/search.py")
         with st.container(horizontal_alignment="right", vertical_alignment="top"):
-            if st.button(_("Settings"), key="settings_button"):
+            if st_yled.button(_("Settings"), key="settings_button"):
                 st.switch_page("pages/settings.py")
         
 
