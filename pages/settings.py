@@ -2,14 +2,7 @@ import streamlit as st
 import BackendMethods.global_functions as gfuncs
 from google.cloud import firestore
 import BackendMethods.auth_functions as authFuncs
-from BackendMethods.backendfuncs import (
-    get_cards2,
-    search_internetarchive,
-    generate_collection,
-    search_movies,
-    generate_login_template,
-    setCollection
-)
+from BackendMethods.backendfuncs import *
 
 try:
     newdb = firestore.Client.from_service_account_info(st.secrets["firebase"])
@@ -38,7 +31,7 @@ else:
                 st.switch_page("pages/home_page.py")
         with st.container(horizontal_alignment="right", vertical_alignment="top"):
             if st.button("Logout"):
-                setCollection("")
+                set_collection("")
                 authFuncs.sign_out()
                 st.switch_page("pages/login.py")
 
