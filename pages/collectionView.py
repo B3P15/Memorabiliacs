@@ -20,7 +20,7 @@ if 'user_info' not in st.session_state:
 ## Logged in ---------------------------------------------------------------------------------------
 ## -------------------------------------------------------------------------------------------------
 else:
-    st_yled.init()
+    st_yled.init(CURR_THEME)
     gfuncs.page_initialization()
 
     user_id = st.session_state.user_info["localId"]

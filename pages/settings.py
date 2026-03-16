@@ -12,7 +12,7 @@ except Exception as e:
     st.error(f"Failed to initialize Firestore: {e}")
     st.stop()
 
-st_yled.init()
+st_yled.init(CURR_THEME)
 
 if 'user_info' not in st.session_state:
     st.switch_page("pages/login.py")
@@ -111,12 +111,16 @@ else:
                   "Cooper" : theme_cooper,
                   "Custom" : theme_custom}
 
+    css_dict = {"Original": ".streamlit/st-styled.css",
+                "Memorabiliac": ".streamlit/memorabiliac.css"}
+
 
     # Select box for themes and a button to save theme choice
     with st.container(horizontal_alignment="left", vertical_alignment="top"):
         color_theme = st_yled.selectbox(_("Select color scheme:"), theme_list, index = theme_list.index(current_theme))
         with st.container(horizontal_alignment="right", vertical_alignment="top"):
             if st_yled.button(_("Save Theme Choice"), key="save_theme_button"):
+                setTheme(css_dict[color_theme])
                 gfuncs.update_settings(conf_file, theme_dict[color_theme])
                 newdb.collection("Users").document(user_id).set(theme_dict[color_theme], merge=True)
                 st.rerun()

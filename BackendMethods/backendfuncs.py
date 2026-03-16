@@ -22,6 +22,8 @@ app = FastAPI()
 
 CURR_COLL = ""
 
+CURR_THEME = ".streamlit/memorabiliac.css"
+
 # Faster version of get_cards using asynchronous gets and future responses
 @app.get("/{game}/cards")
 def get_cards2(
@@ -238,6 +240,10 @@ def checkForCollName(collection_name:str, db) -> bool:
 def setCollection(collection:str):
     global CURR_COLL
     CURR_COLL = collection
+
+def setTheme(theme:str):
+    global CURR_THEME
+    CURR_THEME = theme
 
 REBRICK_API_KEY = st.secrets["REBRICK_API_KEY"]
 

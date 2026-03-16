@@ -23,7 +23,7 @@ except Exception as e:
 ## Logged in ---------------------------------------------------------------------------------------
 ## -------------------------------------------------------------------------------------------------
 else:
-    st_yled.init()
+    st_yled.init(CURR_THEME)
     gfuncs.page_initialization()
 # This is straight from kieran's ui in apitesting, placeholder
     st_yled.subheader(_("Search for Collectables!"), text_alignment="center")

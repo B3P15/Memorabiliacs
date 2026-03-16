@@ -9,12 +9,13 @@ import streamlit as st
 import BackendMethods.global_functions as gfuncs
 from google.cloud import firestore
 from BackendMethods.auth_functions import *
+import BackendMethods.backendfuncs as backEnd
 from BackendMethods.translations import _
 import st_yled
 
 
 st.secrets = access_secret_version()
-
+# st_yled.init(css_path=".streamlit/st-styled.css")
 st_yled.init()
 st.set_page_config(layout="wide")
 # Initialize Firestore client

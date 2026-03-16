@@ -1,10 +1,12 @@
 import streamlit as st
 import BackendMethods.auth_functions as authFuncs
+import BackendMethods.backendfuncs as backEnd
 from BackendMethods.translations import _
 import st_yled
 
 login_color_flag = 0
 
+st_yled.init(css_path=backEnd.CURR_THEME)
 
 # Opens file and writes new value for specified variable
 def update_config_val(conf:str, var:str, new:str) -> None:
@@ -40,8 +42,15 @@ def read_config_val(conf:str, var:str) -> str:
 # Sets the page width, title, and buttons for home, search, settings
 # To be used at the start of any page
 def page_initialization():
-    st_yled.init()
     st.set_page_config(layout="wide")
+    # print("\n")
+    # print(st.session_state)
+    # print("\n")
+    # st_yled.init(css_path=backEnd.CURR_THEME)
+    st_yled.init()
+    # print("\n")
+    # print(st.session_state)
+    # print("\n")
     st_yled.title(_("Memorabiliacs"), text_alignment="center")
     with st.container(horizontal=True, vertical_alignment="top"):
         with st.container(horizontal_alignment="left", vertical_alignment="top"):

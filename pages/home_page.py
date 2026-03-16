@@ -20,8 +20,7 @@ if 'user_info' not in st.session_state:
 ## Logged in ---------------------------------------------------------------------------------------
 ## -------------------------------------------------------------------------------------------------
 else:
-    st_yled.init()
-    gfuncs.page_initialization()
+    
     
     # variables
     conf_file = ".streamlit/config.toml"
@@ -30,6 +29,10 @@ else:
     user_data_dict = db.collection("Users").document(user_id).get().to_dict()
     collections = list(db.collection("Users").document(user_id).collections())
     
+    
+    gfuncs.page_initialization()
+    st_yled.init(css_path=backEnd.CURR_THEME)
+
     # Set language from database
     from BackendMethods.translations import set_language
     user_lang = user_data_dict.get('language', 'en')
