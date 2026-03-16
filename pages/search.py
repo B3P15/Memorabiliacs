@@ -166,7 +166,7 @@ else:
                     with cols[idx % 2]:
                         
                         def add_pokemon_button(item_id, Cardname):
-                            proper_id = item_id.replace("-", "_")
+                            proper_id = str(item_id).replace("-", "_")
                             backEnd.add_reference_search(db, user_id, proper_id, item_id)
                             st.success(f"Added '{Cardname}' to your {backEnd.CURR_COLL.split('_')[0]} collection!")
 
@@ -180,10 +180,9 @@ else:
                             st.write(f"HP: {item['HP']}")
                         if item.get('flavorText'):
                             st.write(f"*{item['flavorText']}*")
-                        st.write(f"ID: {item['id']}")
                         item_id = item['id']
                         item_name = item['name'] if 'name' in item else item['title'] if 'title' in item else "No name"
-                        st.button(f"Add to {backEnd.CURR_COLL.split('_')[0]} Collection", key=f"add_{item['id']}", on_click=add_pokemon_button, kwargs={"item_id": item_id, "Cardname": item_name})
+                        st.button(f"Add to {backEnd.CURR_COLL.split('_')[0]} Collection", key=f"add_{item_id}", on_click=add_pokemon_button, kwargs={"item_id": item_id, "Cardname": item_name})
 
 
 
