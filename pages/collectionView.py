@@ -48,7 +48,7 @@ else:
                 col = cols[idx % 3]
                 with col.container(horizontal_alignment="center"):
                     st.subheader(f"{info.get('name','')}", text_alignment="center")
-                    st.image(info.get('image',''), width="content")
+                    st.image(info.get('image',info.get('images', '')['small']), width="content")
                     for key, val in info.items():
                         if key not in ("name", "image"):
                             st.write(f"{key}: {val}")

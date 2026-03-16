@@ -15,7 +15,7 @@ import io
 from PIL import Image, ImageEnhance, ImageFilter, ImageOps
 from pyzbar import pyzbar
 import json
-from pathlib import Path
+from pathlib import Path as FilePath
 
 BASE_API_URL = "https://apitcg.com/api"
 APITCG_API_KEY = st.secrets["APITCG_API_KEY"]
