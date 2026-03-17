@@ -20,28 +20,17 @@ if 'user_info' not in st.session_state:
 ## Logged in ---------------------------------------------------------------------------------------
 ## -------------------------------------------------------------------------------------------------
 else:
-    st_yled.init(CURR_THEME)
+    st_yled.init(backEnd.CURR_THEME)
     gfuncs.page_initialization()
 
     user_id = st.session_state.user_info["localId"]
-    collectionData = backEnd.generate_collection(backEnd.CURR_COLL, db)
+    items = backEnd.get_collection_items(backEnd.CURR_COLL)  # Use cached function
     st.space("small")
     st_yled.subheader(backEnd.CURR_COLL.split("_")[0], text_alignment="center")
     st.space("small")
 
     # view selection radio buttons
     view_mode = st_yled.radio(_("Display mode"), [_("grid"), _("column")], horizontal=True)
-
-    
-        # iterate through collections and collect item info
-    items = []
-    for id, ref in collectionData.items():
-        if id == "Info":
-            continue
-        doc = ref.get()
-        if doc.exists:
-            info = doc.to_dict()
-            items.append(info)
 
     # display either grid or column view
     if view_mode == _("grid"):
@@ -51,7 +40,7 @@ else:
                 col = cols[idx % 3]
                 with col.container(horizontal_alignment="center"):
                     st_yled.subheader(f"{info.get('name','')}", text_alignment="center")
-                    st.image(info.get('image',''), width="content")
+                    st.image(info.get('image',info.get('images', '')['small']), width="content")
                     for key, val in info.items():
                         if key not in ("name", "image"):
                             st.write(f"{key}: {val}")
@@ -85,5 +74,9 @@ else:
         # Add to collection button. Must input Id for now
         if st_yled.button(_("Add To Collection"), key="add_to_collection"):
             backEnd.add_reference_collectionView(db, user_id, new_string, item_id)
+            backEnd.get_collection_items.clear()  # Clear cache after adding
+            st.rerun()
         if st_yled.button(_("Remove From Collection"), key="remove_from_collection"):
             backEnd.delete_reference(db, user_id, new_string)
+            backEnd.get_collection_items.clear()  # Clear cache after removing
+            st.rerun()

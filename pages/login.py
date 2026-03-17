@@ -16,7 +16,7 @@ import st_yled
 
 st.secrets = access_secret_version()
 # st_yled.init(css_path=".streamlit/st-styled.css")
-st_yled.init()
+st_yled.init(backEnd.CURR_THEME)
 st.set_page_config(layout="wide")
 # Initialize Firestore client
 # The credentials are grabbed from Streamlit secrets

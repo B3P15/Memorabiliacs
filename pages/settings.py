@@ -52,7 +52,7 @@ else:
         code_to_display = {v: k for k, v in lang_display_to_code.items()}
         current_lang = st.session_state.get('language', 'en')
         current_lang_display = code_to_display.get(current_lang, "English")
-        selected_lang = st_yled.selectbox(_("Select Language:"), options=list(lang_display_to_code.keys()), index=list(lang_display_to_code.keys()).index(current_lang_display))
+        selected_lang = st_yled.selectbox(_("Select Language:"), options=list(lang_display_to_code.keys()), index=list(lang_display_to_code.keys()).index(current_lang_display), key="language_selectbox")
         if selected_lang != current_lang_display:
             lang_code = lang_display_to_code[selected_lang]
             set_language(lang_code)
@@ -117,10 +117,10 @@ else:
 
     # Select box for themes and a button to save theme choice
     with st.container(horizontal_alignment="left", vertical_alignment="top"):
-        color_theme = st_yled.selectbox(_("Select color scheme:"), theme_list, index = theme_list.index(current_theme))
+        color_theme = st_yled.selectbox(_("Select color scheme:"), theme_list, index = theme_list.index(current_theme), key="theme_selectbox")
         with st.container(horizontal_alignment="right", vertical_alignment="top"):
             if st_yled.button(_("Save Theme Choice"), key="save_theme_button"):
-                setTheme(css_dict[color_theme])
+                #setTheme(css_dict[color_theme])
                 gfuncs.update_settings(conf_file, theme_dict[color_theme])
                 newdb.collection("Users").document(user_id).set(theme_dict[color_theme], merge=True)
                 st.rerun()
@@ -132,7 +132,7 @@ else:
         with st.container(horizontal_alignment="left", vertical_alignment="top"):
             background_color_choice = st.color_picker(_("Select the background color:"), current_background_color)
             text_color_choice = st.color_picker(_("Select the text color:"), current_text_color)
-            font_choice = st_yled.selectbox(_("Select the font:"), ("serif", "sans-serif"), index=0 if current_font == "serif" else 1)
+            font_choice = st_yled.selectbox(_("Select the font:"), ("serif", "sans-serif"), index=0 if current_font == "serif" else 1, key="font_selectbox")
             base_choice = gfuncs.base_theme_threshold(text_color_choice)
 
         # Save button both writes to config file to show changes, 

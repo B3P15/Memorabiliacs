@@ -31,7 +31,6 @@ else:
     
     
     gfuncs.page_initialization()
-    st_yled.init(css_path=backEnd.CURR_THEME)
 
     # Set language from database
     from BackendMethods.translations import set_language
@@ -50,6 +49,7 @@ else:
     ## Main Page Setup ---------------------------------------------------------------------------------
     ## -------------------------------------------------------------------------------------------------
     st.space("small")
+    st_yled.init(css_path=backEnd.CURR_THEME)
     st_yled.subheader(f"{_('Your Collections')}\n {_('Hello')}, {st.session_state.user_info['email']}", text_alignment="center")
     # DEGUB:{st.session_state.user_info}
     st.space("small")

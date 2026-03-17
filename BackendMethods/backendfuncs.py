@@ -22,7 +22,7 @@ app = FastAPI()
 
 CURR_COLL = ""
 
-CURR_THEME = ".streamlit/memorabiliac.css"
+CURR_THEME = ".streamlit/st-styled.css"
 
 # Faster version of get_cards using asynchronous gets and future responses
 @app.get("/{game}/cards")
@@ -156,6 +156,23 @@ def generate_collection(collection_name: str, db):
         return items_refs
     else:
         return []
+
+@st.cache_data(ttl=3600)
+def get_collection_items(collection_name: str):
+    """Fetch and process all items in a collection - cached to avoid repeated DB reads"""
+    db = firestore.Client.from_service_account_info(st.secrets["firebase"])
+    collectionData = generate_collection(collection_name, db)
+    items = []
+    
+    for id, ref in collectionData.items():
+        if id == "Info":
+            continue
+        doc = ref.get()
+        if doc.exists:
+            info = doc.to_dict()
+            items.append(info)
+    
+    return items
 
 # created new document in db
 def create_collection(collection_name: str, collection_type: str, db):
