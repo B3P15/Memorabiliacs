@@ -23,14 +23,15 @@ else:
     
     
     # variables
-    conf_file = ".streamlit/config.toml"
-    collection_page = "pages/collectionView.py"
+    
     user_id = st.session_state.user_info["localId"]
     user_data_dict = db.collection("Users").document(user_id).get().to_dict()
     collections = list(db.collection("Users").document(user_id).collections())
     
     
-    gfuncs.page_initialization()
+    gfuncs.page_initialization(user_data_dict)
+    # st_yled.init(css_path=backEnd.CURR_THEME)
+    st_yled.init()
 
     # Set language from database
     from BackendMethods.translations import set_language
@@ -38,18 +39,14 @@ else:
     set_language(user_lang)
     
     # Updates user configs
-    gfuncs.update_config_val(conf_file, "base", user_data_dict["base"])
-    gfuncs.update_config_val(conf_file, "backgroundColor", user_data_dict["backgroundColor"])
-    gfuncs.update_config_val(conf_file, "textColor", user_data_dict["textColor"])
-    if gfuncs.login_color_flag == 0:
-        gfuncs.login_color_flag = 1
-        st.rerun()
+    
 
     ## -------------------------------------------------------------------------------------------------
     ## Main Page Setup ---------------------------------------------------------------------------------
     ## -------------------------------------------------------------------------------------------------
     st.space("small")
-    st_yled.init(css_path=backEnd.CURR_THEME)
+    #st_yled.init(css_path=backEnd.CURR_THEME)
+    st_yled.init()
     st_yled.subheader(f"{_('Your Collections')}\n {_('Hello')}, {st.session_state.user_info['email']}", text_alignment="center")
     # DEGUB:{st.session_state.user_info}
     st.space("small")
@@ -103,7 +100,7 @@ else:
 
                         if st_yled.button(_("View Collection"), key=f"{collInfo[0]}_link"):
                             backEnd.setCollection(doc.id)
-                            st.switch_page(collection_page)
+                            st.switch_page(gfuncs.collection_page)
 
                         if st_yled.button(_("Edit"), key=f"edit_{collInfo[0]}"):
                             edit_collection(doc)

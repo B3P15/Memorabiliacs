@@ -20,10 +20,13 @@ if 'user_info' not in st.session_state:
 ## Logged in ---------------------------------------------------------------------------------------
 ## -------------------------------------------------------------------------------------------------
 else:
-    st_yled.init(backEnd.CURR_THEME)
-    gfuncs.page_initialization()
-
+    #st_yled.init(CURR_THEME)
+    st_yled.init()
     user_id = st.session_state.user_info["localId"]
+    user_data_dict = db.collection("Users").document(user_id).get().to_dict()
+    gfuncs.page_initialization(user_data_dict)
+
+    
     items = backEnd.get_collection_items(backEnd.CURR_COLL)  # Use cached function
     st.space("small")
     st_yled.subheader(backEnd.CURR_COLL.split("_")[0], text_alignment="center")

@@ -12,7 +12,8 @@ except Exception as e:
     st.error(f"Failed to initialize Firestore: {e}")
     st.stop()
 
-st_yled.init(CURR_THEME)
+# st_yled.init(CURR_THEME)
+st_yled.init()
 
 if 'user_info' not in st.session_state:
     st.switch_page("pages/login.py")
@@ -43,8 +44,8 @@ else:
     st_yled.title(_("Settings"), text_alignment="center")
 
     st.set_page_config(layout="wide")
-    st_yled.init(css_path=".streamlit/st-styled.css")
-    st_yled.init(css_path=".streamlit/st-styled.css")
+    st_yled.init()
+
 
     # Language selector
     with st.container(horizontal_alignment="left", vertical_alignment="top"):
@@ -69,6 +70,7 @@ else:
     current_font = gfuncs.read_config_val(conf_file, "font")
     # Theme is special in that it exists in the database but not the config file
     current_theme = db_settings["theme"]
+    gfuncs.apply_css_theme(current_theme)
 
     # List of available themes and the dictionaries for the themes
     # (Currently hardcoded)
@@ -76,9 +78,9 @@ else:
     theme_original = {"base" : "dark", 
                       "backgroundColor" : "#cacaca",
                       "textColor" : "#4caeff",
-                      "font" : "sans-serif",
+                      "font" : "'Noto Serif':https://fonts.cdnfonts.com/css/noto-serif",
                       "theme" : "Original"}
-    theme_memorbiliac = {"base" : "dark", 
+    theme_memorabiliac = {"base" : "dark", 
                       "backgroundColor" : "#636363",
                       "textColor" : "#00ff22",
                       "font" : "'Comic Sans MS':https://fonts.cdnfonts.com/css/sans-comic-sans",
@@ -91,12 +93,12 @@ else:
     theme_logan = {"base" : "light", 
                       "backgroundColor" : "#b1a8a8",
                       "textColor" : "#1733f7",
-                      "font" : "sans-serif",
+                      "font" : "'Noto Serif':https://fonts.cdnfonts.com/css/noto-serif",
                       "theme" : "Logan"}
     theme_cooper = {"base" : "dark", 
                       "backgroundColor" : "#76767b",
                       "textColor" : "#ff9600",
-                      "font" : "sans-serif",
+                      "font" : "'Noto Serif':https://fonts.cdnfonts.com/css/noto-serif",
                       "theme" : "Cooper"}
     theme_custom = {"base" : current_base,
                     "backgroundColor" : current_background_color,
@@ -105,7 +107,7 @@ else:
                     "theme" : "Custom"}
     # Dictionary matching database name of dictionary to hardcoded dict
     theme_dict = {"Original" : theme_original,
-                  "Memorabiliac" : theme_memorbiliac,
+                  "Memorabiliac" : theme_memorabiliac,
                   "Paper" : theme_paper,
                   "Logan" : theme_logan,
                   "Cooper" : theme_cooper,
@@ -113,6 +115,13 @@ else:
 
     css_dict = {"Original": ".streamlit/st-styled.css",
                 "Memorabiliac": ".streamlit/memorabiliac.css"}
+    
+    font_dict = {'Noto Serif' : "'Noto Serif':https://fonts.cdnfonts.com/css/noto-serif",
+                 'Roboto' : "Roboto:https://fonts.cdnfonts.com/css/roboto",
+                 'Glook' : "Glook:https://fonts.cdnfonts.com/css/gloock-2",
+                 'Rubik' : "Rubik:https://fonts.cdnfonts.com/css/rubik-2",
+                 'JUMBOTRON' : "JUMBOTRON:https://fonts.cdnfonts.com/css/jumbotron"}
+    font_name_list = list(font_dict.keys())
 
 
     # Select box for themes and a button to save theme choice
@@ -123,7 +132,9 @@ else:
                 #setTheme(css_dict[color_theme])
                 gfuncs.update_settings(conf_file, theme_dict[color_theme])
                 newdb.collection("Users").document(user_id).set(theme_dict[color_theme], merge=True)
+                gfuncs.apply_css_theme(color_theme)
                 st.rerun()
+                
 
 
     # Popover button for advanced settings with editing available for 
@@ -132,7 +143,9 @@ else:
         with st.container(horizontal_alignment="left", vertical_alignment="top"):
             background_color_choice = st.color_picker(_("Select the background color:"), current_background_color)
             text_color_choice = st.color_picker(_("Select the text color:"), current_text_color)
-            font_choice = st_yled.selectbox(_("Select the font:"), ("serif", "sans-serif"), index=0 if current_font == "serif" else 1, key="font_selectbox")
+            font_choice = st_yled.selectbox(_("Select the font:"), font_name_list, 
+                                            index=font_name_list.index(current_font) if current_font in font_name_list else 0,
+                                            key = "theme_select")
             base_choice = gfuncs.base_theme_threshold(text_color_choice)
 
         # Save button both writes to config file to show changes, 
@@ -142,7 +155,7 @@ else:
                 gfuncs.update_config_val(conf_file, "base", "dark" if base_choice=="dark" else "light")
                 gfuncs.update_config_val(conf_file, "backgroundColor", background_color_choice)
                 gfuncs.update_config_val(conf_file, "textColor", text_color_choice)
-                gfuncs.update_config_val(conf_file, "font", font_choice)
+                gfuncs.update_config_val(conf_file, "font", font_dict[font_choice])
                 newdb.collection("Users").document(user_id).set({"base" : base_choice, 
                                                                 "backgroundColor" : background_color_choice, 
                                                                 "textColor" : text_color_choice,

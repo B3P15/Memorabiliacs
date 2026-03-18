@@ -4,9 +4,11 @@ import BackendMethods.backendfuncs as backEnd
 from BackendMethods.translations import _
 import st_yled
 
-login_color_flag = 0
+# login_color_flag = 0
+conf_file = ".streamlit/config.toml"
+collection_page = "pages/collectionView.py"
 
-st_yled.init(css_path=backEnd.CURR_THEME)
+#st_yled.init(css_path=backEnd.CURR_THEME)
 
 # Opens file and writes new value for specified variable
 def update_config_val(conf:str, var:str, new:str) -> None:
@@ -41,9 +43,27 @@ def read_config_val(conf:str, var:str) -> str:
 
 # Sets the page width, title, and buttons for home, search, settings
 # To be used at the start of any page
-def page_initialization():
+def page_initialization(user_data_dict:dict):
     st.set_page_config(layout="wide")
+    st_yled.init()
     st_yled.title(_("Memorabiliacs"), text_alignment="center")
+    config_changes_list = ("base", "backgroundColor", "textColor", "font")
+
+    current_config_data = list()
+    for data in config_changes_list:
+        current_config_data.append(read_config_val(conf_file, data))
+
+    for change in config_changes_list:
+        if change == current_config_data[config_changes_list.index(change)]:
+            update_config_val(conf_file, change, user_data_dict[change])
+            st.rerun()
+    # update_config_val(conf_file, "base", user_data_dict["base"])
+    # update_config_val(conf_file, "backgroundColor", user_data_dict["backgroundColor"])
+    # update_config_val(conf_file, "textColor", user_data_dict["textColor"])
+    # if login_color_flag == 0:
+    #     login_color_flag = 1
+    #     st.rerun()
+
     with st.container(horizontal=True, vertical_alignment="top"):
         with st.container(horizontal_alignment="left", vertical_alignment="top"):
             if st_yled.button(_("Home"), key="home_button"):
@@ -63,3 +83,21 @@ def base_theme_threshold(hex_num:str) -> str:
     brightness = ((r*299)+(g*587)+(b*114))/1000
     return "dark" if brightness >= 128 else "light"
 
+def apply_css_theme(theme):
+    st_yled.init()
+    match theme:
+        case "Original": 
+            st_yled.set("button", "background_color", "#3498db")
+            st_yled.set("button", "border_style", "solid")
+        case "Memorabiliac":
+            st_yled.set("button", "background_color", "#e74c3c")
+            st_yled.set("button", "border_style", "dashed")
+        case "Logan":
+            st_yled.set("button", "background_color", "#2ecc71")
+            st_yled.set("button", "border_style", "dotted")
+        case "Cooper":
+            st_yled.set("button", "background_color", "#9b59b6")
+            st_yled.set("button", "border_style", "double")
+        case "Custom":
+            st_yled.set("button", "background_color", "#ffff00")
+            st_yled.set("button", "border_style", "solid")

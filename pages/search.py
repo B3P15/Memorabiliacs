@@ -23,8 +23,10 @@ except Exception as e:
 ## Logged in ---------------------------------------------------------------------------------------
 ## -------------------------------------------------------------------------------------------------
 else:
-    st_yled.init(CURR_THEME)
-    gfuncs.page_initialization()
+    #st_yled.init(CURR_THEME)
+    st_yled.init()
+    user_data_dict = db.collection("Users").document(user_id).get().to_dict()
+    gfuncs.page_initialization(user_data_dict)
 # This is straight from kieran's ui in apitesting, placeholder
     st_yled.subheader(_("Search for Collectables!"), text_alignment="center")
     # DEGUB:{st.session_state.user_info}
