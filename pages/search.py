@@ -169,9 +169,9 @@ else:
                             proper_id = str(item_id).replace("-", "_")
                             backEnd.add_reference_search(db, user_id, proper_id, item_id)
                             st.success(f"Added '{Cardname}' to your {backEnd.CURR_COLL.split('_')[0]} collection!")
-
-                        if item.get("image"):
-                            st.image(item["image"], width=200)
+                        print(f"pokemon restults = {pokemon_results}")
+                        if item.get("images"):
+                            st.image(item["images"]['small'], width=200)
                         name = item.get('name', item.get('title', 'No name'))
                         st.write(f"**{name}**")
                         if item.get('set'):
@@ -180,7 +180,7 @@ else:
                             st.write(f"HP: {item['HP']}")
                         if item.get('flavorText'):
                             st.write(f"*{item['flavorText']}*")
-                        item_id = item['id']
+                        item_id = item["id"]
                         item_name = item['name'] if 'name' in item else item['title'] if 'title' in item else "No name"
                         st.button(f"Add to {backEnd.CURR_COLL.split('_')[0]} Collection", key=f"add_{item_id}", on_click=add_pokemon_button, kwargs={"item_id": item_id, "Cardname": item_name})
 

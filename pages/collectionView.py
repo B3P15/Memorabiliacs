@@ -22,6 +22,8 @@ else:
 
     user_id = st.session_state.user_info["localId"]
     collectionData = backEnd.generate_collection(backEnd.CURR_COLL, db)
+    
+    items = backEnd.get_collection_items(backEnd.CURR_COLL)  # Use cached function
     st.space("small")
     st.subheader(backEnd.CURR_COLL.split("_")[0], text_alignment="center")
     st.space("small")
@@ -30,16 +32,7 @@ else:
     view_mode = st.radio("Display mode", ["grid", "column"], horizontal=True)
 
     
-        # iterate through collections and collect item info
-    items = []
-    for id, ref in collectionData.items():
-        if id == "Info":
-            continue
-        doc = ref.get()
-        if doc.exists:
-            info = doc.to_dict()
-            items.append(info)
-
+      
     # display either grid or column view
     if view_mode == "grid":
         with st.container(horizontal=True, horizontal_alignment="center", width="stretch"):
@@ -48,7 +41,7 @@ else:
                 col = cols[idx % 3]
                 with col.container(horizontal_alignment="center"):
                     st.subheader(f"{info.get('name','')}", text_alignment="center")
-                    st.image(info.get('image',info.get('images', '')['small']), width="content")
+                    st.image(info["images"]['small'], width=200)
                     for key, val in info.items():
                         if key not in ("name", "image"):
                             st.write(f"{key}: {val}")

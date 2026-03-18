@@ -176,6 +176,20 @@ def generate_collection(collection_name: str, db):
         return items_refs["items"]
     else:
         return []
+    
+@st.cache_data(ttl=3600)
+def get_collection_items(collection_name: str):
+    """Fetch and process all items in a collection - cached to avoid repeated DB reads"""
+    db = firestore.Client.from_service_account_info(st.secrets["firebase"])
+    collectionData = generate_collection(collection_name, db)
+    items = []
+    for id in collectionData:
+        item = collectionData[id]
+        doc = item['ref']
+        info = doc.get().to_dict()
+        items.append(info)
+    
+    return items
 
 def get_collection_types(db):
     """Gets all possible collection types stored in the database
@@ -280,13 +294,27 @@ def rename_collection(collection_name:str, new_collection:str, db):
 
 # ______________________________
 def add_reference_collectionView(db, user_id, item_doc_id, actual_item_id):
-    pokemon_ref = db.collection("Pokemon").document(actual_item_id)
-    db.collection('Users').document(user_id).collection('Collections').document(CURR_COLL).set({item_doc_id: pokemon_ref}, merge=True)
+    coll_type = CURR_COLL.split("_")[1]
+    item_ref = db.collection(coll_type).document(actual_item_id)
+
+    db.collection('Users').document(user_id).collection('Collections').document(CURR_COLL).update({
+    f"items.{item_doc_id}": {
+        "notes": "Your notes here",
+        "ref": item_ref   
+        }
+    })
     st.rerun()
     
 def add_reference_search(db, user_id, item_doc_id, actual_item_id):
-    pokemon_ref = db.collection("Pokemon").document(actual_item_id)
-    db.collection('Users').document(user_id).collection('Collections').document(CURR_COLL).set({item_doc_id: pokemon_ref}, merge=True)
+    coll_type = CURR_COLL.split("_")[1]
+    item_ref = db.collection(coll_type).document(actual_item_id)
+
+    db.collection('Users').document(user_id).collection('Collections').document(CURR_COLL).update({
+    f"items.{item_doc_id}": {
+        "notes": "Your notes here",
+        "ref": item_ref   
+        }
+    })
 
 def delete_reference(db, user_id, item_doc_id):
     delete = db.collection('Users').document(user_id).collection('Collections').document(CURR_COLL)
@@ -406,11 +434,11 @@ def search_algolia(query: str, index_name: str, max_results: int = 10):
             results = []
             for hit in hits:
                 results.append({
-                    "id": getattr(hit, 'id', getattr(hit, 'id', None)),
+                    "id": getattr(hit, 'object_id', getattr(hit, 'object_id', None)),
                     "name": getattr(hit, 'name', None),
-                    "image": getattr(hit, 'image', None),
+                    "images": getattr(hit, 'images', None),
                     "flavorText": getattr(hit, 'flavorText', None),
-                    "HP": getattr(hit, 'HP', getattr(hit, 'hp', None))
+                    "hp": getattr(hit, 'hp', getattr(hit, 'hp', None))
                 })
             return results
         else:
