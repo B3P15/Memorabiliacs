@@ -175,6 +175,25 @@ def generate_collection(collection_name: str, db):
     else:
         return []
 
+
+@st.cache_data(ttl=3600)
+def get_collection_items(collection_name: str):
+    """Fetch and process all items in a collection - cached to avoid repeated DB reads"""
+    db = firestore.Client.from_service_account_info(st.secrets["firebase"])
+    collectionData = generate_collection(collection_name, db)
+    items = []
+
+    for id, ref in collectionData.items():
+        if id == "Info":
+            continue
+        doc = ref.get()
+        if doc.exists:
+            info = doc.to_dict()
+            items.append(info)
+
+    return items
+
+
 def get_collection_types(db):
     """Gets all possible collection types stored in the database
     
@@ -206,7 +225,7 @@ def type_fields(coll_type:str, db):
         fields = doc.to_dict()
         for key in fields.keys():
             res[key] = True
-    return res
+        return res
 
 
 def create_collection(collection_name: str, collection_type: str, db):

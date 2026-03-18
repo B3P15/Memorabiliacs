@@ -27,6 +27,7 @@ else:
     user_data_dict = db.collection("Users").document(user_id).get().to_dict()
     collections = db.collection("Users").document(user_id).collection("Collections")
     fullCollections = []
+    removedCollections = []
     
     # Updates user configs
     gfuncs.update_config_val(conf_file, "base", user_data_dict["base"])
@@ -34,6 +35,7 @@ else:
     gfuncs.update_config_val(conf_file, "textColor", user_data_dict["textColor"])
     if gfuncs.login_color_flag == 0:
         gfuncs.login_color_flag = 1
+        gfuncs.removeCheck = False
         st.rerun()
 
     ## -------------------------------------------------------------------------------------------------
@@ -75,22 +77,31 @@ else:
             name = st.text_input("Name the Collection")
             collType = st.selectbox("Type", backEnd.get_collection_types(db))
             if st.button("Add", key="makeColl") and name is not None and collType is not None:
-                if backEnd.create_collection(name, collType, db):
-                    st.error("Collection name already exist")
-                else:
-                    st.rerun()
+                if gfuncs.collection_input_sanitation(name):
+                    if backEnd.create_collection(name, collType, db):
+                        st.error("Collection name already exist")
+                    else:
+                        st.rerun()
+                else: 
+                    st.error("Invalid Character in name: \n '_', '-', '\\', '/'")
 
         # Remove collection dialog to remove a collection from the db
         @st.dialog("Remove") 
-        def remove_collection(coll):
-            st.subheader(f"Are you sure you want to remove \"{coll.split('_')[0]}\"?", text_alignment="center")
+        def remove_collections():
+            
+            st.subheader("Are you sure you want to remove the following collections:", text_alignment="center")
+            for coll in removedCollections:
+                st.write(coll.split("_")[0])
             with st.container(horizontal=True, horizontal_alignment="center"):
                 if st.button("Yes", key=f"confirmRemove", width="content"):
-                    ref = db.collection("Users").document(user_id).collection("Collections").document(coll)
-                    ref.delete()
+                    for coll in removedCollections:
+                        ref = db.collection("Users").document(user_id).collection("Collections").document(coll)
+                        ref.delete()
+                    removedCollections.clear()
                     st.rerun()
                 
                 if st.button("No", key=f"cancelRemove", width="content"):
+                    gfuncs.removeCheck = False
                     st.rerun()
 
         # iterate through collections
@@ -99,7 +110,11 @@ else:
             if collInfo[0] != "DefaultCollection" : fullCollections.append(doc.id)
             if backEnd.coll_visability(doc.id, db):
                 with st.container(width="content", horizontal_alignment="center"):
-                    st.subheader(f"{collInfo[0]}", text_alignment="center")
+                    with st.container(horizontal=True):
+                        st.subheader(f"{collInfo[0]}", text_alignment="center")
+                        if gfuncs.removeCheck:
+                            if st.checkbox(" ", key=f"remove_{collInfo[0]}", width="content"):
+                                removedCollections.append(doc.id)
 
                     if st.button("View Collection", key=f"{collInfo[0]}_link"):
                         backEnd.set_collection(doc.id)
@@ -108,8 +123,6 @@ else:
                     if st.button("Edit", key=f"edit_{collInfo[0]}"):
                         edit_collection(doc)
 
-                    if st.button("Remove", key=f"remove_{collInfo[0]}", width="content"):
-                        remove_collection(doc.id)
 
                     st.space("medium")
                 st.space("small")
@@ -119,6 +132,13 @@ else:
         # add collection button
         if st.button("Add Collection"):
             add_collection()
+    
+        if st.button("Remove"):
+            gfuncs.removeCheck = not gfuncs.removeCheck
+            if not removedCollections == []:
+                remove_collections()
+            else:
+                st.rerun()
 
     with st.sidebar:
         st.space("small")

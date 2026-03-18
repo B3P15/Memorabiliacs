@@ -3,6 +3,7 @@ import BackendMethods.auth_functions as authFuncs
 
 login_color_flag = 0
 
+removeCheck = False
 
 # Opens file and writes new value for specified variable
 def update_config_val(conf:str, var:str, new:str) -> None:
@@ -51,3 +52,17 @@ def page_initialization():
             if st.button("Settings"):
                 st.switch_page("pages/settings.py")
         
+
+# Used for input sanitation of collection names
+def collection_input_sanitation(coll_name:str):
+    valid = True
+    if coll_name.__contains__("_"):
+        return not valid
+    if coll_name.__contains__("/"):
+        return not valid
+    if coll_name.__contains__("\\"):
+        return not valid
+    if coll_name.__contains__("-"):
+        return not valid
+
+    return valid
