@@ -306,6 +306,7 @@ def add_reference_collectionView(db, user_id, item_doc_id, actual_item_id):
         "ref": item_ref   
         }
     })
+    get_collection_items.clear(CURR_COLL)
     st.rerun()
     
 
@@ -319,13 +320,14 @@ def add_reference_search(db, user_id, item_doc_id, actual_item_id):
         "ref": item_ref   
         }
     })
+    get_collection_items.clear(CURR_COLL)
 
 
 def delete_reference(db, user_id, item_doc_id):
-    # TODO
-    # fix
-    delete = db.collection('Users').document(user_id).collection('Collections').document(CURR_COLL)
-    delete.update({"items" : {item_doc_id: firestore.DELETE_FIELD}})
+    db.collection('Users').document(user_id).collection('Collections').document(CURR_COLL).update({
+          f"items.{item_doc_id}": firestore.DELETE_FIELD
+    })
+    get_collection_items.clear(CURR_COLL)
     st.rerun()
 
 
