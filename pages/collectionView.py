@@ -48,8 +48,7 @@ else:
                     if views[key]:
                         st.write(f"{key}: {items[item][key]}")
             if st.button("Remove From Collection"):
-                print(item)
-                # backEnd.delete_reference(db, user_id, item)
+                backEnd.delete_reference(item, db)
 
     st.space("small")
     st.subheader(backEnd.CURR_COLL.split("_")[0], text_alignment="center")
@@ -68,7 +67,14 @@ else:
                 col = cols[i % 3]
                 with col.container(horizontal_alignment="center"):
                     st.subheader(f"{items[key]["name"]}", text_alignment="center")
-                    st.image(items[key]["images"]['small'], width=200)
+
+                    if backEnd.CURR_COLL.split("_")[1] == "Pokemon":
+                        st.image(items[key]["images"]['small'], width=200)
+                    else:
+                        # image = items[key]["image"][:-7]
+                        # print(image)
+                        st.image(items[key]["image"], width=200)
+
                     if st.button("View More", key=f"{items[key]["name"]}_view"):
                         viewItem(key)
                     st.space("medium")
@@ -78,7 +84,14 @@ else:
             for i, key in enumerate(items.keys()):
                 with cols[1].container(width="stretch", horizontal_alignment="center"):
                     st.subheader(f"{items[key]["name"]}", text_alignment="center")
-                    st.image(items[key]["images"]['small'], width=200)
+
+                    if backEnd.CURR_COLL.split("_")[1] == "Pokemon":
+                        st.image(items[key]["images"]['small'], width=200)
+                    else:
+                        # image = items[key]["image"][:-7]
+                        # print(image)
+                        st.image(items[key]["image"], width=200)
+                        
                     if st.button("View More", key=f"{items[key]["name"]}_view"):
                         viewItem(key)
                     st.space("medium")
@@ -96,6 +109,6 @@ else:
                 new_string+=item_id[i]
         # Add to collection button. Must input Id for now
         if st.button("Add To Collection"):
-            backEnd.add_reference_collectionView(db, user_id, new_string, item_id)
+            backEnd.add_reference_collectionView(new_string, item_id, db)
         
             

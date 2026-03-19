@@ -296,9 +296,16 @@ def rename_collection(collection_name:str, new_collection:str, db):
     collection_ref_OLD.delete()
 
 
-def add_reference_collectionView(db, user_id, item_doc_id, actual_item_id):
+def add_reference_collectionView(item_doc_id, actual_id, db):
+    """Adds an Item to a user's collection
+
+    item_doc_id: the fixed name (removed '-') of the item
+    actual_id: the document reference name of the item
+    db: Firebase database
+    """
+    user_id = st.session_state.user_info['localId']
     coll_type = CURR_COLL.split("_")[1]
-    item_ref = db.collection(coll_type).document(actual_item_id)
+    item_ref = db.collection(coll_type).document(actual_id)
 
     db.collection('Users').document(user_id).collection('Collections').document(CURR_COLL).update({
     f"items.{item_doc_id}": {
@@ -310,9 +317,16 @@ def add_reference_collectionView(db, user_id, item_doc_id, actual_item_id):
     st.rerun()
     
 
-def add_reference_search(db, user_id, item_doc_id, actual_item_id):
+def add_reference_search(item_doc_id, actual_id, db):
+    """Adds an Item to a users collection, does not rerun
+
+    item_doc_id: the fixed name (removed '-') of the item
+    actual_id: the document reference name of the item
+    db: Firebase database
+    """
+    user_id = st.session_state.user_info['localId']
     coll_type = CURR_COLL.split("_")[1]
-    item_ref = db.collection(coll_type).document(actual_item_id)
+    item_ref = db.collection(coll_type).document(actual_id)
 
     db.collection('Users').document(user_id).collection('Collections').document(CURR_COLL).update({
     f"items.{item_doc_id}": {
@@ -323,7 +337,13 @@ def add_reference_search(db, user_id, item_doc_id, actual_item_id):
     get_collection_items.clear(CURR_COLL)
 
 
-def delete_reference(db, user_id, item_doc_id):
+def delete_reference(item_doc_id, db):
+    """Deleted an item from the user's collection
+
+    item_doc_id: the fixed name (removed '-') of the item, version stored in user's collection
+    db: Firebase database
+    """
+    user_id = st.session_state.user_info['localId']
     db.collection('Users').document(user_id).collection('Collections').document(CURR_COLL).update({
           f"items.{item_doc_id}": firestore.DELETE_FIELD
     })

@@ -167,7 +167,7 @@ else:
                         
                         def add_pokemon_button(item_id, Cardname):
                             proper_id = str(item_id).replace("-", "_")
-                            backEnd.add_reference_search(db, user_id, proper_id, item_id)
+                            backEnd.add_reference_search(proper_id, item_id, db)
                             st.success(f"Added '{Cardname}' to your {backEnd.CURR_COLL.split('_')[0]} collection!")
                         print(f"pokemon restults = {pokemon_results}")
                         if item.get("images"):
