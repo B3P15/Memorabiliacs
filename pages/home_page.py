@@ -26,7 +26,9 @@ else:
     
     user_id = st.session_state.user_info["localId"]
     user_data_dict = db.collection("Users").document(user_id).get().to_dict()
-    collections = list(db.collection("Users").document(user_id).collections())
+    collections = db.collection("Users").document(user_id).collection("Collections")
+    fullCollections = []
+    removedCollections = []
     
     
     gfuncs.page_initialization(user_data_dict)
@@ -57,59 +59,80 @@ else:
         # Edit dialog to change the name of the collection
         @st.dialog(_("Edit")) 
         def edit_collection(coll):
-            with st.container(horizontal=True, horizontal_alignment="center"):
-                st_yled.subheader(f"{_('Rename')} {coll.id.split('_')[0]}?", text_alignment="center")
-                coll_rename = st_yled.text_input(" ")
-                if st_yled.button (_("Rename"), key=f"rename_{coll.id.split('_')[0]}", width="content"):
-                    if backEnd.rename_collection(coll, coll_rename, db):
-                        st_yled.error("Collection name already exist")
-                    else: 
+            itemSettings, rename = st.columns([3,1])
+            with itemSettings:
+                hidden = st.checkbox("Hide Collection")
+                fields = doc.to_dict()["settings"]
+                # TODO
+                # Add things for other setting when we figure out 
+                # how to do it
+                doc.reference.update({"settings.hidden" : hidden})
+            with rename:
+                st_yled.subheader(f"Rename {coll.id.split('_')[0]}?", text_alignment="center")
+                coll_rename = st.text_input(" ")
+            with st.container(horizontal=True, horizontal_alignment="right"):
+                if st_yled.button("Save"):
+                    if coll_rename != "":
+                        if backEnd.rename_collection(coll, coll_rename, db):
+                            st_yled.error("Collection name already exist")
+                    else:
                         st.rerun()
 
         # Add collection dialog for adding a new collection to the db
         @st.dialog(_("Add"))
         def add_collection():
-            name = st_yled.text_input(_("Name the Collection"))
-            collType = st_yled.text_input(_("Give Collection Type")) # will be dropdown
-            if st_yled.button(_("Add"), key="makeColl") and name is not None and collType is not None:
-                if backEnd.create_collection(name, collType, db):
-                    st_yled.error("Collection name already exist")
-                else:
-                    st.rerun()
+            name = st_yled.text_input("Name the Collection")
+            collType = st_yled.selectbox("Type", backEnd.get_collection_types(db))
+            if st_yled.button("Add", key="makeColl") and name is not None and collType is not None:
+                if gfuncs.collection_input_sanitation(name):
+                    if backEnd.create_collection(name, collType, db):
+                        st_yled.error("Collection name already exist")
+                    else:
+                        st.rerun()
+                else: 
+                    st_yled.error("Invalid Character in name: \n '_', '-', '\\', '/'")
 
         # Remove collection dialog to remove a collection from the db
-        @st.dialog(_("Remove")) 
-        def remove_collection(coll):
+        @st.dialog("Remove") 
+        def remove_collections():
+            
+            st_yled.subheader("Are you sure you want to remove the following collections:", text_alignment="center")
+            for coll in removedCollections:
+                st.write(coll.split("_")[0])
             with st.container(horizontal=True, horizontal_alignment="center"):
-                st_yled.subheader(f"{_('Are you sure you want to remove')} \"{coll.split('_')[0]}\"?", text_alignment="center")
-                if st_yled.button(_("Yes"), key=f"confirmRemove", width="content"):
-                    ref = db.collection("Users").document(user_id).collection("Collections").document(coll)
-                    ref.delete()
+                if st_yled.button("Yes", key="confirmRemove", width="content"):
+                    for coll in removedCollections:
+                        ref = db.collection("Users").document(user_id).collection("Collections").document(coll)
+                        ref.delete()
+                    removedCollections.clear()
                     st.rerun()
                 
-                if st_yled.button(_("No"), key=f"cancelRemove", width="content"):
+                if st_yled.button("No", key="cancelRemove", width="content"):
+                    gfuncs.removeCheck = False
                     st.rerun()
 
         # iterate through collections
-        for coll in collections:
-            for doc in list(coll.stream()):
-                collInfo = doc.id.split('_')
-                if not collInfo[0] == "DefaultCollection":
-                    with st.container(width="content", horizontal_alignment="center"):
-                        st_yled.subheader(f"{collInfo[0]}", text_alignment="center")
+        for doc in collections.stream():
+            collInfo = doc.id.split('_')
+            if collInfo[0] != "DefaultCollection" : fullCollections.append(doc.id)
+            if backEnd.coll_visability(doc.id, db):
+                with st.container(width="content", horizontal_alignment="center"):
+                    with st.container(horizontal=True):
+                        st.subheader(f"{collInfo[0]}", text_alignment="center")
+                        if gfuncs.removeCheck:
+                            if st.checkbox(" ", key=f"remove_{collInfo[0]}", width="content"):
+                                removedCollections.append(doc.id)
 
-                        if st_yled.button(_("View Collection"), key=f"{collInfo[0]}_link"):
-                            backEnd.setCollection(doc.id)
-                            st.switch_page(gfuncs.collection_page)
+                    if st.button("View Collection", key=f"{collInfo[0]}_link"):
+                        backEnd.set_collection(doc.id)
+                        st.switch_page(gfuncs.collection_page)
 
-                        if st_yled.button(_("Edit"), key=f"edit_{collInfo[0]}"):
-                            edit_collection(doc)
+                    if st.button("Edit", key=f"edit_{collInfo[0]}"):
+                        edit_collection(doc)
 
-                        if st_yled.button(_("Remove"), key=f"remove_{collInfo[0]}", width="content"):
-                            remove_collection(doc.id)
 
-                        st.space("medium")
-                    st.space("small")
+                    st.space("medium")
+                st.space("small")
 
     # Container in bottom right for add button
     with st.container(horizontal=True, horizontal_alignment="right"):
@@ -117,3 +140,17 @@ else:
         if st_yled.button(_("Add Collection"), key="add_collection_button"):
             add_collection()
     
+        if st.button("Remove"):
+            gfuncs.removeCheck = not gfuncs.removeCheck
+            if not removedCollections == []:
+                remove_collections()
+            else:
+                st.rerun()
+
+    with st.sidebar:
+        st.space("small")
+        st.title("All Collections:")
+        for coll in fullCollections:
+            if st.button(f"{coll.split("_")[0]}", type="tertiary"):
+                backEnd.set_collection(coll)
+                st.switch_page(gfuncs.collection_page)

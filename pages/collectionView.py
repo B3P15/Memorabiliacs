@@ -26,45 +26,83 @@ else:
     user_data_dict = db.collection("Users").document(user_id).get().to_dict()
     gfuncs.page_initialization(user_data_dict)
 
-    
+    collectionData = backEnd.generate_collection(backEnd.CURR_COLL, db)
     items = backEnd.get_collection_items(backEnd.CURR_COLL)  # Use cached function
+
+    @st.dialog("Collection Views")
+    def viewCollSettings():
+        with st.container(horizontal_alignment="center"):
+            views = backEnd.collection_views(backEnd.CURR_COLL, db)
+            for view in views.keys():
+                if view != "name" or view != "image":
+                    st.checkbox(f"Hide {view}", key=view, value=(not views[view]))
+
+            if st.button("Save"):
+                newViews = {}
+                for view in views.keys():
+                    newViews[view] = not st.session_state[view]
+                backEnd.update_collection_views(backEnd.CURR_COLL, newViews, db)
+                st.rerun()
+    
+    @st.dialog("Item Info")
+    def viewItem(item):
+        views = backEnd.collection_views(backEnd.CURR_COLL, db)
+        with st.container(horizontal_alignment="center"):
+            for key in items[item].keys():
+                if key not in ("name", "image"):
+                    if views[key]:
+                        st.write(f"{key}: {items[item][key]}")
+            if st.button("Remove From Collection"):
+                backEnd.delete_reference(item, db)
+
     st.space("small")
-    st_yled.subheader(backEnd.CURR_COLL.split("_")[0], text_alignment="center")
+    st.subheader(backEnd.CURR_COLL.split("_")[0], text_alignment="center")
+    if st.button("", icon=":material/settings:", type="tertiary"):
+        viewCollSettings()
     st.space("small")
 
     # view selection radio buttons
-    view_mode = st_yled.radio(_("Display mode"), [_("grid"), _("column")], horizontal=True)
+    view_mode = st.radio("Display mode", ["grid", "column"], horizontal=True)
 
     # display either grid or column view
     if view_mode == _("grid"):
         with st.container(horizontal=True, horizontal_alignment="center", width="stretch"):
             cols = st.columns(3, width="stretch")  # grid view
-            for idx, info in enumerate(items):
-                col = cols[idx % 3]
+            for i, key in enumerate(items.keys()):
+                col = cols[i % 3]
                 with col.container(horizontal_alignment="center"):
-                    st_yled.subheader(f"{info.get('name','')}", text_alignment="center")
-                    st.image(info.get('image',info.get('images', '')['small']), width="content")
-                    for key, val in info.items():
-                        if key not in ("name", "image"):
-                            st.write(f"{key}: {val}")
+                    st_yled.subheader(f"{items[key]["name"]}", text_alignment="center")
+
+                    if backEnd.CURR_COLL.split("_")[1] == "Pokemon":
+                        st.image(items[key]["images"]['small'], width=200)
+                    else:
+                        # image = items[key]["image"][:-7]
+                        # print(image)
+                        st.image(items[key]["image"], width=200)
+
+                    if st_yled.button("View More", key=f"{items[key]["name"]}_view"):
+                        viewItem(key)
                     st.space("medium")
     else:
         with st.container(horizontal=False, horizontal_alignment="center", width="stretch"):
             cols = st.columns([0.2,0.8,0.2], width="stretch")  # column view (default)
-            for info in items:
+            for i, key in enumerate(items.keys()):
                 with cols[1].container(width="stretch", horizontal_alignment="center"):
-                    st_yled.subheader(f"{info.get('name','')}", text_alignment="center")
-                    st.image(info.get('image',''), width=300)
-                    for key, val in info.items():
-                        if key not in ("name", "image"):
-                            st.markdown(f"<p style='text-align: center;'>{key}: {val}</p>", unsafe_allow_html=True)
-                    st.space("medium")
-                st.space("small")
+                    st_yled.subheader(f"{items[key]["name"]}", text_alignment="center")
 
+                    if backEnd.CURR_COLL.split("_")[1] == "Pokemon":
+                        st.image(items[key]["images"]['small'], width=200)
+                    else:
+                        # image = items[key]["image"][:-7]
+                        # print(image)
+                        st.image(items[key]["image"], width=200)
+                        
+                    if st.button("View More", key=f"{items[key]["name"]}_view"):
+                        viewItem(key)
+                    st.space("medium")
 
 
     # Container in bottom right for add button
-    
     with st.container(horizontal=True, horizontal_alignment="right", vertical_alignment="bottom"):
         # Text box for input
         item_id = st_yled.text_input(_("Enter Item ID"))
@@ -76,10 +114,6 @@ else:
                 new_string+=item_id[i]
         # Add to collection button. Must input Id for now
         if st_yled.button(_("Add To Collection"), key="add_to_collection"):
-            backEnd.add_reference_collectionView(db, user_id, new_string, item_id)
-            backEnd.get_collection_items.clear()  # Clear cache after adding
-            st.rerun()
-        if st_yled.button(_("Remove From Collection"), key="remove_from_collection"):
-            backEnd.delete_reference(db, user_id, new_string)
-            backEnd.get_collection_items.clear()  # Clear cache after removing
-            st.rerun()
+            backEnd.add_reference_collectionView(new_string, item_id, db)
+        
+            

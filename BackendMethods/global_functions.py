@@ -9,6 +9,7 @@ conf_file = ".streamlit/config.toml"
 collection_page = "pages/collectionView.py"
 
 #st_yled.init(css_path=backEnd.CURR_THEME)
+removeCheck = False
 
 # Opens file and writes new value for specified variable
 def update_config_val(conf:str, var:str, new:str) -> None:
@@ -101,3 +102,16 @@ def apply_css_theme(theme):
         case "Custom":
             st_yled.set("button", "background_color", "#ffff00")
             st_yled.set("button", "border_style", "solid")
+# Used for input sanitation of collection names
+def collection_input_sanitation(coll_name:str):
+    valid = True
+    if coll_name.__contains__("_"):
+        return not valid
+    if coll_name.__contains__("/"):
+        return not valid
+    if coll_name.__contains__("\\"):
+        return not valid
+    if coll_name.__contains__("-"):
+        return not valid
+
+    return valid
