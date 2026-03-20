@@ -66,8 +66,10 @@ else:
             with st.container(horizontal=True, horizontal_alignment="right"):
                 if st.button("Save"):
                     if coll_rename != "":
-                        if backEnd.rename_collection(coll, coll_rename, db):
+                        if backEnd.rename_collection(coll.id, coll_rename, db):
                             st.error("Collection name already exist")
+                        else:
+                            st.rerun()
                     else:
                         st.rerun()
 
@@ -122,7 +124,6 @@ else:
 
                     if st.button("Edit", key=f"edit_{collInfo[0]}"):
                         edit_collection(doc)
-
 
                     st.space("medium")
                 st.space("small")

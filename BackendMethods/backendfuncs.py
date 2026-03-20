@@ -182,7 +182,10 @@ def generate_collection(collection_name: str, db):
 
 @st.cache_data(ttl=3600)
 def get_collection_items(collection_name: str):
-    """Fetch and process all items in a collection - cached to avoid repeated DB reads"""
+    """Fetch and process all items in a collection - cached to avoid repeated DB reads
+
+    collection_name: Name of the collection to retrieve
+    """
     db = firestore.Client.from_service_account_info(st.secrets["firebase"])
     collectionData = generate_collection(collection_name, db)
     items = {}
@@ -277,10 +280,8 @@ def rename_collection(collection_name:str, new_collection:str, db):
     user_id = st.session_state.user_info['localId']
     
     # gets reference and type of collection
-    collection_ref_OLD = db.collection('Users').document(user_id).collection('Collections').document(collection_name.id)
+    collection_ref_OLD = db.collection('Users').document(user_id).collection('Collections').document(collection_name)
     coll_Info = collection_ref_OLD.get().id.split("_")
-    data = generate_collection(collection_name.id, db)
-    # print(data)
 
     # checks if new name already exists in the database
     if check_for_coll_name(new_collection.title(), db):
@@ -288,11 +289,8 @@ def rename_collection(collection_name:str, new_collection:str, db):
 
     # created new collection to move data to
     fullName = f"{new_collection.title()}_{coll_Info[1]}"
-    db.collection('Users').document(user_id).collection('Collections').document(fullName).set(data, merge=True)
-    items = {"Info":[]}
     
-    db.collection('Users').document(user_id).collection('Collections').document(fullName).set(items, merge=True)
-
+    db.collection('Users').document(user_id).collection('Collections').document(fullName).set(collection_ref_OLD.get().to_dict())
     collection_ref_OLD.delete()
 
 
@@ -656,8 +654,8 @@ def upload_pokemon_data(db):
         "abilities": "N/A",
         "attacks": "N/A",
         "weaknesses": "N/A",
-        "retreatCost": "N/A",
-        "convertedRetreatCost": "N/A",
+        "retreatCost": "N/A", # number
+        "convertedRetreatCost": "N/A", # types  
         "number": "N/A",
         "artist": "N/A",
         "rarity": "N/A",
