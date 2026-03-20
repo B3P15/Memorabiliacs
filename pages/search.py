@@ -36,6 +36,7 @@ else:
     # Search type selector (left column)
     search_type = col_left.selectbox(
         _("What would you like to search for?"),
+        #options=(generate_collection_types(db)),
         options=(_("Vinyl & CDs"), _("Movies"), _("Pokemon Cards"), _("UPC"), _("Lego Sets"), _("Lego Minifigs")),
     )
 

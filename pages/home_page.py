@@ -30,7 +30,7 @@ else:
     fullCollections = []
     removedCollections = []
     
-    
+    gfuncs.db_settings_to_config(user_data_dict)
     gfuncs.page_initialization(user_data_dict)
     # st_yled.init(css_path=backEnd.CURR_THEME)
     st_yled.init()
@@ -81,8 +81,8 @@ else:
         # Add collection dialog for adding a new collection to the db
         @st.dialog(_("Add"))
         def add_collection():
-            name = st_yled.text_input("Name the Collection")
-            collType = st_yled.selectbox("Type", backEnd.get_collection_types(db))
+            name = st.text_input("Name the Collection")
+            collType = st.selectbox("Type", backEnd.get_collection_types(db))
             if st_yled.button("Add", key="makeColl") and name is not None and collType is not None:
                 if gfuncs.collection_input_sanitation(name):
                     if backEnd.create_collection(name, collType, db):

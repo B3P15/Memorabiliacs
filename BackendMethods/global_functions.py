@@ -3,8 +3,8 @@ import BackendMethods.auth_functions as authFuncs
 import BackendMethods.backendfuncs as backEnd
 from BackendMethods.translations import _
 import st_yled
+from time import sleep
 
-# login_color_flag = 0
 conf_file = ".streamlit/config.toml"
 collection_page = "pages/collectionView.py"
 
@@ -42,28 +42,34 @@ def read_config_val(conf:str, var:str) -> str:
 
     return result_list[1]
 
+# Updates config data to match database data
+def db_settings_to_config(user_data_dict:dict):
+    # list of variables in both db and config
+    variables_to_update = ["base", "backgroundColor", "textColor", "font"]
+
+    # list of values of variables above
+    config_data = []
+    db_data = []
+    for var in variables_to_update:
+        config_data.append(read_config_val(conf_file, var))
+        db_data.append(user_data_dict[var])
+
+
+    for i in range(len(variables_to_update)):
+        if config_data[i] != db_data[i]:
+            update_config_val(conf_file, variables_to_update[i], db_data[i])
+
+    sleep(0.25)
+    if config_data != db_data:
+        st.rerun()
+
+
 # Sets the page width, title, and buttons for home, search, settings
 # To be used at the start of any page
 def page_initialization(user_data_dict:dict):
     st.set_page_config(layout="wide")
     st_yled.init()
     st_yled.title(_("Memorabiliacs"), text_alignment="center")
-    config_changes_list = ("base", "backgroundColor", "textColor", "font")
-
-    current_config_data = list()
-    for data in config_changes_list:
-        current_config_data.append(read_config_val(conf_file, data))
-
-    for change in config_changes_list:
-        if change == current_config_data[config_changes_list.index(change)]:
-            update_config_val(conf_file, change, user_data_dict[change])
-            st.rerun()
-    # update_config_val(conf_file, "base", user_data_dict["base"])
-    # update_config_val(conf_file, "backgroundColor", user_data_dict["backgroundColor"])
-    # update_config_val(conf_file, "textColor", user_data_dict["textColor"])
-    # if login_color_flag == 0:
-    #     login_color_flag = 1
-    #     st.rerun()
 
     with st.container(horizontal=True, vertical_alignment="top"):
         with st.container(horizontal_alignment="left", vertical_alignment="top"):

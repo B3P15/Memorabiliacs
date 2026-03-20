@@ -223,11 +223,14 @@ def type_fields(coll_type:str, db):
     res = {}
 
     typeRef = db.collection(coll_type)
+    index = 0
     for doc in typeRef.stream():
         fields = doc.to_dict()
+        index+=1
         for key in fields.keys():
             res[key] = True
-        return res
+        if index >= 2:
+            return res
 
 
 def create_collection(collection_name: str, collection_type: str, db):

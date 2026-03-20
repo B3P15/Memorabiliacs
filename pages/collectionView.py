@@ -47,11 +47,12 @@ else:
     @st.dialog("Item Info")
     def viewItem(item):
         views = backEnd.collection_views(backEnd.CURR_COLL, db)
-        with st.container(horizontal_alignment="center"):
-            for key in items[item].keys():
-                if key not in ("name", "image"):
-                    if views[key]:
-                        st.write(f"{key}: {items[item][key]}")
+        field_text = ""
+        for key in items[item].keys():
+            if key not in ("name", "image", "rarity"):
+                if views[key]:
+                    field_text += f"{key}: {items[item][key]}\n"
+        with st_yled.badge_card_one(title=items[item]["name"], text=field_text, badge_text="Item Info", width="stretch", badge_color="green"):
             if st.button("Remove From Collection"):
                 backEnd.delete_reference(item, db)
 
