@@ -26,7 +26,6 @@ else:
     user_data_dict = db.collection("Users").document(user_id).get().to_dict()
     gfuncs.page_initialization(user_data_dict)
 
-    collectionData = backEnd.generate_collection(backEnd.CURR_COLL, db)
     items = backEnd.get_collection_items(backEnd.CURR_COLL)  # Use cached function
 
     @st.dialog("Collection Views")
@@ -48,12 +47,13 @@ else:
     def viewItem(item):
         views = backEnd.collection_views(backEnd.CURR_COLL, db)
         field_text = ""
-        for key in items[item].keys():
-            if key not in ("name", "image", "rarity"):
-                if views[key]:
-                    field_text += f"{key}: {items[item][key]}\n"
-        with st_yled.badge_card_one(title=items[item]["name"], text=field_text, badge_text="Item Info", width="stretch", badge_color="green"):
-            if st.button("Remove From Collection"):
+        with st_yled.badge_card_one(title=items[item]["name"], text=field_text, badge_text="Attributes", width="stretch", badge_color="primary", 
+                                    background_color=gfuncs.read_config_val(gfuncs.conf_file, "backgroundColor"), card_shadow=True, border_style="solid", border_color=gfuncs.read_config_val(gfuncs.conf_file, "textColor"), border_width=1):
+            for key in items[item].keys():
+                if key not in ("name", "image", "rarity"):
+                    if views[key]:
+                        st.write(f"**{key}**: **{items[item][key]}**")
+            if st_yled.button("Remove From Collection"):
                 backEnd.delete_reference(item, db)
 
     st.space("small")

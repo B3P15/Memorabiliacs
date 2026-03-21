@@ -36,7 +36,7 @@ else:
                 st.switch_page("pages/home_page.py")
         with st.container(horizontal_alignment="right", vertical_alignment="top"):
             if st_yled.button(_("Logout"), key="logout_button"):
-                setCollection("")
+                set_collection("")
                 sign_out()
                 st.switch_page("pages/login.py")
 

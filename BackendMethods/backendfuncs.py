@@ -506,6 +506,54 @@ def search_algolia(query: str, index_name: str, max_results: int = 10):
                     "hp": getattr(hit, 'hp', getattr(hit, 'hp', None))
                 })
             return results
+        
+        elif index_name == "MovieSearchResults":
+            results = []
+            for hit in hits:
+                results.append({
+                    "id": getattr(hit, 'object_id', None),
+                    "name": getattr(hit, 'name', None),
+                    "release_date": getattr(hit, 'release_date', None),
+                    "overview": getattr(hit, 'overview', None),
+                    "image": getattr(hit, 'image', None)
+                })
+            return results
+        
+        elif index_name == "DragonballSearchResults":
+            results = []
+            for hit in hits:
+                results.append({
+                    "id": getattr(hit, 'object_id', None),
+                    "name": getattr(hit, 'name', None),
+                    "power": getattr(hit, 'power', None),
+                    "image": getattr(hit, 'image', None)
+                })
+            return results
+        
+        elif index_name == "DigimonSearchResults":
+            results = []
+            for hit in hits:
+                results.append({
+                    "id": getattr(hit, 'object_id', None),
+                    "name": getattr(hit, 'name', None),
+                    "cardType": getattr(hit, 'cardType', None),
+                    "image": getattr(hit, 'image', None)
+                })
+            return results
+        
+        elif index_name == "OnepieceSearchResults":
+            results = []
+            for hit in hits:
+                results.append({
+                    "id": getattr(hit, 'object_id', None),
+                    "name": getattr(hit, 'name', None),
+                    "type": getattr(hit, 'type', None),
+                    "image": getattr(hit, 'image', None),
+                    "rarity": getattr(hit, 'rarity', None)
+                })
+            return results
+
+
         else:
             return hits
             
@@ -525,9 +573,9 @@ def test_upc_api(upc_code: str):
     if 'items' in data and len(data['items']) > 0:
         item = data['items'][0]
         results = {
-            'title': item['title'],
+            'name': item['title'],
             'description': item['description'],
-            'publisher': item.get('publisher', None),
+            'publisher': item.get('publisher', None) if item['publisher'] else None,
             'ean': item['ean'],
             'image': item['images'][0]  # Get the first image if available
         }
