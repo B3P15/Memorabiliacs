@@ -7,7 +7,7 @@ from BackendMethods.translations import _, set_language
 import st_yled
 
 try:
-    newdb = firestore.Client.from_service_account_info(st.secrets["firebase"])
+    newdb = get_firestore_client()
 except Exception as e:
     st.error(f"Failed to initialize Firestore: {e}")
     st.stop()
@@ -59,11 +59,12 @@ else:
             set_language(lang_code)
             # Save to database
             newdb.collection("Users").document(user_id).set({"language": lang_code}, merge=True)
+            get_user_data.clear(user_id)
             st.rerun()
 
     # Grabs settings from database
     # Also grabs current configuration data from config file
-    db_settings = newdb.collection("Users").document(user_id).get().to_dict()
+    db_settings = get_user_data(user_id)
     current_base = gfuncs.read_config_val(conf_file, "base")
     current_background_color = gfuncs.read_config_val(conf_file, "backgroundColor")
     current_text_color = gfuncs.read_config_val(conf_file, "textColor")
@@ -133,6 +134,7 @@ else:
                 gfuncs.update_settings(conf_file, theme_dict[color_theme])
                 newdb.collection("Users").document(user_id).set(theme_dict[color_theme], merge=True)
                 gfuncs.apply_css_theme(color_theme)
+                get_user_data.clear(user_id)
                 st.rerun()
                 
 
@@ -162,5 +164,6 @@ else:
                                                                 "font" : font_choice,
                                                                 "theme" : "Custom"},
                                                                 merge=True)
+                get_user_data.clear(user_id)
                 st.rerun()
 

@@ -26,6 +26,53 @@ CURR_COLL = ""
 
 app = FastAPI()
 
+@st.cache_resource
+def get_firestore_client():
+    """Cached Firestore client to avoid repeated authentication."""
+    return firestore.Client.from_service_account_info(st.secrets["firebase"])
+
+@st.cache_data(ttl=300)  # Cache for 5 minutes
+def get_user_data(user_id: str):
+    """Fetch user data from Firestore, cached to reduce DB calls."""
+    db = get_firestore_client()
+    return db.collection("Users").document(user_id).get().to_dict()
+
+@st.cache_resource
+def get_user_collections(user_id: str):
+    """Fetch user's collections, cached to reduce DB calls."""
+    db = get_firestore_client()
+    return [{"id": doc.id,**doc.to_dict()} for doc in db.collection('Users').document(user_id).collection('Collections').stream()]
+
+@st.cache_data(ttl=3600)  # Cache for 1 hour
+def get_collection_types():
+    """Fetch collection types, cached globally."""
+    db = get_firestore_client()
+    res = []
+    types = db.collections()
+    for doc in types:
+        if doc.id != "Users":
+            if doc.id == "Custom":
+                res.insert(0, doc.id)
+            else:
+                res.append(doc.id)
+    return res
+
+@st.cache_data(ttl=3600)
+def type_fields(coll_type: str):
+    """Get fields for a collection type, cached per type."""
+    db = get_firestore_client()
+    res = {}
+    typeRef = db.collection(coll_type)
+    index = 0
+    for doc in typeRef.stream():
+        fields = doc.to_dict()
+        index += 1
+        for key in fields.keys():
+            res[key] = True
+        if index >= 2:
+            return res
+    return res
+
 def set_collection(collection:str):
     """Sets the collection name for reference across pages
     
@@ -185,7 +232,7 @@ def generate_collection(collection_name: str, db):
 @st.cache_data(ttl=3600)
 def get_collection_items(collection_name: str):
     """Fetch and process all items in a collection - cached to avoid repeated DB reads"""
-    db = firestore.Client.from_service_account_info(st.secrets["firebase"])
+    db = get_firestore_client()  # Use cached client
     collectionData = generate_collection(collection_name, db)
     items = {}
     for id in collectionData:
@@ -194,43 +241,6 @@ def get_collection_items(collection_name: str):
         info = doc.get().to_dict()
         items[id] = info
     return items
-
-
-def get_collection_types(db):
-    """Gets all possible collection types stored in the database
-    
-    db: Firestore database
-    Returns a list of types, begining with Custom
-    """
-    res = []
-    types = db.collections()
-    for doc in types:
-        if doc.id != "Users":
-            if doc.id == "Custom":
-                res.insert(0, doc.id)
-            else:
-                res.append(doc.id)
-    return res
-
-
-def type_fields(coll_type:str, db):
-    """Gets all the fields in a type
-    
-    coll_type: Type (name of collection document)
-    db: Firestore database
-    Returns a dictionary of field names and booleans
-    """
-    res = {}
-
-    typeRef = db.collection(coll_type)
-    index = 0
-    for doc in typeRef.stream():
-        fields = doc.to_dict()
-        index+=1
-        for key in fields.keys():
-            res[key] = True
-        if index >= 2:
-            return res
 
 
 def create_collection(collection_name: str, collection_type: str, db):
@@ -258,7 +268,7 @@ def create_collection(collection_name: str, collection_type: str, db):
         # collection settings
         "settings": {
             # sets what fields are viewed via item type
-            "views" : type_fields(collection_type, db),
+            "views" : type_fields(collection_type),
             # sets preview image 
             "image" : "url to display image",
             # sets a background image when viewing collection
@@ -270,6 +280,7 @@ def create_collection(collection_name: str, collection_type: str, db):
         }
     }
     db.collection('Users').document(user_id).collection('Collections').document(fullName).set(baseInfo)
+    get_user_collections.clear(user_id)
 
 
 def rename_collection(collection_name:str, new_collection:str, db):
@@ -299,6 +310,7 @@ def rename_collection(collection_name:str, new_collection:str, db):
     db.collection('Users').document(user_id).collection('Collections').document(fullName).set(items, merge=True)
 
     collection_ref_OLD.delete()
+    get_user_collections.clear(user_id)
 
 
 def add_reference_collectionView(item_doc_id, actual_id, db):
@@ -697,50 +709,50 @@ def _load_image(uploaded_file: st.runtime.uploaded_file_manager.UploadedFile) ->
 # Function to upload all pokemon cards to database
 # I have this placed into the homepage 'add_collection' button for the sole purpose of running the code
 # In order to use this for other items, create a template (you can use professor gpt), download
-# the files from the github or wherever the information is and specify it, and run the code.
-def upload_pokemon_data(db):
-    # Specify the location of the data to upload
-    data_dir = Path(r"C:\Users\andre\Desktop\Memorabiliacs\BackendMethods\Pokemon_Cards")
+# # the files from the github or wherever the information is and specify it, and run the code.
+# def upload_pokemon_data(db):
+#     # Specify the location of the data to upload
+#     data_dir = Path(r"C:\Users\andre\Desktop\Memorabiliacs\BackendMethods\Pokemon_Cards")
 
-    # Create a template so that all cards contain all fields and fill the blanks with N/A
-    CARD_TEMPLATE = {
-        "name": "N/A",
-        "supertype": "N/A",
-        "subtypes": "N/A",
-        "level": "N/A",
-        "hp": "N/A",
-        "types": "N/A",
-        "evolvesFrom": "N/A",
-        "abilities": "N/A",
-        "attacks": "N/A",
-        "weaknesses": "N/A",
-        "retreatCost": "N/A",
-        "convertedRetreatCost": "N/A",
-        "number": "N/A",
-        "artist": "N/A",
-        "rarity": "N/A",
-        "flavorText": "N/A",
-        "nationalPokedexNumbers": "N/A",
-        "legalities": "N/A",
-        "images": "N/A"
-    }
+#     # Create a template so that all cards contain all fields and fill the blanks with N/A
+#     CARD_TEMPLATE = {
+#         "name": "N/A",
+#         "supertype": "N/A",
+#         "subtypes": "N/A",
+#         "level": "N/A",
+#         "hp": "N/A",
+#         "types": "N/A",
+#         "evolvesFrom": "N/A",
+#         "abilities": "N/A",
+#         "attacks": "N/A",
+#         "weaknesses": "N/A",
+#         "retreatCost": "N/A",
+#         "convertedRetreatCost": "N/A",
+#         "number": "N/A",
+#         "artist": "N/A",
+#         "rarity": "N/A",
+#         "flavorText": "N/A",
+#         "nationalPokedexNumbers": "N/A",
+#         "legalities": "N/A",
+#         "images": "N/A"
+#     }
 
-    # Runs through the json file of data to analyze all cards ad fill out the template
-    for json_file in data_dir.rglob("*.json"):
-        print(f"Reading {json_file.name}")
+#     # Runs through the json file of data to analyze all cards ad fill out the template
+#     for json_file in data_dir.rglob("*.json"):
+#         print(f"Reading {json_file.name}")
 
-        with open(json_file, "r", encoding="utf-8") as f:
-            cards = json.load(f)
+#         with open(json_file, "r", encoding="utf-8") as f:
+#             cards = json.load(f)
 
-        for card in cards:
+#         for card in cards:
 
-            card_id = card.get("id")
-            if not card_id:
-                continue
+#             card_id = card.get("id")
+#             if not card_id:
+#                 continue
 
-            # Fill missing fields
-            card_map = {k: card.get(k, "N/A") for k in CARD_TEMPLATE}
+#             # Fill missing fields
+#             card_map = {k: card.get(k, "N/A") for k in CARD_TEMPLATE}
 
-            doc_ref = db.collection("Pokemon").document(card_id)
+#             doc_ref = db.collection("Pokemon").document(card_id)
 
-            doc_ref.set(card_map)
+#             doc_ref.set(card_map)

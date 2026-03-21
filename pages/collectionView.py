@@ -8,7 +8,7 @@ import st_yled
 
 # Connects to db
 try:
-    db = firestore.Client.from_service_account_info(st.secrets["firebase"])
+    db = backEnd.get_firestore_client()
 except Exception as e:
     st.error(f"Failed to initialize Firestore: {e}")
     st.stop()    
@@ -23,7 +23,7 @@ else:
     #st_yled.init(CURR_THEME)
     st_yled.init()
     user_id = st.session_state.user_info["localId"]
-    user_data_dict = db.collection("Users").document(user_id).get().to_dict()
+    user_data_dict = backEnd.get_user_data(user_id)
     gfuncs.page_initialization(user_data_dict)
 
     items = backEnd.get_collection_items(backEnd.CURR_COLL)  # Use cached function
@@ -53,7 +53,7 @@ else:
                 if key not in ("name", "image", "rarity"):
                     if views[key]:
                         st.write(f"**{key}**: **{items[item][key]}**")
-            if st_yled.button("Remove From Collection"):
+            if st_yled.button(_("Remove From Collection")):
                 backEnd.delete_reference(item, db)
 
     st.space("small")
@@ -63,7 +63,7 @@ else:
     st.space("small")
 
     # view selection radio buttons
-    view_mode = st.radio("Display mode", ["grid", "column"], horizontal=True)
+    view_mode = st.radio(_("Display mode"), [_("grid"), _("column")], horizontal=True)
 
     # display either grid or column view
     if view_mode == _("grid"):

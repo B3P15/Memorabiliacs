@@ -22,7 +22,7 @@ st.set_page_config(layout="wide")
 # Initialize Firestore client
 # The credentials are grabbed from Streamlit secrets
 try:
-    db = firestore.Client.from_service_account_info(st.secrets["firebase"])
+    db = backEnd.get_firestore_client()
 except Exception as e:
     st.error(f"Failed to initialize Firestore: {e}")
     st.stop()
