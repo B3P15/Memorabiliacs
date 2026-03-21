@@ -293,10 +293,8 @@ def rename_collection(collection_name:str, new_collection:str, db):
     user_id = st.session_state.user_info['localId']
     
     # gets reference and type of collection
-    collection_ref_OLD = db.collection('Users').document(user_id).collection('Collections').document(collection_name.id)
+    collection_ref_OLD = db.collection('Users').document(user_id).collection('Collections').document(collection_name)
     coll_Info = collection_ref_OLD.get().id.split("_")
-    data = generate_collection(collection_name.id, db)
-    # print(data)
 
     # checks if new name already exists in the database
     if check_for_coll_name(new_collection.title(), db):
@@ -304,11 +302,8 @@ def rename_collection(collection_name:str, new_collection:str, db):
 
     # created new collection to move data to
     fullName = f"{new_collection.title()}_{coll_Info[1]}"
-    db.collection('Users').document(user_id).collection('Collections').document(fullName).set(data, merge=True)
-    items = {"Info":[]}
     
-    db.collection('Users').document(user_id).collection('Collections').document(fullName).set(items, merge=True)
-
+    db.collection('Users').document(user_id).collection('Collections').document(fullName).set(collection_ref_OLD.get().to_dict())
     collection_ref_OLD.delete()
     get_user_collections.clear(user_id)
 
