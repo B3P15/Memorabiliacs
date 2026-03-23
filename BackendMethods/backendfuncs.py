@@ -582,7 +582,7 @@ def test_upc_api(upc_code: str):
         results = {
             'name': item['title'],
             'description': item['description'],
-            'publisher': item.get('publisher', None) if item['publisher'] else None,
+            # 'publisher': item.get('publisher', None) if item['publisher'] else None,
             'ean': item['ean'],
             'image': item['images'][0]  # Get the first image if available
         }

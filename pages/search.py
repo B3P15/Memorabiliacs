@@ -144,8 +144,8 @@ else:
                                                    border_style="solid", border_color=gfuncs.read_config_val(gfuncs.conf_file, "textColor"), border_width=1):
                                 if upc_result["description"]:
                                     st.write(f"{_('Description')}: {upc_result['description']}")
-                                if upc_result["publisher"]:
-                                    st.write(f"{_('Publisher')}: {upc_result['publisher']}")
+                                # if upc_result["publisher"]:
+                                #     st.write(f"{_('Publisher')}: {upc_result['publisher']}")
                                 st.write(f"{_('Item ean')}: {upc_result['ean']}")
                                 if backEnd.CURR_COLL:
                                     st_yled.button(_("Add to {collection} Collection").format(collection=backEnd.CURR_COLL.split('_')[0]), key=f"add_upc_{upc_result['ean']}", on_click=add_upc_button, kwargs={"upc_result": upc_result})
