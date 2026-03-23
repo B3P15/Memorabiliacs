@@ -72,7 +72,7 @@ else:
     current_font = gfuncs.read_config_val(conf_file, "font")
     # Theme is special in that it exists in the database but not the config file
     current_theme = db_settings["theme"]
-    gfuncs.apply_css_theme(current_theme)
+    #gfuncs.apply_css_theme(current_theme)
 
     # List of available themes and the dictionaries for the themes
     # (Currently hardcoded)
