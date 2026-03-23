@@ -5,6 +5,9 @@ from BackendMethods.translations import _
 import st_yled
 from time import sleep
 import os
+import requests
+from PIL import Image
+from io import BytesIO
 
 conf_file = ".streamlit/config.toml"
 collection_page = "pages/collectionView.py"
@@ -123,6 +126,8 @@ def apply_css_theme(theme):
         case "Custom":
             st_yled.set("button", "background_color", "#ffff00")
             st_yled.set("button", "border_style", "solid")
+
+
 # Used for input sanitation of collection names
 def collection_input_sanitation(coll_name:str):
     valid = True
@@ -136,3 +141,8 @@ def collection_input_sanitation(coll_name:str):
         return not valid
 
     return valid
+
+# Ensures url is of proper types
+def get_image_from_URL(url:str):
+    r = requests.get(url)
+    return Image.open(BytesIO(r.content))

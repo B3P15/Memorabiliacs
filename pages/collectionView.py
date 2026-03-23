@@ -77,9 +77,7 @@ else:
                     if backEnd.CURR_COLL.split("_")[1] == "Pokemon":
                         st.image(items[key]["images"]['small'], width=200)
                     else:
-                        # image = items[key]["image"][:-7]
-                        st.image(items[key]["image"])
-                        # st.image(image)
+                        st.image(gfuncs.get_image_from_URL(items[key]["image"]), width=200)
 
                     if st_yled.button("View More", key=f"{items[key]["name"]}_view"):
                         viewItem(key)
@@ -94,9 +92,7 @@ else:
                     if backEnd.CURR_COLL.split("_")[1] == "Pokemon":
                         st.image(items[key]["images"]['small'], width=200)
                     else:
-                        # image = items[key]["image"][:-7]
-                        # print(image)
-                        st.image(items[key]["image"], width=200)
+                        st.image(gfuncs.get_image_from_URL(items[key]["image"]), width=200)
                         
                     if st.button("View More", key=f"{items[key]["name"]}_view"):
                         viewItem(key)

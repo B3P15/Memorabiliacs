@@ -4,6 +4,7 @@ import BackendMethods.global_functions as gfuncs
 import BackendMethods.auth_functions as authFuncs
 import BackendMethods.backendfuncs as backEnd
 from BackendMethods.translations import _
+from BackendMethods.translations import set_language
 import st_yled
 
 # Connects to db
@@ -20,10 +21,7 @@ if 'user_info' not in st.session_state:
 ## Logged in ---------------------------------------------------------------------------------------
 ## -------------------------------------------------------------------------------------------------
 else:
-    
-    
     # variables
-    
     user_id = st.session_state.user_info["localId"]
     user_data_dict = backEnd.get_user_data(user_id)
     collections_docs = backEnd.get_user_collections(user_id)
@@ -52,12 +50,8 @@ else:
     '''
     st.markdown(css, unsafe_allow_html=True)
     # Set language from database
-    from BackendMethods.translations import set_language
     user_lang = user_data_dict.get('language', 'en')
-    set_language(user_lang)
-    
-    # Updates user configs
-    
+    set_language(user_lang)    
 
     ## -------------------------------------------------------------------------------------------------
     ## Main Page Setup ---------------------------------------------------------------------------------
@@ -151,7 +145,6 @@ else:
                         st_yled.space("small")
                         if st_yled.button(_("Edit"), key=f"edit_{collInfo[0]}", width="stretch", border_width=5):
                             edit_collection(doc)
-
 
                     st.space("medium")
                 st.space("small")
