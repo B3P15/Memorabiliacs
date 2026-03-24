@@ -236,11 +236,23 @@ def get_collection_items(collection_name: str):
     collectionData = generate_collection(collection_name, db)
     items = {}
     for id in collectionData:
-        item = collectionData[id]
-        doc = item['ref']
-        info = doc.get().to_dict()
-        items[id] = info
+        items[id] = {'info' : (collectionData[id].get('ref')).get().to_dict(),
+                     'notes' : collectionData[id].get('notes')
+                    }
     return items
+
+
+def update_notes(item_id, new_notes, db):
+    """Sets the user's specific note per item
+    
+    item_id: name of the item
+    new_notes: note for item
+    db: Firestore database
+    """
+    user_id = st.session_state.user_info['localId']
+    db.collection('Users').document(user_id).collection('Collections').document(CURR_COLL).update(
+            {f"items.{item_id}.notes": new_notes}
+        )
 
 
 def create_collection(collection_name: str, collection_type: str, db):
