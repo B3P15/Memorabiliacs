@@ -1,0 +1,620 @@
+# French translations for Memorabiliacs.
+# Copyright (C) 2026
+# This file is distributed under the same license as the Memorabiliacs package.
+# Kieran Gilpin <kgilpin2022@gmail.com>, 2026.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Memorabiliacs 1.0\n"
+"Report-Msgid-Bugs-To: kgilpin2022@gmail.com\n"
+"POT-Creation-Date: 2026-03-13 12:00+0000\n"
+"PO-Revision-Date: 2026-03-13 12:00+0000\n"
+"Last-Translator: Kieran Gilpin \n"
+"Language-Team: French\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: fr\n"
+
+#: pages/login.py:30
+msgid "Welcome to Memorabiliacs!"
+msgstr "Bienvenue sur Memorabiliacs !"
+
+#: BackendMethods/auth_functions.py:218
+msgid "Do you have an account?"
+msgstr "Avez-vous un compte ?"
+
+#: BackendMethods/auth_functions.py:219
+#: BackendMethods/auth_functions.py:224
+#: pages/home_page.py:119
+msgid "Yes"
+msgstr "Oui"
+
+#: BackendMethods/auth_functions.py:219
+#: BackendMethods/auth_functions.py:240
+#: pages/home_page.py:127
+msgid "No"
+msgstr "Non"
+
+#: BackendMethods/auth_functions.py:219
+#: BackendMethods/auth_functions.py:254
+msgid "I forgot my password"
+msgstr "J'ai oublié mon mot de passe"
+
+#: BackendMethods/auth_functions.py:229
+#: BackendMethods/auth_functions.py:235
+msgid "Login"
+msgstr "Connexion"
+
+#: BackendMethods/auth_functions.py:230
+#: BackendMethods/auth_functions.py:245
+#: BackendMethods/auth_functions.py:259
+msgid "Username"
+msgstr "Nom d'utilisateur"
+
+#: BackendMethods/auth_functions.py:232
+#: BackendMethods/auth_functions.py:247
+msgid "Password"
+msgstr "Mot de passe"
+
+#: BackendMethods/auth_functions.py:244
+#: BackendMethods/auth_functions.py:250
+msgid "Create Account"
+msgstr "Créer un compte"
+
+#: BackendMethods/auth_functions.py:258
+msgid "Reset Password"
+msgstr "Réinitialiser le mot de passe"
+
+#: BackendMethods/auth_functions.py:261
+msgid "Send Password Reset Email"
+msgstr "Envoyer l'e-mail de réinitialisation du mot de passe"
+
+#: pages/home_page.py:63
+msgid "Your Collections"
+msgstr "Vos Collections"
+
+#: pages/home_page.py:63
+msgid "Hello"
+msgstr "Bonjour"
+
+#: pages/home_page.py:147
+#: pages/home_page.py:71
+msgid "Edit"
+msgstr "Modifier"
+
+#: pages/home_page.py:83
+msgid "Rename"
+msgstr "Renommer"
+
+#: pages/home_page.py:101
+#: pages/home_page.py:97
+msgid "Add"
+msgstr "Ajouter"
+
+#: pages/home_page.py:99
+msgid "Name the Collection"
+msgstr "Nommer la Collection"
+
+#: pages/home_page.py:50
+msgid "Give Collection Type"
+msgstr "Donner le Type de Collection"
+
+#: pages/home_page.py:112
+#: pages/home_page.py:159
+msgid "Remove"
+msgstr "Supprimer"
+
+#: pages/home_page.py:115
+msgid "Are you sure you want to remove"
+msgstr "Êtes-vous sûr de vouloir supprimer"
+
+#: pages/home_page.py:143
+msgid "View Collection"
+msgstr "Voir la Collection"
+
+#: pages/home_page.py:156
+msgid "Add Collection"
+msgstr "Ajouter une Collection"
+
+#: BackendMethods/global_functions.py:98
+#: pages/settings.py:36
+msgid "Home"
+msgstr "Accueil"
+
+#: pages/settings.py:39
+msgid "Logout"
+msgstr "Déconnexion"
+
+#: BackendMethods/global_functions.py:105
+#: pages/settings.py:45
+msgid "Settings"
+msgstr "Paramètres"
+
+#: pages/settings.py:131
+msgid "Select color scheme:"
+msgstr "Sélectionner le schéma de couleurs :"
+
+#: pages/settings.py:133
+msgid "Save Theme Choice"
+msgstr "Enregistrer le Choix de Thème"
+
+#: pages/settings.py:146
+msgid "Advanced Settings"
+msgstr "Paramètres Avancés"
+
+#: pages/settings.py:148
+msgid "Select the background color:"
+msgstr "Sélectionner la couleur d'arrière-plan :"
+
+#: pages/settings.py:149
+msgid "Select the text color:"
+msgstr "Sélectionner la couleur du texte :"
+
+#: pages/settings.py:150
+msgid "Select the font:"
+msgstr "Sélectionner la police :"
+
+#: pages/settings.py:88
+msgid "serif"
+msgstr "serif"
+
+#: pages/settings.py:89
+msgid "sans-serif"
+msgstr "sans-serif"
+
+#: pages/settings.py:158
+msgid "Save Changes"
+msgstr "Enregistrer les Modifications"
+
+#: pages/search.py:30
+msgid "Search for Collectables!"
+msgstr "Rechercher des Objets de Collection !"
+
+#: pages/search.py:40
+msgid "What would you like to search for?"
+msgstr "Que souhaitez-vous rechercher ?"
+
+#: pages/search.py:30
+msgid "Vinyl & CDs"
+msgstr "Vinyles & CDs"
+
+#: pages/search.py:31
+msgid "Movies"
+msgstr "Films"
+
+#: pages/search.py:32
+msgid "Pokemon Cards"
+msgstr "Cartes Pokémon"
+
+#: pages/search.py:144
+msgid "UPC"
+msgstr "UPC"
+
+#: pages/search.py:34
+msgid "Lego Sets"
+msgstr "Ensembles Lego"
+
+#: pages/search.py:35
+msgid "Lego Minifigs"
+msgstr "Minifigs Lego"
+
+#: pages/search.py:63
+msgid "Add items to collection:"
+msgstr "Ajouter des éléments à la collection :"
+
+#: pages/search.py:54
+#: pages/search.py:66
+msgid "(No collections)"
+msgstr "(Aucune collection)"
+
+#: pages/search.py:77
+msgid "Input source"
+msgstr "Source d'entrée"
+
+#: pages/search.py:77
+msgid "Upload"
+msgstr "Télécharger"
+
+#: pages/search.py:77
+#: pages/search.py:81
+msgid "Camera"
+msgstr "Caméra"
+
+#: pages/search.py:78
+msgid "Enhanced decode (slower)"
+msgstr "Décodage amélioré (plus lent)"
+
+#: pages/search.py:82
+msgid "Scan barcode"
+msgstr "Scanner le code-barres"
+
+#: pages/search.py:84
+msgid "Upload barcode image"
+msgstr "Télécharger l'image du code-barres"
+
+#: pages/search.py:70
+msgid "Barcode decoding is unavailable. Install 'pyzbar' and the system 'zbar' library."
+msgstr "Le décodage des codes-barres n'est pas disponible. Installez 'pyzbar' et la bibliothèque système 'zbar'."
+
+#: pages/search.py:94
+msgid "Failed to read image:"
+msgstr "Échec de la lecture de l'image :"
+
+#: pages/search.py:99
+msgid "Supported code(s) detected"
+msgstr "Code(s) pris en charge détecté(s)"
+
+#: pages/search.py:101
+msgid "Detected codes"
+msgstr "Codes détectés"
+
+#: pages/collectionView.py:66
+msgid "Display mode"
+msgstr "Mode d'affichage"
+
+#: pages/collectionView.py:66
+#: pages/collectionView.py:69
+msgid "grid"
+msgstr "grille"
+
+#: pages/collectionView.py:66
+msgid "column"
+msgstr "colonne"
+
+#: pages/collectionView.py:109
+msgid "Enter Item ID"
+msgstr "Entrer l'ID de l'élément"
+
+#: pages/collectionView.py:117
+msgid "Add To Collection"
+msgstr "Ajouter à la Collection"
+
+#: pages/collectionView.py:56
+msgid "Remove From Collection"
+msgstr "Supprimer de la Collection"
+
+#: BackendMethods/global_functions.py:94
+msgid "Memorabiliacs"
+msgstr "Memorabiliacs"
+
+#: BackendMethods/global_functions.py:102
+msgid "Search"
+msgstr "Rechercher"
+
+#: pages/settings.py:57
+msgid "Select Language:"
+msgstr "Sélectionner la Langue :"
+
+#: pages/home_page.py:75
+msgid "Hide Collection"
+msgstr "Masquer la Collection"
+
+#: pages/home_page.py:86
+msgid "Save"
+msgstr "Enregistrer"
+
+#: pages/home_page.py:104
+#: pages/home_page.py:89
+msgid "Collection name already exists"
+msgstr "Le nom de la collection existe déjà"
+
+#: pages/home_page.py:100
+#: pages/home_page.py:142
+#: pages/search.py:427
+msgid "Type"
+msgstr "Type"
+
+#: pages/home_page.py:97
+msgid "Invalid character in name: '_', '-', '\\', '/'"
+msgstr "Caractère invalide dans le nom : '_', '-', '\\', '/'"
+
+#: pages/home_page.py:115
+msgid "the following collections:"
+msgstr "les collections suivantes :"
+
+#: pages/home_page.py:168
+msgid "All Collections:"
+msgstr "Toutes les Collections :"
+
+#: pages/search.py:104
+msgid "Barcode detected, but no UPC/EAN/ISBN code found."
+msgstr "Code-barres détecté, mais aucun code UPC/EAN/ISBN trouvé."
+
+#: pages/search.py:106
+msgid "No barcode detected. Try a clearer image with the code centered."
+msgstr "Aucun code-barres détecté. Essayez une image plus nette avec le code centré."
+
+#: pages/search.py:109
+msgid "Enter UPC code"
+msgstr "Entrez le code UPC"
+
+#: pages/search.py:115
+#: pages/search.py:118
+msgid "ready for use"
+msgstr "prêt à l'emploi"
+
+#: pages/search.py:120
+msgid "Enter a valid UPC (8/12), EAN (8/13), or ISBN (10/13)."
+msgstr "Entrez un UPC valide (8/12), EAN (8/13) ou ISBN (10/13)."
+
+#: pages/search.py:121
+msgid "Search UPC"
+msgstr "Rechercher UPC"
+
+#: pages/search.py:122
+msgid "Searching UPC..."
+msgstr "Recherche UPC..."
+
+#: pages/search.py:124
+msgid "UPC search results:"
+msgstr "Résultats de recherche UPC :"
+
+#: pages/search.py:135
+#: pages/search.py:190
+#: pages/search.py:231
+#: pages/search.py:336
+#: pages/search.py:377
+#: pages/search.py:418
+msgid "Added '{item}' to your {collection} collection!"
+msgstr "'{item}' a été ajouté à votre collection {collection} !"
+
+#: pages/search.py:136
+msgid "UPC Item"
+msgstr "Article UPC"
+
+#: pages/search.py:144
+#: pages/search.py:236
+msgid "No title"
+msgstr "Sans titre"
+
+#: pages/search.py:144
+msgid "UPC Result"
+msgstr "Résultat UPC"
+
+#: pages/search.py:148
+#: pages/search.py:240
+msgid "Description"
+msgstr "Description"
+
+#: pages/search.py:150
+msgid "Publisher"
+msgstr "Éditeur"
+
+#: pages/search.py:151
+msgid "Item ean"
+msgstr "EAN de l'article"
+
+#: pages/search.py:153
+#: pages/search.py:200
+#: pages/search.py:246
+#: pages/search.py:347
+#: pages/search.py:388
+#: pages/search.py:430
+msgid "Add to {collection} Collection"
+msgstr "Ajouter à la collection {collection}"
+
+#: pages/search.py:156
+msgid "UPC search failed"
+msgstr "La recherche UPC a échoué"
+
+#: pages/search.py:159
+msgid "Search for a Pokemon card"
+msgstr "Rechercher une carte Pokémon"
+
+#: pages/search.py:160
+msgid "Search Pokemon"
+msgstr "Rechercher Pokémon"
+
+#: pages/search.py:163
+msgid "Searching Pokemon (Algolia)..."
+msgstr "Recherche de Pokémon (Algolia)..."
+
+#: pages/search.py:174
+#: pages/search.py:219
+#: pages/search.py:325
+#: pages/search.py:366
+#: pages/search.py:407
+msgid "Algolia search failed"
+msgstr "La recherche Algolia a échoué"
+
+#: pages/search.py:182
+msgid "### Top Pokemon results"
+msgstr "### Meilleurs résultats Pokémon"
+
+#: pages/search.py:193
+#: pages/search.py:272
+#: pages/search.py:304
+#: pages/search.py:342
+#: pages/search.py:383
+#: pages/search.py:424
+msgid "No name"
+msgstr "Sans nom"
+
+#: pages/search.py:194
+msgid "Pokemon Card"
+msgstr "Carte Pokémon"
+
+#: pages/search.py:204
+msgid "Search for a movie"
+msgstr "Rechercher un film"
+
+#: pages/search.py:205
+msgid "Search Movies"
+msgstr "Rechercher des films"
+
+#: pages/search.py:208
+msgid "Searching Movies (Algolia)..."
+msgstr "Recherche de films (Algolia)..."
+
+#: pages/search.py:226
+msgid "### Top Movie results"
+msgstr "### Meilleurs résultats de films"
+
+#: pages/search.py:236
+msgid "Movie"
+msgstr "Film"
+
+#: pages/search.py:242
+msgid "Director"
+msgstr "Réalisateur"
+
+#: pages/search.py:244
+msgid "Release Year"
+msgstr "Année de sortie"
+
+#: pages/search.py:252
+msgid "Search for a Lego set"
+msgstr "Rechercher un set Lego"
+
+#: pages/search.py:253
+msgid "Search Lego"
+msgstr "Rechercher Lego"
+
+#: pages/search.py:256
+msgid "Searching for Lego sets..."
+msgstr "Recherche de sets Lego..."
+
+#: pages/search.py:260
+msgid "Lego search failed"
+msgstr "La recherche Lego a échoué"
+
+#: pages/search.py:266
+msgid "### Top Lego set results"
+msgstr "### Meilleurs résultats de sets Lego"
+
+#: pages/search.py:274
+msgid "Year"
+msgstr "Année"
+
+#: pages/search.py:276
+msgid "Theme"
+msgstr "Thème"
+
+#: pages/search.py:278
+msgid "Set ID"
+msgstr "ID du set"
+
+#: pages/search.py:280
+msgid "Part Count"
+msgstr "Nombre de pièces"
+
+#: pages/search.py:284
+msgid "Search for a Lego minifigure"
+msgstr "Rechercher une minifigurine Lego"
+
+#: pages/search.py:285
+msgid "Search Lego Minifigs"
+msgstr "Rechercher des minifigurines Lego"
+
+#: pages/search.py:288
+msgid "Searching for Lego minifigs..."
+msgstr "Recherche de minifigurines Lego..."
+
+#: pages/search.py:292
+msgid "Lego minifig search failed"
+msgstr "La recherche de minifigurines Lego a échoué"
+
+#: pages/search.py:298
+msgid "### Top Lego minifigure results"
+msgstr "### Meilleurs résultats de minifigurines Lego"
+
+#: pages/search.py:306
+msgid "Minifig ID"
+msgstr "ID de la minifigurine"
+
+#: pages/search.py:310
+msgid "Search for a Dragonball Z card"
+msgstr "Rechercher une carte Dragonball Z"
+
+#: pages/search.py:311
+msgid "Search DBZ Cards"
+msgstr "Rechercher des cartes DBZ"
+
+#: pages/search.py:314
+msgid "Searching Dragonball Z cards (Algolia)..."
+msgstr "Recherche de cartes Dragonball Z (Algolia)..."
+
+#: pages/search.py:331
+msgid "### Top Dragonball Z card results"
+msgstr "### Meilleurs résultats de cartes Dragonball Z"
+
+#: pages/search.py:343
+msgid "DBZ Card"
+msgstr "Carte DBZ"
+
+#: pages/search.py:351
+msgid "Search for a Digimon card"
+msgstr "Rechercher une carte Digimon"
+
+#: pages/search.py:352
+msgid "Search Digimon Cards"
+msgstr "Rechercher des cartes Digimon"
+
+#: pages/search.py:355
+msgid "Searching Digimon cards (Algolia)..."
+msgstr "Recherche de cartes Digimon (Algolia)..."
+
+#: pages/search.py:372
+msgid "### Top Digimon card results"
+msgstr "### Meilleurs résultats de cartes Digimon"
+
+#: pages/search.py:384
+msgid "Digimon Card"
+msgstr "Carte Digimon"
+
+#: pages/search.py:392
+msgid "Search for a One Piece card"
+msgstr "Rechercher une carte One Piece"
+
+#: pages/search.py:393
+msgid "Search One Piece Cards"
+msgstr "Rechercher des cartes One Piece"
+
+#: pages/search.py:396
+msgid "Searching One Piece cards (Algolia)..."
+msgstr "Recherche de cartes One Piece (Algolia)..."
+
+#: pages/search.py:413
+msgid "### Top One Piece card results"
+msgstr "### Meilleurs résultats de cartes One Piece"
+
+#: pages/search.py:425
+msgid "One Piece Card"
+msgstr "Carte One Piece"
+
+#: pages/search.py:433
+msgid "Search functionality for this category is coming soon!"
+msgstr "La fonctionnalité de recherche pour cette catégorie arrive bientôt !"
+
+#: pages/search.py:194
+#: pages/search.py:236
+#: pages/search.py:343
+#: pages/search.py:384
+#: pages/search.py:425
+msgid "ID"
+msgstr "ID"
+
+#: pages/search.py:197
+msgid "HP"
+msgstr "PV"
+
+#: pages/search.py:198
+msgid "Flavortext"
+msgstr "Texte d'ambiance"
+
+#: pages/search.py:345
+msgid "Power"
+msgstr "Puissance"
+
+#: pages/search.py:386
+msgid "Card Type"
+msgstr "Type de carte"
+
+#: pages/search.py:428
+msgid "Rarity"
+msgstr "Rareté"
+
+#: pages/collectionView.py:136
+msgid "Add to Collection"
+msgstr "Ajouter à la collection"

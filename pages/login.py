@@ -2,30 +2,48 @@
 #   Author(s): Cooper Wooten, Kieran Gilpin
 #   Desc: Basic version of login page for memorabiliacs using streamlit
 ###############################################################
-import json
-import os
 
 import streamlit as st
 import BackendMethods.global_functions as gfuncs
-from google.cloud import firestore
-from BackendMethods.auth_functions import *
+import BackendMethods.auth_functions as authFuncs
+import BackendMethods.backendfuncs as backEnd
+from BackendMethods.translations import _
+import st_yled
 
 
-st.secrets = access_secret_version()
+st.secrets = authFuncs.access_secret_version()
+# st_yled.init(css_path=".streamlit/st-styled.css")
+# st_yled.init(backEnd.CURR_THEME)
+st_yled.init()
+    
+background_image = "https://gamewardbound.com/wp-content/uploads/2020/11/ikea-kallax-shelves-complete-second-shelf.jpg"
+css = f'''
+    <style>
+        .stApp {{
+            background-image: linear-gradient(to top, {gfuncs.read_config_val(gfuncs.conf_file, "textColor")}, transparent),
+            url({background_image});
+            background-size: cover;
 
+        }}
+        .stApp > header {{
+            background-color: transparent;
+        }}
+    </style>
+    '''
+st.markdown(css, unsafe_allow_html=True)
 st.set_page_config(layout="wide")
 # Initialize Firestore client
 # The credentials are grabbed from Streamlit secrets
 try:
-    db = firestore.Client.from_service_account_info(st.secrets["firebase"])
+    db = backEnd.get_firestore_client()
 except Exception as e:
     st.error(f"Failed to initialize Firestore: {e}")
     st.stop()
 
-st.title("Welcome to Memorabiliacs!", text_alignment="center")
+st_yled.title(_("Welcome to Memorabiliacs!"), text_alignment="center")
 
 if 'user_info' not in st.session_state:
-    generate_login_template(db)
+    authFuncs.generate_login_template(db)
 ## -------------------------------------------------------------------------------------------------
 ## Logged in --------------------------------------------------------------------------------------
 ## -------------------------------------------------------------------------------------------------

@@ -5,10 +5,13 @@ rebrick
 algoliasearch
 streamlit
 google.cloud
-firestore
 internetarchive
 tmdbsimple
 fastapi
 requests_futures
 google-cloud-secret-manager
+st-styled
 pyzbar
+firebase-admin
+google-cloud-storage
+ruff

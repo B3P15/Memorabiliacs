@@ -1,0 +1,620 @@
+# Klingon translations for Memorabiliacs.
+# Copyright (C) 2026
+# This file is distributed under the same license as the Memorabiliacs package.
+# Kieran Gilpin <kgilpin2022@gmail.com>, 2026.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Memorabiliacs 1.0\n"
+"Report-Msgid-Bugs-To: kgilpin2022@gmail.com\n"
+"POT-Creation-Date: 2026-03-13 12:00+0000\n"
+"PO-Revision-Date: 2026-03-13 12:00+0000\n"
+"Last-Translator: Kieran Gilpin \n"
+"Language-Team: Klingon\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: tlh\n"
+
+#: pages/login.py:30
+msgid "Welcome to Memorabiliacs!"
+msgstr "nuqneH Memorabiliacs'e'!"
+
+#: BackendMethods/auth_functions.py:218
+msgid "Do you have an account?"
+msgstr "tlhIngan Hol Daghaj'a'?"
+
+#: BackendMethods/auth_functions.py:219
+#: BackendMethods/auth_functions.py:224
+#: pages/home_page.py:119
+msgid "Yes"
+msgstr "HIja'"
+
+#: BackendMethods/auth_functions.py:219
+#: BackendMethods/auth_functions.py:240
+#: pages/home_page.py:127
+msgid "No"
+msgstr "ghobe'"
+
+#: BackendMethods/auth_functions.py:219
+#: BackendMethods/auth_functions.py:254
+msgid "I forgot my password"
+msgstr "jIghaHta' jIH 'e' jIHar"
+
+#: BackendMethods/auth_functions.py:229
+#: BackendMethods/auth_functions.py:235
+msgid "Login"
+msgstr "chel"
+
+#: BackendMethods/auth_functions.py:230
+#: BackendMethods/auth_functions.py:245
+#: BackendMethods/auth_functions.py:259
+msgid "Username"
+msgstr "pong"
+
+#: BackendMethods/auth_functions.py:232
+#: BackendMethods/auth_functions.py:247
+msgid "Password"
+msgstr "mu'"
+
+#: BackendMethods/auth_functions.py:244
+#: BackendMethods/auth_functions.py:250
+msgid "Create Account"
+msgstr "tlhIngan Hol yI'el"
+
+#: BackendMethods/auth_functions.py:258
+msgid "Reset Password"
+msgstr "mu' yIqaD"
+
+#: BackendMethods/auth_functions.py:261
+msgid "Send Password Reset Email"
+msgstr "mu' qaD 'ej 'ol yIghoS"
+
+#: pages/home_page.py:63
+msgid "Your Collections"
+msgstr "Daj collections"
+
+#: pages/home_page.py:63
+msgid "Hello"
+msgstr "nuqneH"
+
+#: pages/home_page.py:147
+#: pages/home_page.py:71
+msgid "Edit"
+msgstr "choH"
+
+#: pages/home_page.py:83
+msgid "Rename"
+msgstr "pong yIchoH"
+
+#: pages/home_page.py:101
+#: pages/home_page.py:97
+msgid "Add"
+msgstr "chel"
+
+#: pages/home_page.py:99
+msgid "Name the Collection"
+msgstr "collection pong yIghItlh"
+
+#: pages/home_page.py:50
+msgid "Give Collection Type"
+msgstr "collection Segh yIghItlh"
+
+#: pages/home_page.py:112
+#: pages/home_page.py:159
+msgid "Remove"
+msgstr "wech"
+
+#: pages/home_page.py:115
+msgid "Are you sure you want to remove"
+msgstr "bISov'a' wech DaneH'a'"
+
+#: pages/home_page.py:143
+msgid "View Collection"
+msgstr "collection yIlegh"
+
+#: pages/home_page.py:156
+msgid "Add Collection"
+msgstr "collection yIchel"
+
+#: BackendMethods/global_functions.py:98
+#: pages/settings.py:36
+msgid "Home"
+msgstr "juH"
+
+#: pages/settings.py:39
+msgid "Logout"
+msgstr "chu'"
+
+#: BackendMethods/global_functions.py:105
+#: pages/settings.py:45
+msgid "Settings"
+msgstr "ngoD"
+
+#: pages/settings.py:131
+msgid "Select color scheme:"
+msgstr "rItlh ngoD yIwIv:"
+
+#: pages/settings.py:133
+msgid "Save Theme Choice"
+msgstr "ngoD wIv yIchenmoH"
+
+#: pages/settings.py:146
+msgid "Advanced Settings"
+msgstr "mI' ngoD"
+
+#: pages/settings.py:148
+msgid "Select the background color:"
+msgstr "DuQwI' rItlh yIwIv:"
+
+#: pages/settings.py:149
+msgid "Select the text color:"
+msgstr "ghItlh rItlh yIwIv:"
+
+#: pages/settings.py:150
+msgid "Select the font:"
+msgstr "ghItlh mI' yIwIv:"
+
+#: pages/settings.py:88
+msgid "serif"
+msgstr "serif"
+
+#: pages/settings.py:89
+msgid "sans-serif"
+msgstr "sans-serif"
+
+#: pages/settings.py:158
+msgid "Save Changes"
+msgstr "choH yIchenmoH"
+
+#: pages/search.py:30
+msgid "Search for Collectables!"
+msgstr "collectables yIneH!"
+
+#: pages/search.py:40
+msgid "What would you like to search for?"
+msgstr "nuq yIneH DaneH'a'?"
+
+#: pages/search.py:30
+msgid "Vinyl & CDs"
+msgstr "Vinyl & CDs"
+
+#: pages/search.py:31
+msgid "Movies"
+msgstr "movies"
+
+#: pages/search.py:32
+msgid "Pokemon Cards"
+msgstr "Pokemon Cards"
+
+#: pages/search.py:144
+msgid "UPC"
+msgstr "UPC"
+
+#: pages/search.py:34
+msgid "Lego Sets"
+msgstr "Lego Sets"
+
+#: pages/search.py:35
+msgid "Lego Minifigs"
+msgstr "Lego Minifigs"
+
+#: pages/search.py:63
+msgid "Add items to collection:"
+msgstr "ngogh collection'e' yIchel:"
+
+#: pages/search.py:54
+#: pages/search.py:66
+msgid "(No collections)"
+msgstr "(pagh collections)"
+
+#: pages/search.py:77
+msgid "Input source"
+msgstr "ghItlh mI'"
+
+#: pages/search.py:77
+msgid "Upload"
+msgstr "yIghoS"
+
+#: pages/search.py:77
+#: pages/search.py:81
+msgid "Camera"
+msgstr "SIq"
+
+#: pages/search.py:78
+msgid "Enhanced decode (slower)"
+msgstr "mI' decode (pIv)"
+
+#: pages/search.py:82
+msgid "Scan barcode"
+msgstr "barcode yIlegh"
+
+#: pages/search.py:84
+msgid "Upload barcode image"
+msgstr "barcode 'avwI' yIghoS"
+
+#: pages/search.py:70
+msgid "Barcode decoding is unavailable. Install 'pyzbar' and the system 'zbar' library."
+msgstr "Barcode decoding pagh. 'pyzbar' 'ej 'zbar' library yIlo'."
+
+#: pages/search.py:94
+msgid "Failed to read image:"
+msgstr "'avwI' yIlegh Qagh:"
+
+#: pages/search.py:99
+msgid "Supported code(s) detected"
+msgstr "lo' code(s) vIlegh"
+
+#: pages/search.py:101
+msgid "Detected codes"
+msgstr "vIlegh codes"
+
+#: pages/collectionView.py:66
+msgid "Display mode"
+msgstr "legh ngoD"
+
+#: pages/collectionView.py:66
+#: pages/collectionView.py:69
+msgid "grid"
+msgstr "grid"
+
+#: pages/collectionView.py:66
+msgid "column"
+msgstr "column"
+
+#: pages/collectionView.py:109
+msgid "Enter Item ID"
+msgstr "ngogh ID yIghItlh"
+
+#: pages/collectionView.py:117
+msgid "Add To Collection"
+msgstr "collection'e' yIchel"
+
+#: pages/collectionView.py:56
+msgid "Remove From Collection"
+msgstr "collection'e' wech"
+
+#: BackendMethods/global_functions.py:94
+msgid "Memorabiliacs"
+msgstr "Memorabiliacs"
+
+#: BackendMethods/global_functions.py:102
+msgid "Search"
+msgstr "neH"
+
+#: pages/settings.py:57
+msgid "Select Language:"
+msgstr "Hol yIwIv:"
+
+#: pages/home_page.py:75
+msgid "Hide Collection"
+msgstr "collection yISo'"
+
+#: pages/home_page.py:86
+msgid "Save"
+msgstr "yIpol"
+
+#: pages/home_page.py:104
+#: pages/home_page.py:89
+msgid "Collection name already exists"
+msgstr "collection pong tu'lu'ta'"
+
+#: pages/home_page.py:100
+#: pages/home_page.py:142
+#: pages/search.py:427
+msgid "Type"
+msgstr "Segh"
+
+#: pages/home_page.py:97
+msgid "Invalid character in name: '_', '-', '\\', '/'"
+msgstr "pongDaq Degh qab: '_', '-', '\\', '/'"
+
+#: pages/home_page.py:115
+msgid "the following collections:"
+msgstr "collectionsvam:"
+
+#: pages/home_page.py:168
+msgid "All Collections:"
+msgstr "Hoch Collections:"
+
+#: pages/search.py:104
+msgid "Barcode detected, but no UPC/EAN/ISBN code found."
+msgstr "Barcode vIlegh, 'ach UPC/EAN/ISBN code vItu'be'."
+
+#: pages/search.py:106
+msgid "No barcode detected. Try a clearer image with the code centered."
+msgstr "Barcode vItu'be'. code botlhDaq mIllogh 'avwI' tIn yIlo'."
+
+#: pages/search.py:109
+msgid "Enter UPC code"
+msgstr "UPC code yIghItlh"
+
+#: pages/search.py:115
+#: pages/search.py:118
+msgid "ready for use"
+msgstr "lo'laH"
+
+#: pages/search.py:120
+msgid "Enter a valid UPC (8/12), EAN (8/13), or ISBN (10/13)."
+msgstr "UPC (8/12), EAN (8/13), pagh ISBN (10/13) lugh yIghItlh."
+
+#: pages/search.py:121
+msgid "Search UPC"
+msgstr "UPC yIneH"
+
+#: pages/search.py:122
+msgid "Searching UPC..."
+msgstr "UPC vIneH..."
+
+#: pages/search.py:124
+msgid "UPC search results:"
+msgstr "UPC nej ghu'vam:"
+
+#: pages/search.py:135
+#: pages/search.py:190
+#: pages/search.py:231
+#: pages/search.py:336
+#: pages/search.py:377
+#: pages/search.py:418
+msgid "Added '{item}' to your {collection} collection!"
+msgstr "'{item}' {collection} collectionDaq vIchelta'!"
+
+#: pages/search.py:136
+msgid "UPC Item"
+msgstr "UPC ngogh"
+
+#: pages/search.py:144
+#: pages/search.py:236
+msgid "No title"
+msgstr "pong pagh"
+
+#: pages/search.py:144
+msgid "UPC Result"
+msgstr "UPC ghu'vam"
+
+#: pages/search.py:148
+#: pages/search.py:240
+msgid "Description"
+msgstr "DelH"
+
+#: pages/search.py:150
+msgid "Publisher"
+msgstr "ghItlh qonwI'"
+
+#: pages/search.py:151
+msgid "Item ean"
+msgstr "ngogh ean"
+
+#: pages/search.py:153
+#: pages/search.py:200
+#: pages/search.py:246
+#: pages/search.py:347
+#: pages/search.py:388
+#: pages/search.py:430
+msgid "Add to {collection} Collection"
+msgstr "{collection} CollectionDaq yIchel"
+
+#: pages/search.py:156
+msgid "UPC search failed"
+msgstr "UPC nej Qagh"
+
+#: pages/search.py:159
+msgid "Search for a Pokemon card"
+msgstr "Pokemon card yIneH"
+
+#: pages/search.py:160
+msgid "Search Pokemon"
+msgstr "Pokemon yIneH"
+
+#: pages/search.py:163
+msgid "Searching Pokemon (Algolia)..."
+msgstr "Pokemon vIneH (Algolia)..."
+
+#: pages/search.py:174
+#: pages/search.py:219
+#: pages/search.py:325
+#: pages/search.py:366
+#: pages/search.py:407
+msgid "Algolia search failed"
+msgstr "Algolia nej Qagh"
+
+#: pages/search.py:182
+msgid "### Top Pokemon results"
+msgstr "### nIv Pokemon ghu'vam"
+
+#: pages/search.py:193
+#: pages/search.py:272
+#: pages/search.py:304
+#: pages/search.py:342
+#: pages/search.py:383
+#: pages/search.py:424
+msgid "No name"
+msgstr "pong pagh"
+
+#: pages/search.py:194
+msgid "Pokemon Card"
+msgstr "Pokemon Card"
+
+#: pages/search.py:204
+msgid "Search for a movie"
+msgstr "movie yIneH"
+
+#: pages/search.py:205
+msgid "Search Movies"
+msgstr "movies yIneH"
+
+#: pages/search.py:208
+msgid "Searching Movies (Algolia)..."
+msgstr "Movies vIneH (Algolia)..."
+
+#: pages/search.py:226
+msgid "### Top Movie results"
+msgstr "### nIv movie ghu'vam"
+
+#: pages/search.py:236
+msgid "Movie"
+msgstr "movie"
+
+#: pages/search.py:242
+msgid "Director"
+msgstr "muchwI'"
+
+#: pages/search.py:244
+msgid "Release Year"
+msgstr "chegh DIS"
+
+#: pages/search.py:252
+msgid "Search for a Lego set"
+msgstr "Lego set yIneH"
+
+#: pages/search.py:253
+msgid "Search Lego"
+msgstr "Lego yIneH"
+
+#: pages/search.py:256
+msgid "Searching for Lego sets..."
+msgstr "Lego sets vIneH..."
+
+#: pages/search.py:260
+msgid "Lego search failed"
+msgstr "Lego nej Qagh"
+
+#: pages/search.py:266
+msgid "### Top Lego set results"
+msgstr "### nIv Lego set ghu'vam"
+
+#: pages/search.py:274
+msgid "Year"
+msgstr "DIS"
+
+#: pages/search.py:276
+msgid "Theme"
+msgstr "ghu'"
+
+#: pages/search.py:278
+msgid "Set ID"
+msgstr "Set ID"
+
+#: pages/search.py:280
+msgid "Part Count"
+msgstr "ngemmey mI'"
+
+#: pages/search.py:284
+msgid "Search for a Lego minifigure"
+msgstr "Lego minifig yIneH"
+
+#: pages/search.py:285
+msgid "Search Lego Minifigs"
+msgstr "Lego Minifigs yIneH"
+
+#: pages/search.py:288
+msgid "Searching for Lego minifigs..."
+msgstr "Lego Minifigs vIneH..."
+
+#: pages/search.py:292
+msgid "Lego minifig search failed"
+msgstr "Lego minifig nej Qagh"
+
+#: pages/search.py:298
+msgid "### Top Lego minifigure results"
+msgstr "### nIv Lego minifig ghu'vam"
+
+#: pages/search.py:306
+msgid "Minifig ID"
+msgstr "Minifig ID"
+
+#: pages/search.py:310
+msgid "Search for a Dragonball Z card"
+msgstr "Dragonball Z card yIneH"
+
+#: pages/search.py:311
+msgid "Search DBZ Cards"
+msgstr "DBZ Cards yIneH"
+
+#: pages/search.py:314
+msgid "Searching Dragonball Z cards (Algolia)..."
+msgstr "Dragonball Z cards vIneH (Algolia)..."
+
+#: pages/search.py:331
+msgid "### Top Dragonball Z card results"
+msgstr "### nIv Dragonball Z card ghu'vam"
+
+#: pages/search.py:343
+msgid "DBZ Card"
+msgstr "DBZ Card"
+
+#: pages/search.py:351
+msgid "Search for a Digimon card"
+msgstr "Digimon card yIneH"
+
+#: pages/search.py:352
+msgid "Search Digimon Cards"
+msgstr "Digimon Cards yIneH"
+
+#: pages/search.py:355
+msgid "Searching Digimon cards (Algolia)..."
+msgstr "Digimon cards vIneH (Algolia)..."
+
+#: pages/search.py:372
+msgid "### Top Digimon card results"
+msgstr "### nIv Digimon card ghu'vam"
+
+#: pages/search.py:384
+msgid "Digimon Card"
+msgstr "Digimon Card"
+
+#: pages/search.py:392
+msgid "Search for a One Piece card"
+msgstr "One Piece card yIneH"
+
+#: pages/search.py:393
+msgid "Search One Piece Cards"
+msgstr "One Piece Cards yIneH"
+
+#: pages/search.py:396
+msgid "Searching One Piece cards (Algolia)..."
+msgstr "One Piece cards vIneH (Algolia)..."
+
+#: pages/search.py:413
+msgid "### Top One Piece card results"
+msgstr "### nIv One Piece card ghu'vam"
+
+#: pages/search.py:425
+msgid "One Piece Card"
+msgstr "One Piece Card"
+
+#: pages/search.py:433
+msgid "Search functionality for this category is coming soon!"
+msgstr "SeghvamDaq nej Qu'meH laH tugh"
+
+#: pages/search.py:194
+#: pages/search.py:236
+#: pages/search.py:343
+#: pages/search.py:384
+#: pages/search.py:425
+msgid "ID"
+msgstr "ID"
+
+#: pages/search.py:197
+msgid "HP"
+msgstr "HP"
+
+#: pages/search.py:198
+msgid "Flavortext"
+msgstr "flavor ghItlh"
+
+#: pages/search.py:345
+msgid "Power"
+msgstr "HoS"
+
+#: pages/search.py:386
+msgid "Card Type"
+msgstr "Card Segh"
+
+#: pages/search.py:428
+msgid "Rarity"
+msgstr "rarghach"
+
+#: pages/collectionView.py:136
+msgid "Add to Collection"
+msgstr "collectionDaq yIchel"

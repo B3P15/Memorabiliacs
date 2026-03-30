@@ -7,20 +7,107 @@ from fastapi import FastAPI, Query, Path
 from requests_futures.sessions import FuturesSession
 import requests
 from concurrent.futures import as_completed
-from BackendMethods.auth_functions import create_account, sign_in, reset_password
 from algoliasearch.search.client import SearchClientSync
 from algoliasearch.search.models.search_params_object import SearchParamsObject
 from google.cloud import firestore
 import io
 from PIL import Image, ImageEnhance, ImageFilter, ImageOps
 from pyzbar import pyzbar
+import firebase_admin
+from firebase_admin import credentials, storage
 
 BASE_API_URL = "https://apitcg.com/api"
 APITCG_API_KEY = st.secrets["APITCG_API_KEY"]
+REBRICK_API_KEY = st.secrets["REBRICK_API_KEY"]
+tmdb.API_KEY = st.secrets["TMDB_API_KEY"]
+tmdb.REQUESTS_TIMEOUT = (2, 5)  # seconds, for connect and read specifically 
+CURR_COLL = ""
 
 app = FastAPI()
 
-CURR_COLL = ""
+@st.cache_resource
+def get_cloud_storage():
+     """Cached Cloud Storage client to avoid repeated authentication."""
+     firebase_admin.initialize_app(credentials.Certificate(st.secrets["firebase"]), {'storageBucket': "memorabiliacs-ec1bd.firebasestorage.app"})
+     return storage.bucket()
+
+@st.cache_data(ttl=3600)  # Cache for 1 hour
+def get_cloud_storage_image(blob_name: str):
+    """Fetch a signed URL for a blob in Cloud Storage, cached to reduce repeated calls."""
+    bucket = get_cloud_storage()
+    blob = bucket.blob(blob_name)
+    return blob.generate_signed_url(version="v4", expiration=3600)
+
+@st.cache_resource
+def get_firestore_client():
+    """Cached Firestore client to avoid repeated authentication."""
+    return firestore.Client.from_service_account_info(st.secrets["firebase"])
+
+@st.cache_data(ttl=300)  # Cache for 5 minutes
+def get_user_data(user_id: str):
+    """Fetch user data from Firestore, cached to reduce DB calls."""
+    db = get_firestore_client()
+    return db.collection("Users").document(user_id).get().to_dict()
+
+@st.cache_resource
+def get_user_collections(user_id: str):
+    """Fetch user's collections, cached to reduce DB calls."""
+    db = get_firestore_client()
+    return [{"id": doc.id,**doc.to_dict()} for doc in db.collection('Users').document(user_id).collection('Collections').stream()]
+
+@st.cache_data(ttl=3600)  # Cache for 1 hour
+def get_collection_types():
+    """Fetch collection types, cached globally."""
+    db = get_firestore_client()
+    res = []
+    types = db.collections()
+    for doc in types:
+        if doc.id != "Users":
+            if doc.id == "Custom":
+                res.insert(0, doc.id)
+            else:
+                res.append(doc.id)
+    return res
+
+@st.cache_data(ttl=3600)
+def type_fields(coll_type: str):
+    """Get fields for a collection type, cached per type."""
+    db = get_firestore_client()
+    res = {}
+    typeRef = db.collection(coll_type)
+    index = 0
+    for doc in typeRef.stream():
+        fields = doc.to_dict()
+        index += 1
+        for key in fields.keys():
+            res[key] = True
+        if index >= 2:
+            return res
+    return res
+
+def set_collection(collection:str):
+    """Sets the collection name for reference across pages
+    
+    collection: full name_type of the collection (doc.id)
+    """
+    global CURR_COLL
+    CURR_COLL = collection
+
+
+def coll_visability(collection_name: str, db):
+    """Checks if the collection is visable for main page
+    
+    coll_name: full id name of collection
+    db: Firestore database
+    Returns bool of visabliy
+    """
+    user_id = st.session_state.user_info['localId']
+    collection_ref = db.collection('Users').document(user_id).collection('Collections').document(collection_name)
+    contents = collection_ref.get().to_dict()
+    return not contents["settings"]["hidden"]
+
+
+CURR_THEME = ".streamlit/st-styled.css"
 
 # Faster version of get_cards using asynchronous gets and future responses
 @app.get("/{game}/cards")
@@ -67,8 +154,6 @@ def get_cards2(
 
     return(responseList)
 
-tmdb.API_KEY = st.secrets["TMDB_API_KEY"]
-tmdb.REQUESTS_TIMEOUT = (2, 5)  # seconds, for connect and read specifically 
 
 def search_movies(query, max_results=10):
     search = tmdb.Search()
@@ -83,6 +168,7 @@ def search_movies(query, max_results=10):
             'id': movie.get('id')
         })
     return results
+
 
 def search_internetarchive(creators: str = "", title: str = "", max_results: int = 10):
     """Search Internet Archive for audio items filtered to Vinyl or CD formats.
@@ -137,8 +223,7 @@ def search_internetarchive(creators: str = "", title: str = "", max_results: int
 
     return results
 
-# make a method to generate a specific collection (list of dictionaries) based on
-# the input that will be the name of the collection. 
+
 def generate_collection(collection_name: str, db):
     """Generate a collection of items from the database based on the collection name.
 
@@ -151,17 +236,45 @@ def generate_collection(collection_name: str, db):
     collection_doc = collection_ref.get()
     if collection_doc.exists:
         items_refs = collection_doc.to_dict()
-        return items_refs
+        return items_refs["items"]
     else:
         return []
+    
 
-# created new document in db
+@st.cache_data(ttl=3600)
+def get_collection_items(collection_name: str):
+    """Fetch and process all items in a collection - cached to avoid repeated DB reads"""
+    db = get_firestore_client()  # Use cached client
+    collectionData = generate_collection(collection_name, db)
+    items = {}
+    for id in collectionData:
+        items[id] = {'info' : (collectionData[id].get('ref')).get().to_dict(),
+                     'notes' : collectionData[id].get('notes')
+                    }
+    return items
+
+
+def update_notes(item_id, new_notes, db):
+    """Sets the user's specific note per item
+    
+    item_id: name of the item
+    new_notes: note for item
+    db: Firestore database
+    """
+    user_id = st.session_state.user_info['localId']
+    db.collection('Users').document(user_id).collection('Collections').document(CURR_COLL).update(
+            {f"items.{item_id}.notes": new_notes}
+        )
+    get_collection_items.clear(CURR_COLL)  # Clear cache for this collection to reflect updated notes
+
+
 def create_collection(collection_name: str, collection_type: str, db):
     """Create a collection of items in the database with the specified name and type.
 
     collection_name: Name of the collection to create
     collection_type: Type of the collection (e.g., "Pokemon", "Movies", etc.)
     db: Firestore database instance
+    Returns true if collection already exits, else sets collection
     """
     user_id = st.session_state.user_info['localId']
 
@@ -169,13 +282,32 @@ def create_collection(collection_name: str, collection_type: str, db):
     fullName = collection_name.title() + f"_{collection_type}"
 
     # check if name already exists in the database
-    if checkForCollName(collection_name.title(), db):
+    if check_for_coll_name(collection_name.title(), db):
         return True
     
     # created new collection
-    db.collection('Users').document(user_id).collection('Collections').document(fullName).set({"Info":[]})
+    baseInfo = {
+        # list of items per collection
+        "items": {},
 
-# renames a collection
+        # collection settings
+        "settings": {
+            # sets what fields are viewed via item type
+            "views" : type_fields(collection_type),
+            # sets preview image 
+            "image" : "url to display image",
+            # sets a background image when viewing collection
+            "background" : "url to background image",
+            # ? way to re-order collections on main page ?
+            "order" : "figure out later, way to sort/filter/order on main page",
+            # hidden on main page
+            "hidden" : False
+        }
+    }
+    db.collection('Users').document(user_id).collection('Collections').document(fullName).set(baseInfo)
+    get_user_collections.clear(user_id)
+
+
 def rename_collection(collection_name:str, new_collection:str, db):
     """Renames a collection, by use of creating a new collection and moving the data
     
@@ -186,39 +318,77 @@ def rename_collection(collection_name:str, new_collection:str, db):
     user_id = st.session_state.user_info['localId']
     
     # gets reference and type of collection
-    collection_ref_OLD = db.collection('Users').document(user_id).collection('Collections').document(collection_name.id)
+    collection_ref_OLD = db.collection('Users').document(user_id).collection('Collections').document(collection_name)
     coll_Info = collection_ref_OLD.get().id.split("_")
-    data = generate_collection(collection_name.id, db)
-    # print(data)
 
     # checks if new name already exists in the database
-    if checkForCollName(new_collection.title(), db):
+    if check_for_coll_name(new_collection.title(), db):
         return True
 
     # created new collection to move data to
     fullName = f"{new_collection.title()}_{coll_Info[1]}"
-    db.collection('Users').document(user_id).collection('Collections').document(fullName).set(data, merge=True)
-    items = {"Info":[]}
     
-    db.collection('Users').document(user_id).collection('Collections').document(fullName).set(items, merge=True)
-
+    db.collection('Users').document(user_id).collection('Collections').document(fullName).set(collection_ref_OLD.get().to_dict())
     collection_ref_OLD.delete()
+    get_user_collections.clear(user_id)
 
-def add_reference_collectionView(db, user_id, item_doc_id, actual_item_id):
-    pokemon_ref = db.collection("Pokemon").document(actual_item_id)
-    db.collection('Users').document(user_id).collection('Collections').document(CURR_COLL).set({item_doc_id: pokemon_ref}, merge=True)
+
+def add_reference_collectionView(item_doc_id, actual_id, db):
+    """Adds an Item to a user's collection
+
+    item_doc_id: the fixed name (removed '-') of the item
+    actual_id: the document reference name of the item
+    db: Firebase database
+    """
+    user_id = st.session_state.user_info['localId']
+    coll_type = CURR_COLL.split("_")[1]
+    item_ref = db.collection(coll_type).document(actual_id)
+
+    db.collection('Users').document(user_id).collection('Collections').document(CURR_COLL).update({
+    f"items.{item_doc_id}": {
+        "notes": "Your notes here",
+        "ref": item_ref   
+        }
+    })
+    get_collection_items.clear(CURR_COLL)
     st.rerun()
     
-def add_reference_search(db, user_id, item_doc_id, actual_item_id):
-    pokemon_ref = db.collection("Pokemon").document(actual_item_id)
-    db.collection('Users').document(user_id).collection('Collections').document(CURR_COLL).set({item_doc_id: pokemon_ref}, merge=True)
 
-def delete_reference(db, user_id, item_doc_id):
-    delete = db.collection('Users').document(user_id).collection('Collections').document(CURR_COLL)
-    delete.update({item_doc_id: firestore.DELETE_FIELD})
+def add_reference_search(item_doc_id, actual_id, db):
+    """Adds an Item to a users collection, does not rerun
+
+    item_doc_id: the fixed name (removed '-') of the item
+    actual_id: the document reference name of the item
+    db: Firebase database
+    """
+    user_id = st.session_state.user_info['localId']
+    coll_type = CURR_COLL.split("_")[1]
+    item_ref = db.collection(coll_type).document(actual_id)
+
+    db.collection('Users').document(user_id).collection('Collections').document(CURR_COLL).update({
+    f"items.{item_doc_id}": {
+        "notes": "Your notes here",
+        "ref": item_ref   
+        }
+    })
+    get_collection_items.clear(CURR_COLL)
+
+
+def delete_reference(item_doc_id, db):
+    """Deleted an item from the user's collection
+
+    item_doc_id: the fixed name (removed '-') of the item, version stored in user's collection
+    db: Firebase database
+    """
+    user_id = st.session_state.user_info['localId']
+    db.collection('Users').document(user_id).collection('Collections').document(CURR_COLL).update({
+          f"items.{item_doc_id}": firestore.DELETE_FIELD
+    })
+    get_collection_items.clear(CURR_COLL)
     st.rerun()
 
-def checkForCollName(collection_name:str, db) -> bool:
+
+def check_for_coll_name(collection_name:str, db) -> bool:
     """Checks if the provided name is in the database
     
     collection_name: name checking for
@@ -234,12 +404,39 @@ def checkForCollName(collection_name:str, db) -> bool:
             if collName[0] == collection_name:
                 return True
     return False
-    
-def setCollection(collection:str):
-    global CURR_COLL
-    CURR_COLL = collection
+
+def setTheme(theme:str):
+    global CURR_THEME
+    CURR_THEME = theme
 
 REBRICK_API_KEY = st.secrets["REBRICK_API_KEY"]
+
+def collection_views(collection_name:str, db):
+    """Gets the collection type views
+
+    collection_name: name of the collection
+    db: Firebase database
+    Returns list map(dict) of views
+    """
+    user_id = st.session_state.user_info['localId']
+
+    collection_ref = db.collection("Users").document(user_id).collection("Collections").document(collection_name)
+
+    return collection_ref.get().to_dict()["settings"]["views"]
+
+
+def update_collection_views(collection_name:str, views, db):
+    """Updates the type views for the collection
+
+    collection_name: name of collection
+    views: dictonary of fields and booleans per item type
+    db: Firebase database 
+    """
+    user_id = st.session_state.user_info['localId']
+
+    collection_ref = db.collection("Users").document(user_id).collection("Collections").document(collection_name)
+    collection_ref.update({"settings.views": views})
+
 
 def search_minifigs_rebrickable(query, max_results: int = 10):
     """Search Rebrickable for minifigs matching `query` (query can be part of any attribute present in the json, such as name or minifig_id).
@@ -268,6 +465,7 @@ def search_minifigs_rebrickable(query, max_results: int = 10):
         })
 
     return results
+
 
 def search_sets_rebrickable(query, max_results: int = 10):
     """Search Rebrickable for sets matching `query`.
@@ -333,19 +531,68 @@ def search_algolia(query: str, index_name: str, max_results: int = 10):
             results = []
             for hit in hits:
                 results.append({
-                    "id": getattr(hit, 'id', getattr(hit, 'id', None)),
+                    "id": getattr(hit, 'object_id', getattr(hit, 'object_id', None)),
                     "name": getattr(hit, 'name', None),
-                    "image": getattr(hit, 'image', None),
+                    "images": getattr(hit, 'images', None),
                     "flavorText": getattr(hit, 'flavorText', None),
-                    "HP": getattr(hit, 'HP', getattr(hit, 'hp', None))
+                    "hp": getattr(hit, 'hp', getattr(hit, 'hp', None))
                 })
             return results
+        
+        elif index_name == "MovieSearchResults":
+            results = []
+            for hit in hits:
+                results.append({
+                    "id": getattr(hit, 'object_id', None),
+                    "name": getattr(hit, 'name', None),
+                    "release_date": getattr(hit, 'release_date', None),
+                    "overview": getattr(hit, 'overview', None),
+                    "image": getattr(hit, 'image', None)
+                })
+            return results
+        
+        elif index_name == "DragonballSearchResults":
+            results = []
+            for hit in hits:
+                results.append({
+                    "id": getattr(hit, 'object_id', None),
+                    "name": getattr(hit, 'name', None),
+                    "power": getattr(hit, 'power', None),
+                    "image": getattr(hit, 'image', None)
+                })
+            return results
+        
+        elif index_name == "DigimonSearchResults":
+            results = []
+            for hit in hits:
+                results.append({
+                    "id": getattr(hit, 'object_id', None),
+                    "name": getattr(hit, 'name', None),
+                    "cardType": getattr(hit, 'cardType', None),
+                    "image": getattr(hit, 'image', None)
+                })
+            return results
+        
+        elif index_name == "OnepieceSearchResults":
+            results = []
+            for hit in hits:
+                results.append({
+                    "id": getattr(hit, 'object_id', None),
+                    "name": getattr(hit, 'name', None),
+                    "type": getattr(hit, 'type', None),
+                    "image": getattr(hit, 'image', None),
+                    "rarity": getattr(hit, 'rarity', None)
+                })
+            return results
+
+
         else:
             return hits
             
     except Exception as e:
         st.error(f"Algolia search failed: {e}")
         return []
+
 
 def test_upc_api(upc_code: str):
     headers = {
@@ -358,15 +605,16 @@ def test_upc_api(upc_code: str):
     if 'items' in data and len(data['items']) > 0:
         item = data['items'][0]
         results = {
-            'title': item['title'],
+            'name': item['title'],
             'description': item['description'],
-            'publisher': item.get('publisher', None),
+            # 'publisher': item.get('publisher', None) if item['publisher'] else None,
             'ean': item['ean'],
             'image': item['images'][0]  # Get the first image if available
         }
     else:
         raise ValueError("No items found for the provided UPC code.")
     return results
+
 
 def _decode_barcodes(image: Image.Image) -> list[dict[str, str]]:
 
@@ -476,3 +724,55 @@ def _extract_supported_codes(decoded: list[dict[str, str]]) -> list[dict[str, st
 def _load_image(uploaded_file: st.runtime.uploaded_file_manager.UploadedFile) -> Image.Image:
 	data = uploaded_file.getvalue()
 	return Image.open(io.BytesIO(data)).convert("RGB")
+
+
+# Function to upload all pokemon cards to database
+# I have this placed into the homepage 'add_collection' button for the sole purpose of running the code
+# In order to use this for other items, create a template (you can use professor gpt), download
+# # the files from the github or wherever the information is and specify it, and run the code.
+# def upload_pokemon_data(db):
+#     # Specify the location of the data to upload
+#     data_dir = Path(r"C:\Users\andre\Desktop\Memorabiliacs\BackendMethods\Pokemon_Cards")
+
+#     # Create a template so that all cards contain all fields and fill the blanks with N/A
+#     CARD_TEMPLATE = {
+#         "name": "N/A",
+#         "supertype": "N/A",
+#         "subtypes": "N/A",
+#         "level": "N/A",
+#         "hp": "N/A",
+#         "types": "N/A",
+#         "evolvesFrom": "N/A",
+#         "abilities": "N/A",
+#         "attacks": "N/A",
+#         "weaknesses": "N/A",
+#         "retreatCost": "N/A",
+#         "convertedRetreatCost": "N/A",
+#         "number": "N/A",
+#         "artist": "N/A",
+#         "rarity": "N/A",
+#         "flavorText": "N/A",
+#         "nationalPokedexNumbers": "N/A",
+#         "legalities": "N/A",
+#         "images": "N/A"
+#     }
+
+#     # Runs through the json file of data to analyze all cards ad fill out the template
+#     for json_file in data_dir.rglob("*.json"):
+#         print(f"Reading {json_file.name}")
+
+#         with open(json_file, "r", encoding="utf-8") as f:
+#             cards = json.load(f)
+
+#         for card in cards:
+
+#             card_id = card.get("id")
+#             if not card_id:
+#                 continue
+
+#             # Fill missing fields
+#             card_map = {k: card.get(k, "N/A") for k in CARD_TEMPLATE}
+
+#             doc_ref = db.collection("Pokemon").document(card_id)
+
+#             doc_ref.set(card_map)
