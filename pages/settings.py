@@ -181,6 +181,6 @@ else:
         if st_yled.button(_("Save Background Image Changes"), key="save_background_button"):
             if new_image_URL != "" and "https:" in new_image_URL: 
                 newdb.collection("Users").document(user_id).set({"backgroundImageURL" : new_image_URL}, merge=True)
-            get_user_data.clear(user_id)
+            backEnd.get_user_data.clear(user_id)
             sleep(0.25)
             st.rerun()
