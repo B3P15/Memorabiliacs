@@ -18,6 +18,10 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y libzbar0
+      - name: Create Streamlit secrets file for CI/CD
+        run: |
+          mkdir -p .streamlit
+          echo "${{ secrets.CI_SECRETS }}" > .streamlit/secrets.toml
       - uses: actions/setup-python@v5
         with:
           python-version: "3.13.2"
