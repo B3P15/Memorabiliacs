@@ -18,6 +18,12 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y libzbar0
+      - name: Set up Google Cloud credentials
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS_CONTENT: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS_JSON }}
+        run: |
+           echo "$GOOGLE_APPLICATION_CREDENTIALS_CONTENT" > ${{ runner.temp }}/gcloud-key.json
+           echo "GOOGLE_APPLICATION_CREDENTIALS=${{ runner.temp }}/gcloud-key.json" >> $GITHUB_ENV
       - name: Create Streamlit secrets file for CI/CD
         run: |
           mkdir -p .streamlit
