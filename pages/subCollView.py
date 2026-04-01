@@ -62,21 +62,12 @@ else:
             st.rerun()
 
     st.space("small")
-    st.subheader(backEnd.CURR_COLL.split("_")[0], text_alignment="center")
-    if st.button("", icon=":material/settings:", type="tertiary"):
-        viewCollSettings()
-    st.space("small")
+    st.subheader(backEnd.SUB_COLL, text_alignment="center")
+    # if st.button("", icon=":material/settings:", type="tertiary"):
+    #     viewCollSettings()
 
     # view selection radio buttons
     view_mode = st.radio(_("Display mode"), [_("grid"), _("column")], horizontal=True)
-
-    with st.container(horizontal=True, horizontal_alignment="center", width="stretch"):
-        for subCollection in backEnd.get_sub_collections(backEnd.CURR_COLL):
-            with st.container(width="content", horizontal_alignment="center"):
-                with st_yled.image_card_one(title=f"{subCollection}", image_path=gfuncs.THUMNAIL_URLS[coll_type], text=f"**{_('Type')}: {coll_type}**", background_color=gfuncs.read_config_val(gfuncs.conf_file, "backgroundColor"), width=250, height=350, border_style="solid", border_color=gfuncs.read_config_val(gfuncs.conf_file, "textColor"), border_width=1):
-                    if st_yled.button(_("View Collection"), border_width=5, key=f"{subColl}_link", width="stretch"):
-                        backEnd.set_sub_collection(subCollection)
-                        st.switch_page(gfuncs.sub_coll_page)
 
     # display either grid or column view
     if view_mode == _("grid"):

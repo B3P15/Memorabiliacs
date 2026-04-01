@@ -10,6 +10,7 @@ from io import BytesIO
 
 conf_file = ".streamlit/config.toml"
 collection_page = "pages/collectionView.py"
+sub_coll_page = "pages/subCollView.py"
 
 #st_yled.init(css_path=backEnd.CURR_THEME)
 removeCheck = False
