@@ -14,7 +14,7 @@ except Exception as e:
 # user sign-in check
 if 'user_info' not in st.session_state:
     # Check if running in test mode (AppTest sets a marker)
-    if st.secrets.get("STREAMLIT_TESTING", False):
+    if hasattr(st, '_is_running_with_streamlit_app_test'):
         st.session_state.user_info = {
             "localId": "test_user_123",
             "email": "test@example.com"
