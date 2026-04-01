@@ -15,6 +15,9 @@ from PIL import Image, ImageEnhance, ImageFilter, ImageOps
 from pyzbar import pyzbar
 import firebase_admin
 from firebase_admin import credentials, storage
+from BackendMethods.auth_functions import access_secret_version
+
+st.secrets = access_secret_version()
 
 BASE_API_URL = "https://apitcg.com/api"
 APITCG_API_KEY = st.secrets["APITCG_API_KEY"]
@@ -609,7 +612,7 @@ def test_upc_api(upc_code: str):
             'description': item['description'],
             # 'publisher': item.get('publisher', None) if item['publisher'] else None,
             'ean': item['ean'],
-            'image': item['images'][0]  # Get the first image if available
+            'image': item['images'][0] if item['images'] else None, # Get the first image if available
         }
     else:
         raise ValueError("No items found for the provided UPC code.")

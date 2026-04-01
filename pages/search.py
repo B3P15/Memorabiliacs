@@ -140,6 +140,8 @@ else:
                         with cols[0]:
                             if upc_result["image"]:
                                 st.image(upc_result["image"], width="content")
+                            else:
+                                st.info(_("No image available for this item."))
                             with st_yled.badge_card_one(title=upc_result.get('name', _('No title')), text=f"\n**UPC: {upc_result.get('ean', '')}**", badge_text=_("UPC Result"), badge_color="primary",
                                                    background_color=gfuncs.read_config_val(gfuncs.conf_file, "backgroundColor"), card_shadow=True, height="content", width=400, text_font_size=17, title_font_size=30, title_font_weight="bold", 
                                                    border_style="solid", border_color=gfuncs.read_config_val(gfuncs.conf_file, "textColor"), border_width=1):
@@ -149,7 +151,7 @@ else:
                                 #     st.write(f"{_('Publisher')}: {upc_result['publisher']}")
                                 st.write(f"{_('Item ean')}: {upc_result['ean']}")
                                 if backEnd.CURR_COLL:
-                                    st_yled.button(_("Add to {collection} Collection").format(collection=backEnd.CURR_COLL.split('_')[0]), key=f"add_upc_{upc_result['ean']}", on_click=add_upc_button, kwargs={"upc_result": upc_result})
+                                    st_yled.button(_("Add to {collection} Collection").format(collection=backEnd.CURR_COLL.split('_')[0]), key=f"add_upc_{upc_result['ean']}", on_click=add_upc_button, kwargs={"upc_result": upc_result})                           
 
                     except Exception as e:
                         st_yled.error(f"{_('UPC search failed')}: {e}")

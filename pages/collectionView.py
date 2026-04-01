@@ -57,7 +57,7 @@ else:
                 if key not in ("name", "image", "rarity", "id"):
                     if views[key]:
                         st.write(f"**{key}**: **{items[item]['info'][key]}**")
-            if st_yled.button(_("Remove From Collection")):
+            if st.button(_("Remove From Collection")):
                 backEnd.delete_reference(item, db)
 
     st.space("small")
@@ -81,16 +81,20 @@ else:
 
                         if backEnd.CURR_COLL.split("_")[1] == "Pokemon":
                             st.image(gfuncs.get_image_from_URL(curr_item["info"]["images"]['small']), width=200)
+                        elif backEnd.CURR_COLL.split("_")[1] == "Custom":
+                            if curr_item["info"]["image"] is not None:
+                                st.image(curr_item["info"]["image"], width=200)
+                            else:
+                                st.image(gfuncs.THUMNAIL_URLS["Custom"], width=200)
                         else:
                             st.image(gfuncs.get_image_from_URL(curr_item["info"]["image"]), width=200)
-
                         info = st.text_input("Notes", value = curr_item.get('notes'), key = f"notes_{key}", width=250)
                         
                         if info != items[key].get('notes'):
                             backEnd.update_notes(key, info, db)
                             st.success("Updated!")
 
-                        if st_yled.button("View More", key=f"{curr_item["info"]["name"]}_view"):
+                        if st_yled.button("View More", key=f"{curr_item['info'].get('name')}_{curr_item['info'].get('id')}_view"):
                             viewItem(key)
                         st.space("medium")
     else:
@@ -103,6 +107,12 @@ else:
 
                     if backEnd.CURR_COLL.split("_")[1] == "Pokemon":
                         st.image(gfuncs.get_image_from_URL(curr_item['info']['images']['small']), width=200)
+                    elif backEnd.CURR_COLL.split("_")[1] == "Custom":
+                        if curr_item["info"]["image"] is not None:
+                            st.image(curr_item["info"]["image"], width=200)
+                        else:
+                            st.image(gfuncs.THUMNAIL_URLS["Custom"], width=200)
+                        st.image(curr_item["info"]["image"], width=200)
                     else:
                         st.image(gfuncs.get_image_from_URL(curr_item["info"]["image"]), width=200)
     
@@ -112,7 +122,7 @@ else:
                         backEnd.update_notes(key, info, db)
                         st.success("Updated!")
                         
-                    if st_yled.button("View More", key=f"{curr_item['info'].get('name')}_view"):
+                    if st_yled.button("View More", key=f"{curr_item['info'].get('name')+curr_item['info'].get('id')}_view"):
                         viewItem(key)
                     st.space("medium")
 
