@@ -3,6 +3,7 @@ import BackendMethods.global_functions as gfuncs
 import BackendMethods.backendfuncs as backEnd
 from BackendMethods.translations import _
 import st_yled
+import os
 
 # Connects to db
 try:
@@ -11,9 +12,17 @@ except Exception as e:
     st.error(f"Failed to initialize Firestore: {e}")
     st.stop()    
 
+is_test_mode = os.getenv("STREAMLIT_TEST_MODE", "false").lower() == "true"
 # user sign-in check
 if 'user_info' not in st.session_state:
-    st.switch_page("pages/login.py")
+    # Check if running in test mode (AppTest sets a marker)
+    if is_test_mode:
+        st.session_state.user_info = {
+            "localId": "test_user_123",
+            "email": "test@example.com"
+        }
+    else:
+        st.switch_page("pages/login.py")
 ## -------------------------------------------------------------------------------------------------
 ## Logged in ---------------------------------------------------------------------------------------
 ## -------------------------------------------------------------------------------------------------
@@ -32,7 +41,7 @@ else:
         with st.container(horizontal_alignment="center"):
             views = backEnd.collection_views(backEnd.CURR_COLL, db)
             for view in views.keys():
-                if view != "name" or view != "image":
+                if view != "Name" or view != "Image":
                     st.checkbox(f"Hide {view}", key=view, value=(not views[view]))
 
             if st.button("Save"):
@@ -46,12 +55,12 @@ else:
     def viewItem(item):
         views = backEnd.collection_views(backEnd.CURR_COLL, db)
         field_text = ""
-        with st_yled.badge_card_one(title=items[item]['info']["name"], text=field_text, badge_text="Attributes", width="stretch", badge_color="primary", background_color=gfuncs.read_config_val(gfuncs.conf_file, "backgroundColor"), card_shadow=True, border_style="solid", border_color=gfuncs.read_config_val(gfuncs.conf_file, "textColor"), border_width=1):
+        with st_yled.badge_card_one(title=items[item]['info']["Name"], text=field_text, badge_text="Attributes", width="stretch", badge_color="primary", background_color=gfuncs.read_config_val(gfuncs.conf_file, "backgroundColor"), card_shadow=True, border_style="solid", border_color=gfuncs.read_config_val(gfuncs.conf_file, "textColor"), border_width=1):
             for key in items[item]['info'].keys():
-                if key not in ("name", "image", "rarity", "id"):
+                if key not in ("Name", "Image", "Rarity", "ID"):
                     if views[key]:
                         st.write(f"**{key}**: **{items[item]['info'][key]}**")
-            if st_yled.button(_("Remove From Collection")):
+            if st.button(_("Remove From Collection")):
                 backEnd.delete_reference(item, db)
 
     @st.dialog("Create Sub Collection")
@@ -86,20 +95,23 @@ else:
                     col = cols[i % 3]
                     curr_item = items[key]
                     with col.container(horizontal_alignment="center"):
-                        st_yled.subheader(f"{curr_item['info'].get('name')}", text_alignment="center")
+                        st_yled.subheader(f"{curr_item['info'].get('Name')}", text_alignment="center")
 
-                        if backEnd.CURR_COLL.split("_")[1] == "Pokemon":
-                            st.image(gfuncs.get_image_from_URL(curr_item["info"]["images"]['small']), width=200)
+                        if backEnd.CURR_COLL.split("_")[1] == "Custom":
+                            if curr_item["info"]["image"] is not None:
+                                st.image(curr_item["info"]["image"], width=200)
+                            else:
+                                st.image(gfuncs.THUMNAIL_URLS["Custom"], width=200)
                         else:
-                            st.image(gfuncs.get_image_from_URL(curr_item["info"]["image"]), width=200)
-
+                            st.image(gfuncs.get_image_from_URL(curr_item["info"]["Image"]), width=200)
+                            
                         info = st.text_input("Notes", value = curr_item.get('notes'), key = f"notes_{key}", width=250)
                         
                         if info != items[key].get('notes'):
                             backEnd.update_notes(key, info, db)
                             st.success("Updated!")
 
-                        if st_yled.button("View More", key=f"{curr_item["info"]["name"]}_view"):
+                        if st_yled.button("View More", key=f"{curr_item["info"]["Name"]}_view"):
                             viewItem(key)
                         st.space("medium")
     else:
@@ -108,12 +120,15 @@ else:
             for key in items.keys():
                 curr_item = items[key]
                 with cols[1].container(horizontal_alignment="center"):
-                    st_yled.subheader(f"{curr_item['info'].get('name')}", text_alignment="center")
+                    st_yled.subheader(f"{curr_item['info'].get('Name')}", text_alignment="center")
 
-                    if backEnd.CURR_COLL.split("_")[1] == "Pokemon":
-                        st.image(gfuncs.get_image_from_URL(curr_item['info']['images']['small']), width=200)
+                    if backEnd.CURR_COLL.split("_")[1] == "Custom":
+                        if curr_item["info"]["image"] is not None:
+                            st.image(curr_item["info"]["image"], width=200)
+                        else:
+                            st.image(gfuncs.THUMNAIL_URLS["Custom"], width=200)
                     else:
-                        st.image(gfuncs.get_image_from_URL(curr_item["info"]["image"]), width=200)
+                        st.image(gfuncs.get_image_from_URL(curr_item["info"]["Image"]), width=200)
     
                     info = st.text_input("Notes", value = curr_item.get('notes'), key = f"notes_{key}", width=250)
                     
@@ -121,7 +136,7 @@ else:
                         backEnd.update_notes(key, info, db)
                         st.success("Updated!")
                         
-                    if st_yled.button("View More", key=f"{curr_item['info'].get('name')}_view"):
+                    if st_yled.button("View More", key=f"{curr_item['info'].get('Name')}_view"):
                         viewItem(key)
                     st.space("medium")
 
@@ -132,7 +147,6 @@ else:
             "name" : backEnd.CURR_COLL.split("_")[0],
             "type" : backEnd.CURR_COLL.split("_")[1]
         }
-
         st.page_link(page="pages/search.py", label=_("Add to Collection"), query_params=collection)
 
         if st.button("Create subColl"):

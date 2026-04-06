@@ -83,17 +83,8 @@ def get_collection_types():
 def type_fields(coll_type: str):
     """Get fields for a collection type, cached per type."""
     db = get_firestore_client()
-    res = {}
     typeRef = db.collection(coll_type)
-    index = 0
-    for doc in typeRef.stream():
-        fields = doc.to_dict()
-        index += 1
-        for key in fields.keys():
-            res[key] = True
-        if index >= 2:
-            return res
-    return res
+    return typeRef.document("#TEMPLATE").get().to_dict()
 
 # Cache??
 def coll_visability(collection_name: str, db) -> bool:
@@ -633,7 +624,7 @@ def test_upc_api(upc_code: str):
             'description': item['description'],
             # 'publisher': item.get('publisher', None) if item['publisher'] else None,
             'ean': item['ean'],
-            'image': item['images'][0]  # Get the first image if available
+            'image': item['images'][0] if item['images'] else None, # Get the first image if available
         }
     else:
         raise ValueError("No items found for the provided UPC code.")

@@ -1,0 +1,41 @@
+name: Memorabilaics Testing
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+permissions:
+  contents: read
+
+jobs:
+  streamlit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libzbar0
+      - name: Set up Google Cloud credentials
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS_CONTENT: ${{ secrets.GOOGLE_CLOUD_SDK_JSON }}
+        run: |
+           echo "$GOOGLE_APPLICATION_CREDENTIALS_CONTENT" > ${{ runner.temp }}/gcloud-key.json
+           echo "GOOGLE_APPLICATION_CREDENTIALS=${{ runner.temp }}/gcloud-key.json" >> $GITHUB_ENV
+      - name: Create Streamlit secrets file for CI/CD
+        run: |
+          mkdir -p .streamlit
+          cat > .streamlit/secrets.toml << 'EOF'
+          ${{ secrets.CI_SECRETS }}
+          EOF
+      - name: Set test mode environment variable
+        run: echo "STREAMLIT_TEST_MODE=true" >> $GITHUB_ENV
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13.2"
+      - uses: streamlit/streamlit-app-action@v0.0.3
+        with:
+          app-path: memorabiliacs.py
+          ruff: true
