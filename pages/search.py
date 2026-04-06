@@ -54,11 +54,6 @@ else:
 
     # Persist selection in session state
     default_index = None if (collection == {}) else display_collections.index(collection["name"]) if collection["name"] in display_collections else None
-    # if hasattr(backEnd, 'CURR_COLL') and backEnd.CURR_COLL:
-    #     try:
-    #         default_index = collections.index(backEnd.CURR_COLL+"_"+search_type)
-    #     except Exception:
-    #         default_index = 0
     selected_collection = col_right.selectbox(_("Add items to collection:"), options=display_collections, index=default_index, key="selected_collection")
 
     # Set backend current collection for add actions

@@ -15,7 +15,9 @@ from PIL import Image, ImageEnhance, ImageFilter, ImageOps
 from pyzbar import pyzbar
 import firebase_admin
 from firebase_admin import credentials, storage
+from BackendMethods.auth_functions import access_secret_version
 
+st.secrets = access_secret_version()
 BASE_API_URL = "https://apitcg.com/api"
 APITCG_API_KEY = st.secrets["APITCG_API_KEY"]
 REBRICK_API_KEY = st.secrets["REBRICK_API_KEY"]
@@ -73,17 +75,18 @@ def get_collection_types():
 def type_fields(coll_type: str):
     """Get fields for a collection type, cached per type."""
     db = get_firestore_client()
-    res = {}
     typeRef = db.collection(coll_type)
-    index = 0
-    for doc in typeRef.stream():
-        fields = doc.to_dict()
-        index += 1
-        for key in fields.keys():
-            res[key] = True
-        if index >= 2:
-            return res
-    return res
+    return typeRef.document("#TEMPLATE").get().to_dict()
+    # res = {}
+    # index = 0
+    # for doc in typeRef.stream():
+    #     fields = doc.to_dict()
+    #     index += 1
+    #     for key in fields.keys():
+    #         res[key] = True
+    #     if index >= 2:
+    #         return res
+    # return res
 
 def set_collection(collection:str):
     """Sets the collection name for reference across pages
