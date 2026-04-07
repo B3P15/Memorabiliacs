@@ -33,12 +33,21 @@ else:
     st_yled.init()
     user_data_dict = backEnd.get_user_data(user_id)
     gfuncs.page_initialization(user_data_dict)
+    collection = st.query_params
+
+    if st.button("Back"):
+        if collection == {}:
+            backEnd.set_collection("")
+            backEnd.set_sub_collection("")
+            st.switch_page(gfuncs.home_page)
+        else:
+            st.switch_page(gfuncs.collection_page)
+
     st_yled.subheader(_("Search for Collectables!"), text_alignment="center")
     st.space("large")
     col_left, col_right = st.columns([3, 2])
 
 
-    collection = st.query_params
     all_types = backEnd.get_collection_types()
     collSearch = None if (collection == {}) else all_types.index(collection["type"])
 

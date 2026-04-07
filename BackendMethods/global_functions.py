@@ -11,6 +11,7 @@ from io import BytesIO
 conf_file = ".streamlit/config.toml"
 collection_page = "pages/collectionView.py"
 sub_coll_page = "pages/subCollView.py"
+home_page = "pages/home_page.py"
 
 #st_yled.init(css_path=backEnd.CURR_THEME)
 removeCheck = False
@@ -84,7 +85,7 @@ def db_settings_to_config(user_data_dict:dict):
         st.rerun()
 
 background_image = 'https://pbs.twimg.com/media/F9pQLNmXYAAKAn4.jpg'
-background_image_flag = True
+background_image_flag = False
 
 
 
@@ -117,6 +118,7 @@ def page_initialization(user_data_dict:dict):
         with st.container(horizontal_alignment="left", vertical_alignment="top"):
             if st_yled.button(_("Home"), key="home_button"):
                 backEnd.set_collection("")
+                backEnd.set_sub_collection("")
                 st.switch_page("pages/home_page.py")
         with st.container(horizontal_alignment="center", vertical_alignment="top"):
             if st_yled.button(_("Search"), key="search_button"):

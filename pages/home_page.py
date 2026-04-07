@@ -169,10 +169,6 @@ else:
                 gfuncs.sleep(0.25)
                 st.rerun()
 
-        if st.button("Change Data"):
-            backEnd.renameData(db)
-            st.rerun()
-
     with st.sidebar:
         st.space("small")
         st.title(_("All Collections:"))

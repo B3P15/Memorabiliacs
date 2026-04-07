@@ -16,6 +16,7 @@ from pyzbar import pyzbar
 import firebase_admin
 from firebase_admin import credentials, storage
 from BackendMethods.auth_functions import access_secret_version
+import BackendMethods.global_functions as gfuncs
 
 st.secrets = access_secret_version()
 BASE_API_URL = "https://apitcg.com/api"
@@ -107,13 +108,26 @@ def check_for_coll_name(collection_name:str, db) -> bool:
     """
     user_id = st.session_state.user_info['localId']
 
-    collections = list(db.collection("Users").document(user_id).collections())
+    collections = db.collection("Users").document(user_id).collection("Collections")
+    for doc in collections.stream():
+        collName = doc.id.split("_")
+        if collName[0] == collection_name:
+            return True
+    return False
 
-    for coll in collections:
-        for doc in list(coll.stream()):
-            collName = doc.id.split("_")
-            if collName[0] == collection_name:
-                return True
+def check_for_sub_name(collection:str, sub_name:str, db):
+    """Checks if name for subcollection exists
+    
+    collection: source collection
+    sub_name: name checking for existance
+    db: Firestore database
+    """
+    user_id = st.session_state.user_info['localId']
+
+    collections = db.collection("Users").document(user_id).collection("Collections").document(collection).collection("Sub Collections")
+    for doc in collections.stream():
+        if doc.id == sub_name:
+            return True
     return False
 
 ###################################################################################################
@@ -150,9 +164,9 @@ def get_collection_items(collection_name: str):
     db = get_firestore_client()  # Use cached client
     user_id = st.session_state.user_info['localId']
     collection = db.collection('Users').document(user_id).collection('Collections').document(collection_name).get()
-    data = collection.to_dict()
+    data = collection.to_dict()["items"]
     items = {}
-    for item in data["items"]:
+    for item in data:
         items[item] = {'info' : (data[item].get('ref')).get().to_dict(),
                        'notes' : data[item].get('notes'),
                        'quantity' : data[item].get('quantitiy')
@@ -184,9 +198,31 @@ def get_sub_collections(collection:str):
     user_id = st.session_state.user_info['localId']
     db = get_firestore_client()
     res = []
-    for subColl in db.collection("Users").document(user_id).collection("Collections").document(collection).collection("Sub Collection").stream():
+    for subColl in db.collection("Users").document(user_id).collection("Collections").document(collection).collection("Sub Collections").stream():
         res.append(subColl.id)
     return res
+
+@st.cache_data(ttl=3600)
+def get_sub_collection_items(collection_name:str, sub_collection_name: str):
+    """Gets all items in a sub collection from the database.
+
+    collection_name: Name of the collection sub collection is in
+    sub_collection_name: Name of the sub collection to retrieve
+    db: Firestore database instance
+    Returns a list of items (data dictionaries) referenced in the specified sub collection
+    """
+    db = get_firestore_client()  # Use cached client
+    user_id = st.session_state.user_info['localId']
+    collection = db.collection('Users').document(user_id).collection('Collections').document(collection_name).collection("Sub Collections").document(sub_collection_name).get()
+    data = collection.to_dict()["items"]
+    items = {}
+    for item in data:
+        items[item] = {'info' : (data[item].get('ref')).get().to_dict(),
+                       'notes' : data[item].get('notes'),
+                    #    'quantity' : data[item].get('quantitiy')
+                    }
+    return items
+
 
 ###################################################################################################
 ######################################### [Setting Data] ##########################################
@@ -340,7 +376,32 @@ def create_sub_collection(name:str, collection:str, db):
             "hidden" : False
         }
     }
-    db.collection('Users').document(user_id).collection('Collections').document(collection).collection("Sub Collection").document(name).set(baseInfo)
+    db.collection('Users').document(user_id).collection('Collections').document(collection).collection("Sub Collections").document(name.title()).set(baseInfo)
+    get_sub_collections.clear(collection)
+
+def rename_sub_collection(collection_name:str, original_sub_name:str, new_sub_name:str, db):
+    """Renames a sub collection, by use of creating a new collection and moving the data
+    
+    collection_name: name of source collection
+    original_sub_name: name for sub collection
+    new_sub_name: new name for sub collection
+    db: database
+    """
+    user_id = st.session_state.user_info['localId']
+    
+    # gets reference and type of collection
+    collection_ref = db.collection('Users').document(user_id).collection('Collections').document(collection_name)
+    old_sub = collection_ref.collection("Sub Collections").document(original_sub_name)
+
+    # checks if new name already exists in the database
+    new_name = new_sub_name.title()
+    if check_for_sub_name(collection_name, new_name, db):
+        return True
+
+    # created new collection to move data to
+    collection_ref.collection("Sub Collections").document(new_name).set(old_sub.get().to_dict())
+    old_sub.delete()
+    get_sub_collection_items.clear(collection_name, new_name)
 
 ###################################################################################################
 ############################################ [Other] ##############################################
