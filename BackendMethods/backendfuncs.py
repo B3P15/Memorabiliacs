@@ -415,6 +415,18 @@ def rename_sub_collection(collection_name:str, original_sub_name:str, new_sub_na
     old_sub.delete()
     get_sub_collection_items.clear(collection_name, new_name)
 
+def delete_sub_collection(name:str, collection:str):
+    """Removes subcollection from collection
+    
+    name: name of subcollection
+    collection: parent collection
+    """
+    user_id = st.session_state.user_info['localId']
+    db = get_firestore_client()
+    sub_ref = db.collection('Users').document(user_id).collection('Collections').document(collection).collection("Sub Collections").document(name)
+    sub_ref.delete()
+    get_sub_collections.clear(collection)
+
 ###################################################################################################
 ############################################ [Other] ##############################################
 # Faster version of get_cards using asynchronous gets and future responses
@@ -827,15 +839,15 @@ def _load_image(uploaded_file: st.runtime.uploaded_file_manager.UploadedFile) ->
 	return Image.open(io.BytesIO(data)).convert("RGB")
 
 def renameData(db):
-    name = "Music"
+    name = "Digimon"
     coll = db.collection(name)
     for single in coll.stream():
         item = single.to_dict()
-        if "image" in item:
+        if "Notes" in item:
             newItem = {
-                "Image" : item["image"],
-                "Name" : item["title"],
-                "Artist" : item["creator"],
+                "Item Notes" : item["Notes"],
             }
-            db.collection(name).document(single.id).set(newItem)
+            db.collection(name).document(single.id).set(newItem, merge=True)
+            db.collection(name).document(single.id).set({"Notes": firestore.DELETE_FIELD}, merge=True)
+            # return
     print("done")

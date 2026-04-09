@@ -41,13 +41,9 @@ else:
     def edit_collection(sub):
         itemSettings, rename = st.columns([3,2])
         with itemSettings:
-            pass
-            # hidden = st.checkbox(_("Hide Collection"))
-            # TODO
-            # Add things for other setting when we figure out 
-            # how to do it
-            # ref = db.collection("Users").document(user_id).collection("Collections").document(coll["id"])
-            # ref.update({"settings.hidden" : hidden})
+            if st.button("Remove Sub Collection"):
+                backEnd.delete_sub_collection(sub, backEnd.CURR_COLL)
+                st.rerun()
         with rename:
             st_yled.subheader(f"{_('Rename')} {sub}?", text_alignment="center")
             sub_rename = st.text_input(" ")
@@ -55,7 +51,7 @@ else:
             if st.button(_("Save")):
                 if sub_rename != "":
                     if backEnd.rename_sub_collection(backEnd.CURR_COLL, sub, sub_rename, db):
-                        st_yled.error(_("Collection name already exists"))
+                        st_yled.error(_("Sub Collection name already exists"))
                     else:
                         backEnd.get_sub_collections.clear(backEnd.CURR_COLL)
                         st.rerun()
@@ -65,15 +61,12 @@ else:
     @st.dialog("Collection Views")
     def viewCollSettings():
         with st.container(horizontal_alignment="center"):
-            
-            st.subheader("Main page view")
+            st.subheader("Main Page View")
             for name in ["Name", "Image", "Quantity" , "Notes"]:
                 st.checkbox(f"Hide {name}", key=name, value=(not views[name]))
-            # st.checkbox(f"Hide Image", key="Image", value=(not views["Image"]))
-            # st.checkbox(f"Hide Quantity", key="Quantity", value=(not views["Quantity"]))
-            # st.checkbox(f"Hide Notes", key="Notes", value=(not views["Notes"]))
             st.divider()
-            st.subheader("Secondary Data")
+
+            st.subheader("Additional Data")
             for view in views.keys():
                 if view not in ["Name", "Image", "Quantity" , "Notes"]:
                     st.checkbox(f"Hide {view}", key=view, value=(not views[view]))
@@ -87,7 +80,6 @@ else:
     
     @st.dialog("Item Info")
     def viewItem(item):
-        # views = backEnd.collection_views(backEnd.CURR_COLL, db)
         field_text = ""
         with st_yled.badge_card_one(title=items[item]['info']["Name"], text=field_text, badge_text="Attributes", width="stretch", badge_color="primary", background_color=gfuncs.read_config_val(gfuncs.conf_file, "backgroundColor"), card_shadow=True, border_style="solid", border_color=gfuncs.read_config_val(gfuncs.conf_file, "textColor"), border_width=1):
             for key in items[item]['info'].keys():
@@ -116,7 +108,9 @@ else:
 
     # view selection radio buttons
     view_mode = st.radio(_("Display mode"), [_("grid"), _("column")], horizontal=True)
+    # Make in settings, not radio button on main page
 
+    # Sub collections
     with st.container(horizontal=True, horizontal_alignment="center", width="stretch"):
         for subCollection in backEnd.get_sub_collections(backEnd.CURR_COLL):
             with st.container(width="content", horizontal_alignment="center"):
@@ -127,51 +121,21 @@ else:
                     if st_yled.button(_("Edit"), border_width=5, key=f"edit_{subCollection}", width="stretch"):
                             edit_collection(subCollection)
 
-    # display either grid or column view
-    if view_mode == _("grid"):
-        with st.container(horizontal=True, horizontal_alignment="center", width="stretch"):
-            cols = st.columns(3, width="stretch")  # grid view
-            for i, key in enumerate(items.keys()):
+    # all items
+    with st.container(horizontal=True, horizontal_alignment="center", width="stretch"):
+        cols = st.columns(3, width="stretch") 
+        for i, key in enumerate(items.keys()):
+            # display either grid or column view
+            if view_mode == _("grid"):
                 col = cols[i % 3]
-                curr_item = items[key]
-                with col.container(horizontal_alignment="center"):
-                    if views["Name"]:
-                        st_yled.subheader(f"{curr_item['info'].get('Name')}", text_alignment="center")
-
-                    if views["Image"]:
-                        if backEnd.CURR_COLL.split("_")[1] == "Custom":
-                            if curr_item["info"]["image"] is not None:
-                                st.image(curr_item["info"]["image"], width=200)
-                            else:
-                                st.image(gfuncs.THUMNAIL_URLS["Custom"], width=200)
-                        else:
-                            st.image(gfuncs.get_image_from_URL(curr_item["info"]["Image"]), width=200)
-
-                    with st.container(horizontal=True, horizontal_alignment="center"):
-                        if views["Notes"]:
-                            notes = curr_item.get("Notes")
-                            if notes != "Enter notes here":
-                                # info = st.text_input("Notes", value = curr_item.get('notes'), key = f"notes_{key}", width=250)
-                                st.write(notes)
-
-                        if views["Quantity"]:
-                            st.write(f"x{curr_item.get("quantity")}")
-                    
-                    # if info != items[key].get('notes'):
-                    #     backEnd.update_notes(key, info, db)
-                    #     st.success("Updated!")
-
-                    if st_yled.button("View More", key=f"{curr_item["info"]["Name"]}_view"):
-                        viewItem(key)
-                    st.space("medium")
-    else:
-        with st.container(horizontal=True, horizontal_alignment="center", width="stretch"):
-            cols = st.columns(3, width="stretch")  # grid view
-            for key in items.keys():
-                curr_item = items[key]
-                with cols[1].container(horizontal_alignment="center"):
+            else: 
+                col = cols[1]
+            curr_item = items[key]
+            with col.container(horizontal_alignment="center"):
+                if views["Name"]:
                     st_yled.subheader(f"{curr_item['info'].get('Name')}", text_alignment="center")
 
+                if views["Image"]:
                     if backEnd.CURR_COLL.split("_")[1] == "Custom":
                         if curr_item["info"]["image"] is not None:
                             st.image(curr_item["info"]["image"], width=200)
@@ -179,17 +143,25 @@ else:
                             st.image(gfuncs.THUMNAIL_URLS["Custom"], width=200)
                     else:
                         st.image(gfuncs.get_image_from_URL(curr_item["info"]["Image"]), width=200)
-    
-                    info = st.text_input("Notes", value = curr_item.get('notes'), key = f"notes_{key}", width=250)
-                    
-                    if info != items[key].get('notes'):
-                        backEnd.update_notes(key, info, db)
-                        st.success("Updated!")
-                        
-                    if st_yled.button("View More", key=f"{curr_item['info'].get('Name')}_view"):
-                        viewItem(key)
-                    st.space("medium")
 
+                with st.container(horizontal=True, horizontal_alignment="center"):
+                    if views["Notes"]:
+                        notes = curr_item.get("Notes")
+                        if notes != "Enter notes here":
+                            # info = st.text_input("Notes", value = curr_item.get('notes'), key = f"notes_{key}", width=250)
+                            st.write(notes)
+
+                    if views["Quantity"]:
+                        st.write(f"x{curr_item.get("quantity")}")
+                
+                # if info != items[key].get('notes'):
+                #     backEnd.update_notes(key, info, db)
+                #     st.success("Updated!")
+
+                if st_yled.button("View More", key=f"{curr_item["info"]["Name"]}_view"):
+                    viewItem(key)
+                st.space("medium")
+    
 
     # Container in bottom right for add button
     with st.container(horizontal=True, horizontal_alignment="right", vertical_alignment="bottom"):
