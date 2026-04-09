@@ -85,7 +85,10 @@ def type_fields(coll_type: str):
     """Get fields for a collection type, cached per type."""
     db = get_firestore_client()
     typeRef = db.collection(coll_type)
-    return typeRef.document("#TEMPLATE").get().to_dict()
+    fields = typeRef.document("#TEMPLATE").get().to_dict()
+    fields["Notes"] = True
+    fields["Quantity"] = True
+    return fields
 
 # Cache??
 def coll_visability(collection_name: str, db) -> bool:
@@ -168,8 +171,8 @@ def get_collection_items(collection_name: str):
     items = {}
     for item in data:
         items[item] = {'info' : (data[item].get('ref')).get().to_dict(),
-                       'notes' : data[item].get('notes'),
-                    #    'quantity' : data[id].get('quantity', 1)  # Default to 1 if quantity is not set
+                       'Notes' : data[item].get('notes'),
+                       'quantity' : data[item].get('quantity', 1)  # Default to 1 if quantity is not set
                     }
     return items
 
@@ -307,22 +310,24 @@ def update_notes(item_id, new_notes, db):
         )
     get_collection_items.clear(CURR_COLL)  # Clear cache for this collection to reflect updated notes
 
-def add_reference_search(item_doc_id, actual_id, db):
+def add_item(item_id:str, notes:str, quantity:int, db):
     """Adds an Item to a users collection, does not rerun
 
-    item_doc_id: the fixed name (removed '-') of the item
-    actual_id: the document reference name of the item
-    db: Firebase database
+    item_id: the id/name of the item
+    notes: specific per user note for item
+    quantitiy: how many to add
+    db: Firestore database
     """
     user_id = st.session_state.user_info['localId']
     coll_type = CURR_COLL.split("_")[1]
-    item_ref = db.collection(coll_type).document(actual_id)
+    item_ref = db.collection(coll_type).document(item_id)
+    fixed_name = item_ref.get().id.replace("-", "_")
 
     db.collection('Users').document(user_id).collection('Collections').document(CURR_COLL).update({
-    f"items.{item_doc_id}": {
-        "notes": "Your notes here",
+    f"items.{fixed_name}": {
+        "notes": notes,
         "ref": item_ref,
-        "quantity" : 1
+        "quantity" : quantity
         }
     })
     get_collection_items.clear(CURR_COLL)

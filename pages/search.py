@@ -2,6 +2,7 @@ import streamlit as st
 import BackendMethods.global_functions as gfuncs
 import BackendMethods.backendfuncs as backEnd
 from BackendMethods.translations import _
+from time import sleep
 import st_yled
 import os
 
@@ -72,6 +73,20 @@ else:
     # Persist selection in session state
     default_index = None if (collection == {}) else display_collections.index(collection["name"]) if collection["name"] in display_collections else None
     selected_collection = col_right.selectbox(_("Add items to collection:"), options=display_collections, index=default_index, key="selected_collection")
+
+    @st.dialog("Add to Collection")
+    def add_item_to_coll(item_id, name):
+        st.write(name)
+        notes = st.text_input("Add notes", value="Enter notes here")
+        quantity = st.text_input("How many", value="1")
+        if st.button("Save"):
+            if quantity.isdigit():
+                backEnd.add_item(item_id, notes, quantity, db)
+                st_yled.success(_("Added '{item}' to your {collection} collection!").format(item=name, collection=backEnd.CURR_COLL.split('_')[0]))
+                sleep(.5)
+                st.rerun()
+            else:
+                st.error("Quantity must be a whole number")
 
     # Set backend current collection for add actions
     if selected_collection and selected_collection != _("(No collections)"):
@@ -196,11 +211,6 @@ else:
                 cols = st.columns(2)
                 for idx, item in enumerate(pokemon_results):
                     with cols[idx % 2]:
-                        
-                        def add_pokemon_button(item_id, Cardname):
-                            proper_id = str(item_id).replace("-", "_")
-                            backEnd.add_reference_search(proper_id, item_id, db)
-                            st_yled.success(_("Added '{item}' to your {collection} collection!").format(item=Cardname, collection=backEnd.CURR_COLL.split('_')[0]))
                         if item.get("image"):
                             st.image(item["image"], width=300)
                         with st_yled.badge_card_one(title=item.get('name', _('No name')), background_color=gfuncs.read_config_val(gfuncs.conf_file, "backgroundColor"), 
@@ -210,7 +220,7 @@ else:
                             st_yled.write(f"**{_('HP')}: {item.get('hp', 'N/A')}**")
                             st_yled.write(f"**{_('Flavortext')}: {item.get('flavorText', 'N/A')}**")
                             if backEnd.CURR_COLL:
-                                st_yled.button(_("Add to {collection} Collection").format(collection=backEnd.CURR_COLL.split('_')[0]), key=f"add_{item['id']}", on_click=add_pokemon_button, kwargs={"item_id": item['id'], "Cardname": item['name']})
+                                st_yled.button(_("Add to {collection} Collection").format(collection=backEnd.CURR_COLL.split('_')[0]), key=f"add_{item['id']}", on_click=add_item_to_coll, kwargs={"item_id": item['id'], "name": item['name']})
 
     elif search_type == "Movies":
         with st_yled.form(key="algolia_search_form", clear_on_submit=False):

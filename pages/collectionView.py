@@ -32,6 +32,7 @@ else:
     user_id = st.session_state.user_info["localId"]
     user_data_dict = backEnd.get_user_data(user_id)
     gfuncs.page_initialization(user_data_dict)
+    views = backEnd.collection_views(backEnd.CURR_COLL, db)
 
     items = backEnd.get_collection_items(backEnd.CURR_COLL)  # Use cached function
     coll_type = backEnd.CURR_COLL.split("_")[1]
@@ -64,9 +65,17 @@ else:
     @st.dialog("Collection Views")
     def viewCollSettings():
         with st.container(horizontal_alignment="center"):
-            views = backEnd.collection_views(backEnd.CURR_COLL, db)
+            
+            st.subheader("Main page view")
+            for name in ["Name", "Image", "Quantity" , "Notes"]:
+                st.checkbox(f"Hide {name}", key=name, value=(not views[name]))
+            # st.checkbox(f"Hide Image", key="Image", value=(not views["Image"]))
+            # st.checkbox(f"Hide Quantity", key="Quantity", value=(not views["Quantity"]))
+            # st.checkbox(f"Hide Notes", key="Notes", value=(not views["Notes"]))
+            st.divider()
+            st.subheader("Secondary Data")
             for view in views.keys():
-                if view != "Name" or view != "Image":
+                if view not in ["Name", "Image", "Quantity" , "Notes"]:
                     st.checkbox(f"Hide {view}", key=view, value=(not views[view]))
 
             if st.button("Save"):
@@ -78,7 +87,7 @@ else:
     
     @st.dialog("Item Info")
     def viewItem(item):
-        views = backEnd.collection_views(backEnd.CURR_COLL, db)
+        # views = backEnd.collection_views(backEnd.CURR_COLL, db)
         field_text = ""
         with st_yled.badge_card_one(title=items[item]['info']["Name"], text=field_text, badge_text="Attributes", width="stretch", badge_color="primary", background_color=gfuncs.read_config_val(gfuncs.conf_file, "backgroundColor"), card_shadow=True, border_style="solid", border_color=gfuncs.read_config_val(gfuncs.conf_file, "textColor"), border_width=1):
             for key in items[item]['info'].keys():
@@ -126,21 +135,31 @@ else:
                 col = cols[i % 3]
                 curr_item = items[key]
                 with col.container(horizontal_alignment="center"):
-                    st_yled.subheader(f"{curr_item['info'].get('Name')}", text_alignment="center")
+                    if views["Name"]:
+                        st_yled.subheader(f"{curr_item['info'].get('Name')}", text_alignment="center")
 
-                    if backEnd.CURR_COLL.split("_")[1] == "Custom":
-                        if curr_item["info"]["image"] is not None:
-                            st.image(curr_item["info"]["image"], width=200)
+                    if views["Image"]:
+                        if backEnd.CURR_COLL.split("_")[1] == "Custom":
+                            if curr_item["info"]["image"] is not None:
+                                st.image(curr_item["info"]["image"], width=200)
+                            else:
+                                st.image(gfuncs.THUMNAIL_URLS["Custom"], width=200)
                         else:
-                            st.image(gfuncs.THUMNAIL_URLS["Custom"], width=200)
-                    else:
-                        st.image(gfuncs.get_image_from_URL(curr_item["info"]["Image"]), width=200)
-                        
-                    info = st.text_input("Notes", value = curr_item.get('notes'), key = f"notes_{key}", width=250)
+                            st.image(gfuncs.get_image_from_URL(curr_item["info"]["Image"]), width=200)
+
+                    with st.container(horizontal=True, horizontal_alignment="center"):
+                        if views["Notes"]:
+                            notes = curr_item.get("Notes")
+                            if notes != "Enter notes here":
+                                # info = st.text_input("Notes", value = curr_item.get('notes'), key = f"notes_{key}", width=250)
+                                st.write(notes)
+
+                        if views["Quantity"]:
+                            st.write(f"x{curr_item.get("quantity")}")
                     
-                    if info != items[key].get('notes'):
-                        backEnd.update_notes(key, info, db)
-                        st.success("Updated!")
+                    # if info != items[key].get('notes'):
+                    #     backEnd.update_notes(key, info, db)
+                    #     st.success("Updated!")
 
                     if st_yled.button("View More", key=f"{curr_item["info"]["Name"]}_view"):
                         viewItem(key)
