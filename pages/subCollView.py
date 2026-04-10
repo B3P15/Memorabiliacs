@@ -133,8 +133,6 @@ else:
             else: 
                 col = cols[1]
             curr_item = items[key]
-            print(key)
-            print(curr_item)
             with col.container(horizontal_alignment="center"):
                 if views["Name"]:
                     st_yled.subheader(f"{curr_item['info'].get('Name')}", text_alignment="center")
