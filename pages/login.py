@@ -48,4 +48,5 @@ if 'user_info' not in st.session_state:
 ## -------------------------------------------------------------------------------------------------
 else:
     gfuncs.login_color_flag = 0
+    st.session_state.muted = False
     st.switch_page("pages/home_page.py")

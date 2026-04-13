@@ -4,6 +4,7 @@ import BackendMethods.backendfuncs as backEnd
 from BackendMethods.translations import _
 import st_yled
 import os
+import time
 
 # Connects to db
 try:
@@ -63,10 +64,12 @@ else:
         field_text = ""
         with st_yled.badge_card_one(title=items[item]['info']["Name"], text=field_text, badge_text="Attributes", width="stretch", badge_color="primary", background_color=gfuncs.read_config_val(gfuncs.conf_file, "backgroundColor"), card_shadow=True, border_style="solid", border_color=gfuncs.read_config_val(gfuncs.conf_file, "textColor"), border_width=1):
             for key in items[item]['info'].keys():
-                if key not in ("Name", "Image", "Rarity", "ID"):
+                if key not in ("Name", "Image", "Rarity", "id"):
                     if views[key]:
                         st.write(f"**{key}**: **{items[item]['info'][key]}**")
             if st.button(_("Remove From Collection")):
+                st.audio(gfuncs.DEFAULT_SOUNDS["Delete"], autoplay=True, width=1, start_time=0)
+                time.sleep(1)
                 backEnd.delete_reference(item, db)
 
     st.space("small")
@@ -101,8 +104,7 @@ else:
                         if info != items[key].get('notes'):
                             backEnd.update_notes(key, info, db)
                             st.success("Updated!")
-                        print(curr_item)
-                        if st_yled.button("View More", key=f"{curr_item["info"]["id"]}_view"):
+                        if st_yled.button("View More", key=f"{curr_item['info']['id']}_view"):
                             viewItem(key)
                         st.space("medium")
     else:

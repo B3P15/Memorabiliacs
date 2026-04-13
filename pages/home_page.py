@@ -177,4 +177,5 @@ else:
                 backEnd.set_collection(coll)
                 st.switch_page(gfuncs.collection_page)
         st.space(500)
-        st.button(icon=":material/settings:", label=_("Settings"), on_click=lambda: st.switch_page("pages/settings.py"))
+        if st.button(icon=":material/settings:", label=_("Settings")):
+            st.switch_page("pages/settings.py")

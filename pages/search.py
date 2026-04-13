@@ -135,6 +135,7 @@ else:
                                 #add UPC object to Custom collection in firestore
                                 db.collection("Custom").document(proper_id).set(upc_result, merge=True)
                                 backEnd.add_reference_search(proper_id, item_id, db)
+                                st.audio(gfuncs.DEFAULT_SOUNDS["add"], autoplay=True, width=1, start_time=0)
                                 st_yled.success(
                                     _("Added '{item}' to your {collection} collection!").format(
                                         item=upc_result.get("name", _("UPC Item")),
@@ -193,6 +194,7 @@ else:
                             def add_pokemon_button(item_id, Cardname):
                                 proper_id = str(item_id).replace("-", "_")
                                 backEnd.add_reference_search(proper_id, item_id, db)
+                                st.audio(gfuncs.DEFAULT_SOUNDS["add"], autoplay=True, width=1, start_time=0)
                                 st_yled.success(_("Added '{item}' to your {collection} collection!").format(item=Cardname, collection=backEnd.CURR_COLL.split('_')[0]))
                             if item.get("image"):
                                 with innercols[1]:
@@ -236,6 +238,7 @@ else:
                     def add_movie_button(item_id, Moviename):
                                 proper_id = str(item_id).replace("-", "_")
                                 backEnd.add_reference_search(proper_id, item_id, db)
+                                st.audio(gfuncs.DEFAULT_SOUNDS["add"], autoplay=True, width=1, start_time=0)
                                 st_yled.success(_("Added '{item}' to your {collection} collection!").format(item=Moviename, collection=backEnd.CURR_COLL.split('_')[0]))
                     for idx, item in enumerate(movie_results):
                         with cols[idx % 3]:
@@ -349,6 +352,7 @@ else:
                     def add_dbz_button(item_id, Cardname):
                                 proper_id = str(item_id).replace("-", "_")
                                 backEnd.add_reference_search(proper_id, item_id, db)
+                                st.audio(gfuncs.DEFAULT_SOUNDS["add"], autoplay=True, width=1, start_time=0)
                                 st_yled.success(_("Added '{item}' to your {collection} collection!").format(item=Cardname, collection=backEnd.CURR_COLL.split('_')[0]))
 
                     for idx, item in enumerate(dbz_results):
@@ -393,6 +397,7 @@ else:
                     def add_digimon_button(item_id, Cardname):
                                 proper_id = str(item_id).replace("-", "_")
                                 backEnd.add_reference_search(proper_id, item_id, db)
+                                st.audio(gfuncs.DEFAULT_SOUNDS["add"], autoplay=True, width=1, start_time=0)
                                 st_yled.success(_("Added '{item}' to your {collection} collection!").format(item=Cardname, collection=backEnd.CURR_COLL.split('_')[0]))
 
                     for idx, item in enumerate(digimon_results):
@@ -437,6 +442,7 @@ else:
                     def add_onepiece_button(item_id, Cardname):
                                 proper_id = str(item_id).replace("-", "_")
                                 backEnd.add_reference_search(proper_id, item_id, db)
+                                st.audio(gfuncs.DEFAULT_SOUNDS["add"], autoplay=True, width=1, start_time=0)
                                 st_yled.success(_("Added '{item}' to your {collection} collection!").format(item=Cardname, collection=backEnd.CURR_COLL.split('_')[0]))
 
                     for idx, item in enumerate(onepiece_results):
