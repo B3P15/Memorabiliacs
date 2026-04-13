@@ -71,6 +71,18 @@ def get_collection_types():
                 res.append(doc.id)
     return res
 
+@st.cache_data(ttl=3600)  # Cache for 1 hour
+def get_template_types():
+    """Fetch collection types, cached globally."""
+    db = get_firestore_client()
+    user_id = st.session_state.user_info['localId']
+    types = db.collection("Users").document(user_id).collection("Collections").document(CURR_COLL).get().to_dict()["templates"]
+    if types == {} or types == None:
+        return {}
+    else:
+        return types
+    
+
 @st.cache_data(ttl=3600)
 def type_fields(coll_type: str):
     """Get fields for a collection type, cached per type."""
@@ -229,6 +241,7 @@ def generate_collection(collection_name: str, db):
     collection_doc = collection_ref.get()
     if collection_doc.exists:
         items_refs = collection_doc.to_dict()
+        print(f'items_refs = {items_refs}')
         return items_refs["items"]
     else:
         return []
@@ -240,11 +253,21 @@ def get_collection_items(collection_name: str):
     db = get_firestore_client()  # Use cached client
     collectionData = generate_collection(collection_name, db)
     items = {}
-    for id in collectionData:
-        items[id] = {'info' : (collectionData[id].get('ref')).get().to_dict(),
-                     'notes' : collectionData[id].get('notes')
-                    }
-    return items
+    print(f'collectionData = {collectionData}')
+    coll_type = CURR_COLL.split("_")[1]
+    if coll_type != "Custom":
+        for id in collectionData:
+            items[id] = {'info' : (collectionData[id].get('ref')).get().to_dict()['items'],
+                        'notes' : collectionData[id].get('notes')
+                        }
+        return items
+    else:
+        for key in collectionData:
+            actualData = collectionData[key]['ref'].get().to_dict()
+            for id in actualData:
+               items[id] = {'info' : (actualData[id].get('ref')).get().to_dict()['items'],
+                        'notes' : actualData[id].get('notes')
+                        } 
 
 
 def update_notes(item_id, new_notes, db):
@@ -297,6 +320,49 @@ def create_collection(collection_name: str, collection_type: str, db):
             "hidden" : False
         }
     }
+    db.collection('Users').document(user_id).collection('Collections').document(fullName).set(baseInfo)
+    get_user_collections.clear(user_id)
+
+def create_custom_collection(collection_name: str, collection_type: str, db):
+    """Create a custom collection of items in the database with the specified name and type.
+
+    collection_name: Name of the collection to create
+    collection_type: Type of the collection (e.g., "Pokemon", "Movies", etc.)
+    db: Firestore database instance
+    Returns true if collection already exits, else sets collection
+    """
+    user_id = st.session_state.user_info['localId']
+
+    # generates db collection name
+    fullName = collection_name.title() + f"_{collection_type}"
+
+    # check if name already exists in the database
+    if check_for_coll_name(collection_name.title(), db):
+        return True
+    
+    # created new collection
+    baseInfo = {
+        # list of items per collection
+        "items": {"No Custom Templates"},
+
+        # collection settings
+        "settings": {
+            # sets what fields are viewed via item type
+            "views" : type_fields(collection_type),
+            # sets preview image 
+            "image" : "url to display image",
+            # sets a background image when viewing collection
+            "background" : "url to background image",
+            # ? way to re-order collections on main page ?
+            "order" : "figure out later, way to sort/filter/order on main page",
+            # hidden on main page
+            "hidden" : False
+        },
+        
+        # list of item templates
+        "templates": {}
+    }
+    db.collection('Custom').document(fullName).set(baseInfo)
     db.collection('Users').document(user_id).collection('Collections').document(fullName).set(baseInfo)
     get_user_collections.clear(user_id)
 

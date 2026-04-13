@@ -83,7 +83,7 @@ def db_settings_to_config(user_data_dict:dict):
         st.rerun()
 
 background_image = 'https://pbs.twimg.com/media/F9pQLNmXYAAKAn4.jpg'
-background_image_flag = True
+background_image_flag = False
 
 
 

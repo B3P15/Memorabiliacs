@@ -37,11 +37,10 @@ else:
     # cloud_image_url = backEnd.get_cloud_storage_image("pikachu.jpeg")  # Example usage of cached image retrieval
 
     # st.image(cloud_image_url, width=200)  # Display the image from Cloud Storage
-
-
-    items = backEnd.get_collection_items(backEnd.CURR_COLL)  # Use cached function
+    
     coll_type = backEnd.CURR_COLL.split("_")[1]
     
+    items = backEnd.get_collection_items(backEnd.CURR_COLL)  # Use cached function
     @st.dialog("Collection Views")
     def viewCollSettings():
         with st.container(horizontal_alignment="center"):
@@ -68,6 +67,52 @@ else:
                         st.write(f"**{key}**: **{items[item]['info'][key]}**")
             if st.button(_("Remove From Collection")):
                 backEnd.delete_reference(item, db)
+      
+    @st.dialog("Template Info")
+    def createCustomTemplate():
+        template = []
+        with st_yled.badge_card_one(title='Create Custom Template', text='', badge_text="Attributes", width="stretch", badge_color="primary", background_color=gfuncs.read_config_val(gfuncs.conf_file, "backgroundColor"), card_shadow=True, border_style="solid", border_color=gfuncs.read_config_val(gfuncs.conf_file, "textColor"), border_width=1):
+            tempName = st.text_input("Enter template name: ", value="here")
+            for index in range(0,10):
+                value = (st.text_input("Enter attribute name: ", value="here", key=index))
+                if value != "here":
+                    template.append(value)
+        if st_yled.button(_("Create Template"), key='CT'):
+            # Make Template arrays in both locations
+            db.collection('Custom').document(backEnd.CURR_COLL).update({"templates": {tempName: template}})
+            db.collection('Users').document(user_id).collection('Collections').document(backEnd.CURR_COLL).update({"templates": {tempName: template}})
+    
+    if "createCustomItemPopup" not in st.session_state:
+        st.session_state.createCustomItemPopup = False
+    # Make function give popup based on selected template with text inputs
+    
+    @st.dialog("Item Info")
+    def createCustomItem(template):
+        attributes = {}
+        with st_yled.badge_card_one(title="Enter values", text="", badge_text="New item", width="stretch", badge_color="primary", background_color=gfuncs.read_config_val(gfuncs.conf_file, "backgroundColor"), card_shadow=True, border_style="solid", border_color=gfuncs.read_config_val(gfuncs.conf_file, "textColor"), border_width=1):
+            if ("name" in template) == False and ("Name" in template) == False:
+                name = st.text_input("Name", value="", key="force_name")
+            for i in range(len(template)):
+                attribute = st.text_input(_(template[i]), value="", key=i)
+                if template[i] == "name" or template[i] == "Name":
+                    name = attribute
+                if attribute != "":
+                    attributes[template[i]] = attribute
+            if st_yled.button(_("Create"), key="CreateKey"):
+                db.collection('Custom').document(backEnd.CURR_COLL).update({
+                    "items": {name: attributes}
+                })
+                item_ref = db.collection('Custom').document(backEnd.CURR_COLL).get()
+                print(item_ref)
+                db.collection('Users').document(user_id).collection('Collections').document(backEnd.CURR_COLL).update({
+                    f"items.{name}": {
+                        "notes": "Your notes here",
+                        "ref": item_ref   
+                        }
+                    })
+                st.session_state.createCustomItemPopup = False
+                backEnd.get_collection_items.clear(backEnd.CURR_COLL)
+                st.rerun()
 
     st.space("small")
     st.subheader(backEnd.CURR_COLL.split("_")[0], text_alignment="center")
@@ -82,29 +127,33 @@ else:
     if view_mode == _("grid"):
             with st.container(horizontal=True, horizontal_alignment="center", width="stretch"):
                 cols = st.columns(3, width="stretch")  # grid view
-                for i, key in enumerate(items.keys()):
-                    col = cols[i % 3]
-                    curr_item = items[key]
-                    with col.container(horizontal_alignment="center"):
-                        st_yled.subheader(f"{curr_item['info'].get('Name')}", text_alignment="center")
+                if coll_type == "Custom" and items == None:
+                    pass
+                else:
+                    for i, key in enumerate(items.keys()):
+                        col = cols[i % 3]
+                        print(f'items = {items}')
+                        curr_item = items[key]
+                        with col.container(horizontal_alignment="center"):
+                            st_yled.subheader(f"{curr_item['info'].get('Name')}", text_alignment="center")
 
-                        if backEnd.CURR_COLL.split("_")[1] == "Custom":
-                            if curr_item["info"]["image"] is not None:
-                                st.image(curr_item["info"]["image"], width=200)
+                            if backEnd.CURR_COLL.split("_")[1] == "Custom":
+                                if curr_item["info"]["image"] is not None:
+                                    st.image(curr_item["info"]["image"], width=200)
+                                else:
+                                    st.image(gfuncs.THUMNAIL_URLS["Custom"], width=200)
                             else:
-                                st.image(gfuncs.THUMNAIL_URLS["Custom"], width=200)
-                        else:
-                            st.image(gfuncs.get_image_from_URL(curr_item["info"]["Image"]), width=200)
+                                st.image(gfuncs.get_image_from_URL(curr_item["info"]["Image"]), width=200)
+                                
+                            info = st.text_input("Notes", value = curr_item.get('notes'), key = f"notes_{key}", width=250)
                             
-                        info = st.text_input("Notes", value = curr_item.get('notes'), key = f"notes_{key}", width=250)
-                        
-                        if info != items[key].get('notes'):
-                            backEnd.update_notes(key, info, db)
-                            st.success("Updated!")
+                            if info != items[key].get('notes'):
+                                backEnd.update_notes(key, info, db)
+                                st.success("Updated!")
 
-                        if st_yled.button("View More", key=f"{curr_item["info"]["Name"]}_view"):
-                            viewItem(key)
-                        st.space("medium")
+                            if st_yled.button("View More", key=f"{curr_item["info"]["Name"]}_view"):
+                                viewItem(key)
+                            st.space("medium")
     else:
         with st.container(horizontal=True, horizontal_alignment="center", width="stretch"):
             cols = st.columns(3, width="stretch")  # grid view
@@ -138,5 +187,27 @@ else:
             "name" : backEnd.CURR_COLL.split("_")[0],
             "type" : backEnd.CURR_COLL.split("_")[1]
         }
-        st.page_link(page="pages/search.py", label=_("Add to Collection"), query_params=collection)
+
+        # TODO
+        #  Translate string 
+        # Change create custom to load a value into the templates map called "no custom template" which will be removed/ovewritten
+        #  after the creation of the user's first template.
+
+        if coll_type == "Custom":
+            types = backEnd.get_template_types.clear()
+            if types == {} or types == None:
+                st.text("No Custom Templates")
+            else:     
+                tempType = st.selectbox(_("Type"), list(types.keys())) 
+                template = types[tempType]   
+            st.page_link(page="pages/search.py", label=_("Add Existing Item"), query_params=collection)
+            if st_yled.button(_("New Custom Template"), key="NCT"):
+                createCustomTemplate()
+            # Make function to display list of templates
+            if st_yled.button(_("New Custom Item"), key="NCI"):
+                st.session_state.createCustomItemPopup = True
+            if st.session_state.createCustomItemPopup == True:
+                createCustomItem(template)
+        else:    
+            st.page_link(page="pages/search.py", label=_("Add to Collection"), query_params=collection)  
             
