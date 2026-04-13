@@ -44,6 +44,16 @@ else:
             if st.button("Remove Sub Collection"):
                 backEnd.delete_sub_collection(sub, backEnd.CURR_COLL)
                 st.rerun()
+            currSize = backEnd.get_sub_coll_size(sub, backEnd.CURR_COLL)
+            newSize = st.text_input("Change size of collection?", value=currSize)
+            if newSize.isdigit():
+                if int(newSize) < currSize:
+                    st.warning("Cannot change size to be smaller than current size")
+                elif int(newSize) > currSize:
+                    ref = db.collection('Users').document(user_id).collection('Collections').document(backEnd.CURR_COLL).collection("Sub Collections").document(sub)
+                    ref.update({"settings.size": int(newSize)})
+            else:
+                st.warning("Size must be a whole number")
         with rename:
             st_yled.subheader(f"{_('Rename')} {sub}?", text_alignment="center")
             sub_rename = st.text_input(" ")
@@ -88,6 +98,7 @@ else:
                         st.write(f"**{key}**: **{items[item]['info'][key]}**")
             if st.button(_("Remove From Collection")):
                 backEnd.delete_reference(item, db)
+                st.rerun()
 
     @st.dialog("Create Sub Collection")
     def subColl():
@@ -96,6 +107,9 @@ else:
         if st.button("Save"):
             if size.isdigit():
                 backEnd.create_sub_collection(name, backEnd.CURR_COLL, size, db)
+                st.rerun()
+            elif size == "":
+                backEnd.create_sub_collection(name, backEnd.CURR_COLL, 999, db)
                 st.rerun()
             else:
                 st.error("Size needs to be a whole number")

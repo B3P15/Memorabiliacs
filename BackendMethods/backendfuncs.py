@@ -222,11 +222,10 @@ def get_sub_collection_items(collection_name:str, sub_collection_name: str):
     for item in data:
         items[item] = {'info' : (data[item].get('ref')).get().to_dict(),
                        'notes' : data[item].get('notes'),
-                       'quantity' : data[item].get('quantitiy', 1)
+                       'quantity' : data[item].get('quantity', 1)
                     }
     return items
 
-@st.cache_data(ttl=3600)
 def get_sub_coll_size(name:str, collection:str) -> int:
     """Gets the size of the given sub collection
     
@@ -351,11 +350,16 @@ def delete_reference(item_doc_id, db):
     db: Firebase database
     """
     user_id = st.session_state.user_info['localId']
-    db.collection('Users').document(user_id).collection('Collections').document(CURR_COLL).update({
-          f"items.{item_doc_id}": firestore.DELETE_FIELD
-    })
+    ref = db.collection('Users').document(user_id).collection('Collections').document(CURR_COLL)
+    ammount = int(ref.get().to_dict()["items"][item_doc_id]["quantity"])
+    if ammount == 1:
+        ref.update({
+            f"items.{item_doc_id}": firestore.DELETE_FIELD
+        })
+    else:
+        ammount -= 1
+        ref.update({f"items.{item_doc_id}.quantity": ammount })
     get_collection_items.clear(CURR_COLL)
-    st.rerun()
 
 def update_collection_views(collection_name:str, views, db):
     """Updates the type views for the collection
@@ -462,6 +466,25 @@ def add_item_sub_coll(item_id:str, notes:str, quantity:int, sub_coll:str, collec
         "quantity" : quantity
         }
     })
+    get_sub_collection_items.clear(collection, sub_coll)
+
+def del_item_sub_coll(item_id:str, quantity:int, sub_coll:str, collection:str):
+    """Removes an item to a users sub collection
+
+    item_id: the id/name of the item
+    quantitiy: how many to remove
+    sub_coll: name of sub collection
+    collection: name of parent collection
+    """
+    user_id = st.session_state.user_info['localId']
+    db = get_firestore_client()
+    sub_ref = db.collection('Users').document(user_id).collection('Collections').document(collection).collection("Sub Collections").document(sub_coll)
+    ammount = int(sub_ref.get().to_dict()["items"][item_id]['quantity'])
+    if ammount - quantity <= 0:
+        sub_ref.update({f"items.{item_id}" : firestore.DELETE_FIELD})
+    else:
+        ammount -= quantity
+        sub_ref.update({f"items.{item_id}.quantity": ammount})
     get_sub_collection_items.clear(collection, sub_coll)
 
 ###################################################################################################

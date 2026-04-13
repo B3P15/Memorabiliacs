@@ -54,13 +54,17 @@ else:
     @st.dialog("Add to Sub Collection")
     def addToSub():
         totalSize = backEnd.get_sub_coll_size(backEnd.SUB_COLL, backEnd.CURR_COLL)
+        firstPass = False
         if "itemsToAdd" not in st.session_state:
-            st.session_state["itemsToAdd"] = {}
-            fristThrough = True
-        else:
-            fristThrough = False
-
+            st.session_state["itemsToAdd"] = {}   
+            firstPass = True
         itemsToAdd = st.session_state["itemsToAdd"]
+
+        if firstPass:
+            for item in items:
+                itemsToAdd[item] = int(items[item]["quantity"])
+            firstPass = False
+
         with st.container(horizontal_alignment="center"):
             fullItems = backEnd.get_collection_items(backEnd.CURR_COLL)
             cols = st.columns(3, width="stretch") 
@@ -72,7 +76,7 @@ else:
                 curr_item = fullItems[key]
                 with col.container(horizontal_alignment="center"):
                     st_yled.subheader(f"{curr_item['info'].get('Name')}", text_alignment="center")
-                    if fristThrough:
+                    if key not in itemsToAdd:
                         itemsToAdd[key] = 0
 
                     if backEnd.CURR_COLL.split("_")[1] == "Custom":
@@ -92,7 +96,9 @@ else:
                         elif itemsToAdd[key] == itemQuant:
                             st.warning("Not enough of that item")
                         else:
+                            print(f"{key}: {itemsToAdd[key]}")
                             itemsToAdd[key] += 1
+                            print(f"{key}: {itemsToAdd[key]}")
                             st.rerun(scope="fragment")
                     
             totalQaunt = 0
@@ -103,7 +109,9 @@ else:
             if st.button("Save"):
                 for item in itemsToAdd.keys(): 
                     if itemsToAdd[item] != 0:
+                        print(f"{item} : {itemsToAdd[item]}")
                         backEnd.add_item_sub_coll(item, fullItems[item].get("Notes"), itemsToAdd[item], backEnd.SUB_COLL, backEnd.CURR_COLL)
+                del st.session_state["itemsToAdd"]
                 st.rerun()
     
     @st.dialog("Item Info")
@@ -114,8 +122,10 @@ else:
                 if key not in ("Name", "Image"):
                     if views[key]:
                         st.write(f"**{key}**: **{items[item]['info'][key]}**")
-            if st_yled.button(_("Remove From Collection")):
-                backEnd.delete_reference(item, db)
+            if st.button(_("Remove From Collection")):
+                backEnd.del_item_sub_coll(item, 1, backEnd.SUB_COLL, backEnd.CURR_COLL)
+                print(f"Delete : {item}")
+                st.rerun()
 
 
     st.space("small")
@@ -148,7 +158,7 @@ else:
 
                 with st.container(horizontal=True, horizontal_alignment="center"):
                     if views["Notes"]:
-                        notes = curr_item.get("Notes")
+                        notes = curr_item.get("notes")
                         if notes != "Enter notes here":
                             # info = st.text_input("Notes", value = curr_item.get('notes'), key = f"notes_{key}", width=250)
                             st.write(notes)
