@@ -274,7 +274,9 @@ def create_collection(collection_name: str, collection_type: str, db):
             # ? way to re-order collections on main page ?
             "order" : "figure out later, way to sort/filter/order on main page",
             # hidden on main page
-            "hidden" : False
+            "hidden" : False,
+            # gid / colomn view
+            "collection view" : "grid"
         }
     }
     db.collection('Users').document(user_id).collection('Collections').document(fullName).set(baseInfo)
@@ -333,14 +335,21 @@ def add_item(item_id:str, notes:str, quantity:int, db):
     coll_type = CURR_COLL.split("_")[1]
     item_ref = db.collection(coll_type).document(item_id)
     fixed_name = item_ref.get().id.replace("-", "_")
-
-    db.collection('Users').document(user_id).collection('Collections').document(CURR_COLL).update({
-    f"items.{fixed_name}": {
-        "notes": notes,
-        "ref": item_ref,
-        "quantity" : quantity
-        }
-    })
+    ref = db.collection('Users').document(user_id).collection('Collections').document(CURR_COLL)
+    items = get_collection_items(CURR_COLL)
+    if fixed_name in items:
+        ammount = int(ref.get().to_dict()["items"][fixed_name]["quantity"])
+        ammount += quantity
+        ref.update({f"items.{fixed_name}.quantity" : ammount})
+        ref.update({f"items.{fixed_name}.notes" : notes})
+    else: 
+        ref.update({
+        f"items.{fixed_name}": {
+            "notes": notes,
+            "ref": item_ref,
+            "quantity" : quantity
+            }
+        })
     get_collection_items.clear(CURR_COLL)
 
 def delete_reference(item_doc_id, db):

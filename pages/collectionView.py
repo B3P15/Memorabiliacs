@@ -35,9 +35,12 @@ else:
     user_data_dict = backEnd.get_user_data(user_id)
     gfuncs.page_initialization(user_data_dict)
     views = backEnd.collection_views(backEnd.CURR_COLL, db)
-
+    ref = db.collection("Users").document(user_id).collection("Collections").document(backEnd.CURR_COLL)
+    view_mode = ref.get().to_dict()['settings']['collection view']
     items = backEnd.get_collection_items(backEnd.CURR_COLL)  # Use cached function
     coll_type = backEnd.CURR_COLL.split("_")[1]
+    settings_page_flag = False
+    viewing_flag = False
 
     @st.dialog(_("Edit")) 
     def edit_collection(sub):
@@ -70,39 +73,76 @@ else:
                 else:
                     st.rerun()
     
-    @st.dialog("Collection Views")
+    @st.fragment
+    @st.dialog("Collection Setting")
     def viewCollSettings():
-        with st.container(horizontal_alignment="center"):
-            st.subheader("Main Page View")
-            for name in ["Name", "Image", "Quantity" , "Notes"]:
-                st.checkbox(f"Hide {name}", key=name, value=(not views[name]))
-            st.divider()
-
-            st.subheader("Additional Data")
-            for view in views.keys():
-                if view not in ["Name", "Image", "Quantity" , "Notes"]:
-                    st.checkbox(f"Hide {view}", key=view, value=(not views[view]))
-
+        global settings_page_flag
+        if settings_page_flag:
+            st.header("Settings", text_alignment="center")
+            st.subheader("New page", text_alignment="center")
+            global ref
+            view_mode = st.radio(_("Display mode"), [_("grid"), _("column")], horizontal=True)
+            hidden = st.checkbox(_("Hide Collection"), value=ref.get().to_dict()['settings']['hidden'])
             if st.button("Save"):
-                newViews = {}
-                for view in views.keys():
-                    newViews[view] = not st.session_state[view]
-                backEnd.update_collection_views(backEnd.CURR_COLL, newViews, db)
+                ref.update({"settings.hidden" : hidden})
+                ref.update({"settings" : {"collection view" : view_mode}}, merge=True)
                 st.rerun()
+        else: 
+            st.header("Collection Views", text_alignment="center")
+            with st.container(horizontal_alignment="center"):
+                st.subheader("Main Page View", text_alignment="center")
+                for name in ["Name", "Image", "Quantity" , "Notes"]:
+                    st.checkbox(f"Hide {name}", key=name, value=(not views[name]))
+                st.divider()
+
+                st.subheader("Additional Data", text_alignment="center")
+                for view in views.keys():
+                    if view not in ["Name", "Image", "Quantity" , "Notes"]:
+                        st.checkbox(f"Hide {view}", key=view, value=(not views[view]))
+
+            with st.container(horizontal_alignment="right"):
+                if st.button("Save"):
+                    newViews = {}
+                    for view in views.keys():
+                        newViews[view] = not st.session_state[view]
+                    backEnd.update_collection_views(backEnd.CURR_COLL, newViews, db)
+                    st.rerun()
+
+        # Arrows
+        with st.container(horizontal=True, horizontal_alignment="center"):
+            if st.button("", icon=":material/arrow_back_ios:"):
+                settings_page_flag = False
+                st.rerun(scope="fragment")
+            if st.button("", icon=":material/arrow_forward_ios:"):
+                settings_page_flag = True
+                st.rerun(scope="fragment")
     
+    @st.fragment
     @st.dialog("Item Info")
     def viewItem(item):
-        field_text = ""
-        with st_yled.badge_card_one(title=items[item]['info']["Name"], text=field_text, badge_text="Attributes", width="stretch", badge_color="primary", background_color=gfuncs.read_config_val(gfuncs.conf_file, "backgroundColor"), card_shadow=True, border_style="solid", border_color=gfuncs.read_config_val(gfuncs.conf_file, "textColor"), border_width=1):
-            for key in items[item]['info'].keys():
-                if key not in ("Name", "Image", "Rarity", "id"):
-                    if views[key]:
-                        st.write(f"**{key}**: **{items[item]['info'][key]}**")
-            if st.button(_("Remove From Collection")):
-                st.audio(gfuncs.DEFAULT_SOUNDS["Delete"], autoplay=True, width=1, start_time=0)
-                time.sleep(1)
-                backEnd.delete_reference(item, db)
+        global viewing_flag
+        if viewing_flag:
+            ref = db.collection("Users").document(user_id).collection("Collections").document(backEnd.CURR_COLL)
+            note = st.text_input("Item Note", value=ref.get().to_dict()["items"][item].get('notes'), key=f"notes")
+            if st.button("Save"):
+                backEnd.update_notes(item, note, db)
+                viewing_flag = False
                 st.rerun()
+        else:
+            field_text = ""
+            with st_yled.badge_card_one(title=items[item]['info']["Name"], text=field_text, badge_text="Attributes", width="stretch", badge_color="primary", background_color=gfuncs.read_config_val(gfuncs.conf_file, "backgroundColor"), card_shadow=True, border_style="solid", border_color=gfuncs.read_config_val(gfuncs.conf_file, "textColor"), border_width=1):
+                for key in items[item]['info'].keys():
+                    if key not in ("Name", "Image", "Rarity", "id"):
+                        if views[key]:
+                            st.write(f"**{key}**: **{items[item]['info'][key]}**")
+                if st.button("Edit Note"):
+                    viewing_flag = True
+                    st.rerun(scope="fragment")
+                if st.button(_("Remove From Collection")):
+                    st.audio(gfuncs.DEFAULT_SOUNDS["Delete"], autoplay=True, width=1, start_time=0)
+                    time.sleep(1)
+                    backEnd.delete_reference(item, db)
+                    st.rerun()
 
     @st.dialog("Create Sub Collection")
     def subColl():
@@ -118,15 +158,12 @@ else:
             else:
                 st.error("Size needs to be a whole number")
 
-    st.space("small")
     st.subheader(backEnd.CURR_COLL.split("_")[0], text_alignment="center")
-    if st.button("", icon=":material/settings:", type="tertiary"):
-        viewCollSettings()
-    st.space("small")
+    with st.container(horizontal_alignment="right"):
+        if st.button("Collection Settings", icon=":material/settings:", type="tertiary"):
+            settings_page_flag = False
+            viewCollSettings()
 
-    # view selection radio buttons
-    view_mode = st.radio(_("Display mode"), [_("grid"), _("column")], horizontal=True)
-    # Make in settings, not radio button on main page
 
     # Sub collections
     with st.container(horizontal=True, horizontal_alignment="center", width="stretch"):
@@ -162,14 +199,13 @@ else:
                     else:
                         st.image(gfuncs.get_image_from_URL(curr_item["info"]["Image"]), width=200)
 
+                if views["Quantity"]:
+                    st.subheader(f"x{curr_item.get("quantity")}", text_alignment="right")
+
                 if views["Notes"]:
                     notes = curr_item.get("Notes")
                     if notes != "Enter notes here":
-                        # info = st.text_input("Notes", value = curr_item.get('notes'), key = f"notes_{key}", width=250)
-                        st.write(notes)
-
-                if views["Quantity"]:
-                    st.write(f"x{curr_item.get("quantity")}")
+                        st.subheader(notes)
                 
                 if st_yled.button("View More", key=f"{curr_item["info"]["Name"]}_view"):
                     viewItem(key)

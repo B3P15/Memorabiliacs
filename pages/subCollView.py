@@ -25,6 +25,8 @@ else:
     user_data_dict = backEnd.get_user_data(user_id)
     gfuncs.page_initialization(user_data_dict)
     views = backEnd.collection_views(backEnd.CURR_COLL, db)
+    ref = db.collection("Users").document(user_id).collection("Collections").document(backEnd.CURR_COLL)
+    view_mode = ref.get().to_dict()['settings']['collection view']
 
     if st.button("Back"):
         backEnd.set_sub_collection("")
@@ -96,9 +98,7 @@ else:
                         elif itemsToAdd[key] == itemQuant:
                             st.warning("Not enough of that item")
                         else:
-                            print(f"{key}: {itemsToAdd[key]}")
                             itemsToAdd[key] += 1
-                            print(f"{key}: {itemsToAdd[key]}")
                             st.rerun(scope="fragment")
                     
             totalQaunt = 0
@@ -109,7 +109,6 @@ else:
             if st.button("Save"):
                 for item in itemsToAdd.keys(): 
                     if itemsToAdd[item] != 0:
-                        print(f"{item} : {itemsToAdd[item]}")
                         backEnd.add_item_sub_coll(item, fullItems[item].get("Notes"), itemsToAdd[item], backEnd.SUB_COLL, backEnd.CURR_COLL)
                 del st.session_state["itemsToAdd"]
                 st.rerun()
@@ -124,15 +123,10 @@ else:
                         st.write(f"**{key}**: **{items[item]['info'][key]}**")
             if st.button(_("Remove From Collection")):
                 backEnd.del_item_sub_coll(item, 1, backEnd.SUB_COLL, backEnd.CURR_COLL)
-                print(f"Delete : {item}")
                 st.rerun()
 
 
-    st.space("small")
     st.subheader(backEnd.SUB_COLL, text_alignment="center")
-
-    # view selection radio buttons
-    view_mode = st.radio(_("Display mode"), [_("grid"), _("column")], horizontal=True)
 
     with st.container(horizontal=True, horizontal_alignment="center", width="stretch"):
         cols = st.columns(3, width="stretch") 
@@ -156,19 +150,13 @@ else:
                     else:
                         st.image(gfuncs.get_image_from_URL(curr_item["info"]["Image"]), width=200)
 
-                with st.container(horizontal=True, horizontal_alignment="center"):
-                    if views["Notes"]:
-                        notes = curr_item.get("notes")
-                        if notes != "Enter notes here":
-                            # info = st.text_input("Notes", value = curr_item.get('notes'), key = f"notes_{key}", width=250)
-                            st.write(notes)
+                if views["Quantity"]:
+                    st.subheader(f"x{curr_item.get("quantity")}", text_alignment="right")
 
-                    if views["Quantity"]:
-                        st.write(f"x{curr_item.get("quantity")}")
-                
-                # if info != items[key].get('notes'):
-                #     backEnd.update_notes(key, info, db)
-                #     st.success("Updated!")
+                if views["Notes"]:
+                    notes = curr_item.get("notes")
+                    if notes != "Enter notes here":
+                        st.subheader(notes)
 
                 if st_yled.button("View More", key=f"{curr_item["info"]["Name"]}_view"):
                     viewItem(key)
