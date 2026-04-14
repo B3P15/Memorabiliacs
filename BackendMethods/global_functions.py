@@ -89,7 +89,6 @@ def db_settings_to_config(user_data_dict:dict):
     if config_data != db_data:
         st.rerun()
 
-background_image = 'https://pbs.twimg.com/media/F9pQLNmXYAAKAn4.jpg'
 background_image_flag = True
 
 
@@ -103,7 +102,7 @@ def page_initialization(user_data_dict:dict):
         <style>
             .stApp {{
                 background-image: linear-gradient(to top, {read_config_val(conf_file, "textColor")}, transparent),
-                url({background_image});
+                url({user_data_dict["backgroundImageURL"]});
                 background-size: cover;
 
             }}
