@@ -60,28 +60,35 @@ else:
     def viewItem(item):
         views = backEnd.collection_views(backEnd.CURR_COLL, db)
         field_text = ""
+        print(f'views= {views}')
         with st_yled.badge_card_one(title=items[item]['info']["Name"], text=field_text, badge_text="Attributes", width="stretch", badge_color="primary", background_color=gfuncs.read_config_val(gfuncs.conf_file, "backgroundColor"), card_shadow=True, border_style="solid", border_color=gfuncs.read_config_val(gfuncs.conf_file, "textColor"), border_width=1):
-            for key in items[item]['info'].keys():
-                if key not in ("Name", "Image", "Rarity", "ID"):
-                    if views[key]:
+            if coll_type == 'Custom':
+                for key in items[item]['info'].keys():
+                    if key not in ("Name", "Image"): 
                         st.write(f"**{key}**: **{items[item]['info'][key]}**")
+            else:
+                for key in items[item]['info'].keys():
+                    if key not in ("Name", "Image"):
+                        if views[key]:
+                            st.write(f"**{key}**: **{items[item]['info'][key]}**")
             if st.button(_("Remove From Collection")):
                 backEnd.delete_reference(item, db)
       
     @st.dialog("Template Info")
     def createCustomTemplate():
-        template = []
+        template = ["Image"]
         with st_yled.badge_card_one(title='Create Custom Template', text='', badge_text="Attributes", width="stretch", badge_color="primary", background_color=gfuncs.read_config_val(gfuncs.conf_file, "backgroundColor"), card_shadow=True, border_style="solid", border_color=gfuncs.read_config_val(gfuncs.conf_file, "textColor"), border_width=1):
             tempName = st.text_input("Enter template name: ", value="here")
             for index in range(0,10):
                 value = (st.text_input("Enter attribute name: ", value="here", key=index))
                 if value != "here":
-                    template.append(value)
-        if st_yled.button(_("Create Template"), key='CT'):
+                    template.append(value.title())
+        if st.button(_("Create Template"), key='CT'):
             # Make Template arrays in both locations
             db.collection('Custom').document(backEnd.CURR_COLL).update({"templates": {tempName: template}})
             db.collection('Users').document(user_id).collection('Collections').document(backEnd.CURR_COLL).update({f"templates.{tempName}": template})
-            backEnd.get_collection_items.clear(backEnd.CURR_COLL)
+            backEnd.get_template_types.clear()
+            st.rerun()
     
     if "createCustomItemPopup" not in st.session_state:
         st.session_state.createCustomItemPopup = False
@@ -100,6 +107,8 @@ else:
                     name = attribute
                 if attribute != "":
                     attributes[template[i]] = attribute
+                if attribute == "":
+                    attributes[template[i]] = "blank"
             if st_yled.button(_("Create"), key="CreateKey"):
                 new_item_id = db.collection('Custom').document(backEnd.CURR_COLL)
                 db.collection('Custom').document(backEnd.CURR_COLL).update({
@@ -134,16 +143,17 @@ else:
                     if coll_type == "Custom":
                         # Make custom item list match format of normal item list
                         item_list = db.collection('Custom').document(backEnd.CURR_COLL).get().to_dict()['items']
+                        print(f'item lisit = {item_list}')
                     for i, key in enumerate(items.keys()):
                         col = cols[i % 3]
-                        print(f'items = {items}')
                         curr_item = items[key]
                         with col.container(horizontal_alignment="center"):
                             st_yled.subheader(f"{curr_item['info'].get('Name')}", text_alignment="center")
 
                             if backEnd.CURR_COLL.split("_")[1] == "Custom":
-                                if curr_item["info"]["image"] is not None:
-                                    st.image(curr_item["info"]["image"], width=200)
+                                if curr_item["info"]["Image"] is not None:
+                                    print(f'image = {curr_item}')
+                                    st.image(curr_item["info"]["Image"], width=200)
                                 else:
                                     st.image(gfuncs.THUMNAIL_URLS["Custom"], width=200)
                             else:

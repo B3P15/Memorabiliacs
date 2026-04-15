@@ -78,10 +78,16 @@ def get_template_types():
     user_id = st.session_state.user_info['localId']
     types = db.collection("Users").document(user_id).collection("Collections").document(CURR_COLL).get().to_dict()['templates']
     typelist = list(types.keys())
+    tlist = []
+    for key in typelist:
+        if key == 'No Custom Template':
+            tlist.insert(0, 'No Custom Template')
+        else:
+            tlist.append(key)
     if typelist == ["No Custom Template"]:
         return typelist
     else:
-        return typelist[2::]
+        return tlist[1::]
     
 
 @st.cache_data(ttl=3600)
@@ -242,7 +248,7 @@ def generate_collection(collection_name: str, db):
     collection_doc = collection_ref.get()
     if collection_doc.exists:
         items_refs = collection_doc.to_dict()
-        print(f'items_refs = {items_refs}')
+        # print(f'items_refs = {items_refs}')
         return items_refs["items"]
     else:
         return []
@@ -254,8 +260,9 @@ def get_collection_items(collection_name: str):
     db = get_firestore_client()  # Use cached client
     collectionData = generate_collection(collection_name, db)
     items = {}
-    print(f'collectionData = {collectionData}')
+    # print(f'collectionData = {collectionData}')
     coll_type = CURR_COLL.split("_")[1]
+    user_id = st.session_state.user_info['localId']
     if coll_type != "Custom":
         for id in collectionData:
             items[id] = {'info' : (collectionData[id].get('ref')).get().to_dict(),
@@ -267,10 +274,13 @@ def get_collection_items(collection_name: str):
             return items
         else:
             for key in collectionData:
-                actualData = collectionData[key]['ref'].get().to_dict()
+                actualData = collectionData[key]['ref'].get().to_dict()['items']
+                userData = db.collection('Users').document(user_id).collection('Collections').document(CURR_COLL).get().to_dict()['items']
+                print(f'actual data = {actualData}')
+                print(f'userData = {userData}')
                 for id in actualData:
-                    items[id] = {'info' : (actualData[id].get('ref')).get().to_dict()['items'],
-                                'notes' : actualData[id].get('notes')
+                    items[id] = {'info' : actualData[id],
+                                'notes' : userData[id].get('notes')
                                 }
             return items 
 
