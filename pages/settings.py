@@ -178,4 +178,6 @@ else:
                 backEnd.get_user_data.clear(user_id)
                 sleep(0.25)
                 st.rerun()
+    with st.popover(_("Background Image Settings")):
+        new_image_URL = st.text_input(("URL of image to be used for background: "), value=db_settings["backgroundImageURL"])
 

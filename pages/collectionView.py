@@ -183,16 +183,21 @@ else:
                             st.image(gfuncs.THUMNAIL_URLS["Custom"], width=200)
                     else:
                         st.image(gfuncs.get_image_from_URL(curr_item["info"]["Image"]), width=200)
-    
-                    info = st.text_input("Notes", value = curr_item.get('notes'), key = f"notes_{key}", width=250)
+                itemCols = st.columns(2, width="stretch")
+                with itemCols[1].container(horizontal_alignment="right"):
+                    if views["Quantity"]:
+                        st.subheader(f"x{curr_item.get("quantity")}", text_alignment="right")
+                with itemCols[0].container(horizontal_alignment="left"):
+                    if views["Notes"]:
+                        notes = curr_item.get("Notes")
+                        if notes != "Enter notes here":
+                            st.subheader(notes)
                     
-                    if info != items[key].get('notes'):
-                        backEnd.update_notes(key, info, db)
-                        st.success("Updated!")
-                        
-                    if st_yled.button("View More", key=f"{curr_item['info'].get('Name')}_view"):
-                        viewItem(key)
-                    st.space("medium")
+                if st_yled.button("View More", key=f"{curr_item['info']['Name']}_{key}_view"):
+                    viewItem(key)
+                st.space("medium")
+    
+                    
 
 
     # Container in bottom right for add button
