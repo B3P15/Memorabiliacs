@@ -72,108 +72,127 @@ else:
             backEnd.set_collection("")
         except Exception:
             backEnd.CURR_COLL = ""
+    
     if search_type == "Custom":
-        input_mode = st_yled.radio(_("Input source"), options=[_("Upload"), _("Camera")], horizontal=True)
-        enhanced = st_yled.toggle(_("Enhanced decode (slower)"), value=False)
-        uploaded = None
+        tab1, tab2 = st.tabs(["UPC Search", "Custom Image Upload"])
+        with tab1:
+            input_mode = st_yled.radio(_("Input source"), options=[_("Upload"), _("Camera")], horizontal=True)
+            enhanced = st_yled.toggle(_("Enhanced decode (slower)"), value=False)
+            uploaded = None
 
-        if input_mode == _("Camera"):
-            uploaded = st.camera_input(_("Scan barcode"))
-        else:
-            uploaded = st.file_uploader(_("Upload barcode image"), type=["png", "jpg", "jpeg"])
-
-        decoded: list[dict[str, str]] = []
-        if uploaded is not None:
-            try:
-                image = backEnd._load_image(uploaded)
-                decoded = backEnd._decode_barcodes(image)
-                if enhanced and not decoded:
-                    decoded = backEnd._decode_with_enhancements(image)
-            except Exception as exc:
-                st_yled.error(f"{_('Failed to read image:')} {exc}")
-
-        if decoded:
-            supported_codes = backEnd._extract_supported_codes(decoded)
-            if supported_codes:
-                st_yled.success(_("Supported code(s) detected"))
-                options = [f"{item['code']} ({item['label']})" for item in supported_codes]
-                selected = st_yled.selectbox(_("Detected codes"), options=options)
-                st.session_state["last_code"] = selected.split(" ")[0]
+            if input_mode == _("Camera"):
+                uploaded = st.camera_input(_("Scan barcode"))
             else:
-                st_yled.warning(_("Barcode detected, but no UPC/EAN/ISBN code found."))
-        elif uploaded is not None:
-            st_yled.warning(_("No barcode detected. Try a clearer image with the code centered."))
+                uploaded = st.file_uploader(_("Upload barcode image"), type=["png", "jpg", "jpeg"])
 
-        st.divider()
-        upc_query = st_yled.text_input(_("Enter UPC code"), value=st.session_state.get("last_code", ""))
-        if upc_query:
-            normalized = backEnd._normalize_payload(upc_query)
-            if len(normalized) == 10 and normalized[:-1].isdigit() and normalized[-1] in "Xx":
-                code = normalized[:-1] + "X"
-                label = backEnd._classify_code(code, "ISBN10")
-                st_yled.success(f"{label} {_('ready for use')}: {code}")
-            elif normalized.isdigit() and len(normalized) in {8, 12, 13}:
-                label = backEnd._classify_code(normalized, "")
-                st_yled.success(f"{label} {_('ready for use')}: {normalized}")
-            else:
-                st.info(_("Enter a valid UPC (8/12), EAN (8/13), or ISBN (10/13)."))
-            if st_yled.button(_("Search UPC")):
-                with st.spinner(_("Searching UPC...")):
-                    try:
-                        st.markdown(_("UPC search results:"))
-                        cols = st.columns(2)
-                        upc_result = backEnd.test_upc_api(upc_query)
-                        
-                        def add_upc_button(upc_result):
-                            item_id = upc_result.get("ean", upc_query)
-                            proper_id = str(item_id).replace("-", "_")
-                            #add UPC object to Custom collection in firestore
-                            db.collection("Custom").document(proper_id).set(upc_result, merge=True)
-                            backEnd.add_reference_search(proper_id, item_id, db)
-                            st_yled.success(
-                                _("Added '{item}' to your {collection} collection!").format(
-                                    item=upc_result.get("name", _("UPC Item")),
-                                    collection=backEnd.CURR_COLL.split("_")[0],
+            decoded: list[dict[str, str]] = []
+            if uploaded is not None:
+                try:
+                    image = backEnd._load_image(uploaded)
+                    decoded = backEnd._decode_barcodes(image)
+                    if enhanced and not decoded:
+                        decoded = backEnd._decode_with_enhancements(image)
+                except Exception as exc:
+                    st_yled.error(f"{_('Failed to read image:')} {exc}")
+
+            if decoded:
+                supported_codes = backEnd._extract_supported_codes(decoded)
+                if supported_codes:
+                    st_yled.success(_("Supported code(s) detected"))
+                    options = [f"{item['code']} ({item['label']})" for item in supported_codes]
+                    selected = st_yled.selectbox(_("Detected codes"), options=options)
+                    st.session_state["last_code"] = selected.split(" ")[0]
+                else:
+                    st_yled.warning(_("Barcode detected, but no UPC/EAN/ISBN code found."))
+            elif uploaded is not None:
+                st_yled.warning(_("No barcode detected. Try a clearer image with the code centered."))
+
+            st.divider()
+            upc_query = st_yled.text_input(_("Enter UPC code"), value=st.session_state.get("last_code", ""))
+            if upc_query:
+                normalized = backEnd._normalize_payload(upc_query)
+                if len(normalized) == 10 and normalized[:-1].isdigit() and normalized[-1] in "Xx":
+                    code = normalized[:-1] + "X"
+                    label = backEnd._classify_code(code, "ISBN10")
+                    st_yled.success(f"{label} {_('ready for use')}: {code}")
+                elif normalized.isdigit() and len(normalized) in {8, 12, 13}:
+                    label = backEnd._classify_code(normalized, "")
+                    st_yled.success(f"{label} {_('ready for use')}: {normalized}")
+                else:
+                    st.info(_("Enter a valid UPC (8/12), EAN (8/13), or ISBN (10/13)."))
+                if st_yled.button(_("Search UPC")):
+                    with st.spinner(_("Searching UPC...")):
+                        try:
+                            st.markdown(_("UPC search results:"))
+                            cols = st.columns(2)
+                            upc_result = backEnd.test_upc_api(upc_query)
+                            
+                            def add_upc_button(upc_result):
+                                item_id = upc_result.get("ean", upc_query)
+                                proper_id = str(item_id).replace("-", "_")
+                                #add UPC object to Custom collection in firestore
+                                db.collection("Custom").document(proper_id).set(upc_result, merge=True)
+                                backEnd.add_reference_search(proper_id, item_id, db)
+                                st_yled.success(
+                                    _("Added '{item}' to your {collection} collection!").format(
+                                        item=upc_result.get("name", _("UPC Item")),
+                                        collection=backEnd.CURR_COLL.split("_")[0],
+                                    )
                                 )
-                            )
 
-                        with cols[0]:
-                            if upc_result["image"]:
-                                st.image(upc_result["image"], width="content")
-                            with st_yled.badge_card_one(title=upc_result.get('name', _('No title')), text=f"\n**UPC: {upc_result.get('ean', '')}**", badge_text=_("UPC Result"), badge_color="primary",
-                                                   background_color=gfuncs.read_config_val(gfuncs.conf_file, "backgroundColor"), card_shadow=True, height="content", width=400, text_font_size=17, title_font_size=30, title_font_weight="bold", 
-                                                   border_style="solid", border_color=gfuncs.read_config_val(gfuncs.conf_file, "textColor"), border_width=1):
-                                if upc_result["description"]:
-                                    st.write(f"{_('Description')}: {upc_result['description']}")
-                                # if upc_result["publisher"]:
-                                #     st.write(f"{_('Publisher')}: {upc_result['publisher']}")
-                                st.write(f"{_('Item ean')}: {upc_result['ean']}")
-                                if backEnd.CURR_COLL:
-                                    st_yled.button(_("Add to {collection} Collection").format(collection=backEnd.CURR_COLL.split('_')[0]), key=f"add_upc_{upc_result['ean']}", on_click=add_upc_button, kwargs={"upc_result": upc_result})
+                            with cols[0]:
+                                if upc_result["image"]:
+                                    st.image(upc_result["image"], width="content")
+                                with st_yled.badge_card_one(title=upc_result.get('name', _('No title')), text=f"\n**UPC: {upc_result.get('ean', '')}**", badge_text=_("UPC Result"), badge_color="primary",
+                                                    background_color=gfuncs.read_config_val(gfuncs.conf_file, "backgroundColor"), card_shadow=True, height="content", width=400, text_font_size=17, title_font_size=30, title_font_weight="bold", 
+                                                    border_style="solid", border_color=gfuncs.read_config_val(gfuncs.conf_file, "textColor"), border_width=1):
+                                    if upc_result["description"]:
+                                        st.write(f"{_('Description')}: {upc_result['description']}")
+                                    # if upc_result["publisher"]:
+                                    #     st.write(f"{_('Publisher')}: {upc_result['publisher']}")
+                                    st.write(f"{_('Item ean')}: {upc_result['ean']}")
+                                    if backEnd.CURR_COLL:
+                                        st_yled.button(_("Add to {collection} Collection").format(collection=backEnd.CURR_COLL.split('_')[0]), key=f"add_upc_{upc_result['ean']}", on_click=add_upc_button, kwargs={"upc_result": upc_result})
 
-                    except Exception as e:
-                        st_yled.error(f"{_('UPC search failed')}: {e}")
+                        except Exception as e:
+                            st_yled.error(f"{_('UPC search failed')}: {e}")
 
-        st.divider()
+        with tab2:
+            # Test for GCS image upload, leaving here if others want to mess with
+            uploaded = st.file_uploader("Upload image to GCS", type=["png", "jpg", "jpeg", "webp"])
 
-        # Test for GCS image upload, leaving here if others want to mess with
-        uploaded = st.file_uploader("Upload image to GCS", type=["png", "jpg", "jpeg", "webp"])
+            if uploaded and st.button("Save image"):
+                db = backEnd.get_firestore_client()
+                user_id = st.session_state.user_info["localId"]
+                backEnd.upload_user_image(uploaded, user_id, db)
+                st.success("Image uploaded.")
 
-        if uploaded and st.button("Save image"):
+            
+            st.divider()
+
+            def add_custom_button(item_id, image_name):
+                            proper_id = str(item_id).replace("-", "_")
+                            backEnd.add_reference_search(proper_id, item_id, db)
+                            st_yled.success(_("Added '{item}' to your {collection} collection!").format(item=image_name, collection=backEnd.CURR_COLL.split('_')[0]))
             db = backEnd.get_firestore_client()
             user_id = st.session_state.user_info["localId"]
-            backEnd.upload_user_image(uploaded, user_id, db)
-            st.success("Image uploaded.")
+            image_name_list = backEnd.get_user_image_names(user_id, db)
+            with st.container(horizontal=True, horizontal_alignment="left", width="stretch", gap="medium"):
+                for image_name in image_name_list:
+                    img_url = backEnd.get_user_image_url(user_id, db, image_name)
+                    if img_url:
+                        with st.container(vertical_alignment="top"):
+                            st.image(img_url, width=250)
+                            with st_yled.badge_card_one(title=image_name, background_color=gfuncs.read_config_val(gfuncs.conf_file, "backgroundColor"), 
+                                                card_shadow=True, badge_text=_("Custom Image"), badge_color="primary", text=f"\r\n{image_name}",
+                                                height="content", width=400, text_font_size=17, title_font_size=30, title_font_weight="bold", 
+                                                border_style="solid", border_color=gfuncs.read_config_val(gfuncs.conf_file, "textColor"), border_width=1):
+                                if backEnd.CURR_COLL:
+                                    st_yled.button(_("Add to {collection} Collection").format(collection=backEnd.CURR_COLL.split('_')[0]), key=f"add_{image_name}", on_click=add_custom_button, kwargs={"item_id": image_name, "image_name": image_name})
 
-        db = backEnd.get_firestore_client()
-        user_id = st.session_state.user_info["localId"]
-        img_url = backEnd.get_user_image_url(user_id, db)
-        if img_url:
-            st.image(img_url)
 
-        st.divider()
 
-        # display all pictures with button to add to collection
+            # display all pictures with button to add to collection
 
     elif search_type == "Pokemon":
         with st_yled.form(key="algolia_search_form", clear_on_submit=False):

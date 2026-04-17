@@ -170,7 +170,7 @@ else:
                 st.rerun()
 
     with st.popover(_("Background Image Settings")):
-        new_image_URL = st.text_input(_("URL of image to be used for background: "))
+        new_image_URL = st.text_input(_("URL of image to be used for background: "), value=db_settings["backgroundImageURL"])
 
         
         if st.checkbox(_("Toggle Background Image"), value=db_settings["backgroundImageFlag"], key="toggle_background"):

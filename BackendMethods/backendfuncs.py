@@ -739,7 +739,7 @@ def upload_user_image(uploaded_file, user_id: str, db, firestore_field: str = "p
     """
     bucket = get_cloud_storage()
     ext = os.path.splitext(uploaded_file.name or "")[1].lower() or ".bin"
-    blob_name = f"user_uploads/{user_id}/{uuid.uuid4().hex}{ext}"
+    blob_name = f"user_uploads/{user_id}/{uploaded_file.name}"
     blob = bucket.blob(blob_name)
 
     blob.upload_from_string(
@@ -747,7 +747,7 @@ def upload_user_image(uploaded_file, user_id: str, db, firestore_field: str = "p
         content_type=(uploaded_file.type or "application/octet-stream")
     )
 
-    db.collection("Users").document(user_id).collection("UserImages").document().set({
+    db.collection("Users").document(user_id).collection("UserImages").document(uploaded_file.name).set({
         "image_name": uploaded_file.name,
         "image": blob_name
     })
