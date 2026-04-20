@@ -52,7 +52,7 @@ else:
     #st_yled.init(css_path=backEnd.CURR_THEME)
     st_yled.init()
 
-    if gfuncs.background_image_flag:
+    if user_data_dict["backgroundImageFlag"]:
         subheader_color = gfuncs.read_config_val(gfuncs.conf_file, "backgroundColor")
     else:
         subheader_color = gfuncs.read_config_val(gfuncs.conf_file, "textColor")
