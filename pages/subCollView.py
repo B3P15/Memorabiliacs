@@ -168,7 +168,7 @@ else:
                         notes = curr_item.get("Notes")
                         if notes != "Enter notes here":
                             st.subheader(notes)
-                if st_yled.button("View More", key=f"{curr_item["info"]["Name"]}_view"):
+                if st_yled.button("View More", key=f"{curr_item["info"]["Name"]}_{key}_view"):
                     viewItem(key)
                 st.space("medium")
 
