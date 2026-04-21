@@ -59,6 +59,12 @@ else:
                 st.rerun()
             else:
                 st.error("Quantity must be a whole number")
+    
+    def add_wishlisted_item(item, name):
+        if backEnd.wishlist_item(item, backEnd.CURR_COLL):
+            st_yled.success(_("Wishlisted '{item}' to your {collection} collection!").format(item=name, collection=backEnd.CURR_COLL.split('_')[0]))
+        else:
+            st.error("Item is already in the collection")
 
     st_yled.subheader(_("Search for Collectables!"), text_alignment="center")
     st.space("small")
@@ -209,11 +215,6 @@ else:
                         for idx, item in enumerate(pokemon_results):
                             with cols[idx % 3]:
                                 innercols = st.columns([0.5,4,0.5])
-                                def add_pokemon_button(item_id, Cardname):
-                                    proper_id = str(item_id).replace("-", "_")
-                                    backEnd.add_reference_search(proper_id, item_id, db)
-                                    st.audio(gfuncs.DEFAULT_SOUNDS["add"], autoplay=True, width=1, start_time=0)
-                                    st_yled.success(_("Added '{item}' to your {collection} collection!").format(item=Cardname, collection=backEnd.CURR_COLL.split('_')[0]))
                                 if item.get("image"):
                                     with innercols[1]:
                                         st.image(item["image"], width="stretch")
@@ -225,6 +226,7 @@ else:
                                     st_yled.write(f"**{_('Flavortext')}: {item.get('flavorText', 'N/A')}**")
                                     if backEnd.CURR_COLL:
                                         st_yled.button(_("Add to {collection} Collection").format(collection=backEnd.CURR_COLL.split('_')[0]), key=f"add_{item['id']}", on_click=add_item_to_coll, kwargs={"item_id": item['id'], "name": item['name']})
+                                        st_yled.button(_("Wishlist to {collection} Collection").format(collection=backEnd.CURR_COLL.split('_')[0]), key=f"wishlist{item['id']}", on_click=add_wishlisted_item, kwargs={"item": item['id'], "name": item['name']})
                                 st.space("small")
 
             elif search_type == "Movies":

@@ -114,12 +114,11 @@ else:
             with st.container(horizontal=True, horizontal_alignment="center"):
                 if st_yled.button(_("Yes"), key="confirmRemove", width="content"):
                     for coll in removedCollections:
-                        ref = db.collection("Users").document(user_id).collection("Collections").document(coll)
-                        ref.delete()
+                        backEnd.delete_collection(coll)
                     removedCollections.clear()
-                    backEnd.get_user_collections.clear(user_id)
+                    backEnd.get_user_collections.clear()
                     st.rerun()
-                
+        
                 if st_yled.button(_("No"), key="cancelRemove", width="content"):
                     gfuncs.removeCheck = False
                     st.rerun()
@@ -169,8 +168,10 @@ else:
                 gfuncs.sleep(0.25)
                 st.rerun()
 
-        # if st.button("Change data"):
-        #     backEnd.renameData(db)
+        if st.button("Test"):
+            test = backEnd.get_collection_wishlisted("Pokemon_Pokemon")
+            for thing in test:
+                print(f"{thing} : {test[thing].get("Name")}")
 
     with st.sidebar:
         st.space("small")

@@ -15,8 +15,9 @@ from PIL import Image, ImageEnhance, ImageFilter, ImageOps
 from pyzbar import pyzbar
 import firebase_admin
 from firebase_admin import credentials, storage
+from BackendMethods.auth_functions import access_secret_version
 
-#st.secrets = access_secret_version()
+st.secrets = access_secret_version()
 BASE_API_URL = "https://apitcg.com/api"
 APITCG_API_KEY = st.secrets["APITCG_API_KEY"]
 REBRICK_API_KEY = st.secrets["REBRICK_API_KEY"]
@@ -187,6 +188,22 @@ def collection_views(collection_name:str, db):
 
     return collection_ref.get().to_dict()["settings"]["views"]
 
+def get_collection_wishlisted(collection:str):
+    """Gets all wishlisted items
+    
+    collection: full name of collection
+    """
+    user_id = st.session_state.user_info['localId']
+    db = get_firestore_client()
+    coll_ref = db.collection("Users").document(user_id).collection("Collections").document(collection)
+    data = coll_ref.get().to_dict().get("Wishlist", None)
+
+    items = {}
+    if data != None:
+        for item in data:
+            items[item] = data[item].get("ref").get().to_dict()
+    return items
+
 ## Sub Coll ##
 @st.cache_data(ttl=3600)
 def get_sub_collections(collection:str):
@@ -308,6 +325,17 @@ def rename_collection(collection_name:str, new_collection:str, db):
     collection_ref_OLD.delete()
     get_user_collections.clear(user_id)
 
+def delete_collection(collection:str):
+    """Deletes collection
+    
+    collection: full name of collection
+    """
+    user_id = st.session_state.user_info['localId']
+    db = get_firestore_client()
+
+    ref = db.collection("Users").document(user_id).collection("Collections").document(collection)
+    db.recursive_delete(ref)
+
 def update_notes(item_id, new_notes, db):
     """Sets the user's specific note per item
     
@@ -349,6 +377,28 @@ def add_item(item_id:str, notes:str, quantity:int, db):
             }
         })
     get_collection_items.clear(CURR_COLL)
+
+def wishlist_item(item:str, collection:str) -> bool:
+    """Adds item to collection as wishlisted item
+    
+    item: item id
+    collection: full collection name
+    Return false if error, true if success"""
+    user_id = st.session_state.user_info['localId']
+    db = get_firestore_client()
+    coll_type = collection.split("_")[1]
+    fixed_name = item.replace("-", "_")
+    item_ref = db.collection(coll_type).document(item)
+    coll_ref = db.collection("Users").document(user_id).collection("Collections").document(collection)
+
+    coll_items = get_collection_items(collection)
+    if fixed_name in coll_items:
+        return False
+
+    coll_ref.update({f"Wishlist.{fixed_name}" : {
+        "ref" : item_ref
+    }})
+    return True
 
 def delete_reference(item_doc_id, db):
     """Deleted an item from the user's collection
