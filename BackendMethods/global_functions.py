@@ -8,7 +8,7 @@ import requests
 from PIL import Image
 from io import BytesIO
 
-conf_file = os.path.join(os.path.dirname(__file__), '.streamlit', 'config.toml')
+conf_file = os.path.join(os.path.dirname(__file__), '..', '.streamlit', 'config.toml')
 collection_page = "pages/collectionView.py"
 sub_coll_page = "pages/subCollView.py"
 home_page = "pages/home_page.py"
