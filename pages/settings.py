@@ -34,7 +34,8 @@ if 'user_info' not in st.session_state:
 else:
 
     # Specifies the config file that will be read from and written to
-    conf_file = ".streamlit/config.toml"
+    conf_file = os.path.join(os.path.dirname(__file__), '.streamlit', 'config.toml')
+    #conf_file = ".streamlit/config.toml"
 
     user_id = st.session_state.user_info["localId"]
 
