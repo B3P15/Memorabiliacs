@@ -60,6 +60,7 @@ def update_settings(conf:str, diction:dict) -> None:
 
 # Opens config file and reads the value of a specified variable
 def read_config_val(conf:str, var:str) -> str:
+    result_list = []
     with open(conf, "r") as f:
         config_lines = f.readlines()
         for line in config_lines:
