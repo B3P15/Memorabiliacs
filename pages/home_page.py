@@ -52,13 +52,8 @@ else:
     #st_yled.init(css_path=backEnd.CURR_THEME)
     st_yled.init()
 
-    if user_data_dict["backgroundImageFlag"]:
-        subheader_color = gfuncs.read_config_val(gfuncs.conf_file, "backgroundColor")
-    else:
-        subheader_color = gfuncs.read_config_val(gfuncs.conf_file, "textColor")
-    
-    st_yled.subheader(f"{_('Your Collections')}", text_alignment="center", color=subheader_color)
-    st_yled.subheader(f"{_('Hello')}, {st.session_state.user_info['email'].split('@')[0]}!", text_alignment="center", font_size=20, color=subheader_color)
+    st_yled.subheader(f"{_('Your Collections')}", text_alignment="center")
+    st_yled.subheader(f"{_('Hello')}, {st.session_state.user_info['email'].split('@')[0]}!", text_alignment="center", font_size=20)
     # DEGUB:{st.session_state.user_info}
     st.space("small")
 

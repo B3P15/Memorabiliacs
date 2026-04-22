@@ -62,11 +62,11 @@ def update_settings(conf:str, diction:dict) -> None:
 def read_config_val(conf:str, var:str) -> str:
     with open(conf, "r") as f:
         config_lines = f.readlines()
-
         for line in config_lines:
             if var in line:
                 result_list = line.split('"')
-
+    if not result_list:
+        raise ValueError(f"Variable {var} not found in config file.")
     return result_list[1]
 
 
@@ -120,6 +120,13 @@ def page_initialization(user_data_dict:dict):
             .stPageLink {{
                 color: {read_config_val(conf_file, "textColor")};
                 background-color: {read_config_val(conf_file, "backgroundColor")};
+            }}
+
+            .stHeading {{
+                color: {read_config_val(conf_file, "textColor")};
+                background-color: {read_config_val(conf_file, "backgroundColor")};
+                border-radius: 15px;
+                width: 20%;
             }}
         </style>
         '''
