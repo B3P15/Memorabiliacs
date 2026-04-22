@@ -5,6 +5,8 @@ from BackendMethods.translations import _
 import st_yled
 import os
 import time
+import numpy as np
+
 
 # Connects to db
 try:
@@ -211,6 +213,17 @@ else:
                 if st_yled.button("View More", key=f"{curr_item['info']['Name']}_{key}_view"):
                     viewItem(key)
                 st.space("medium")
+
+    with st.container(horizontal=True, horizontal_alignment="center", width="stretch"):
+        wishlist = backEnd.get_collection_wishlisted(backEnd.CURR_COLL)
+        for i, key in enumerate(wishlist.keys()):
+            if view_mode == _("grid"):
+                col = cols[i % 3]
+            else: 
+                col = cols[1]
+            with col.container(horizontal_alignment="center"):
+                img = gfuncs.image_to_array(wishlist[key].get("Image"))
+                st.image(img)  
     
 
     # Container in bottom right for add button
