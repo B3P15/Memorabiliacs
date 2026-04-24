@@ -92,6 +92,22 @@ def db_settings_to_config(user_data_dict:dict):
     if config_data != db_data:
         st.rerun()
 
+def apply_background_image(background_image_url:str) -> None:
+    # valid_url_response = requests.head(background_image_url)
+    # if valid_url_response.headers.get('Content-Type', '').startswith('image/'):
+    css = f'''
+        <style>
+            .stApp {{
+                background-image: linear-gradient(to top, {read_config_val("textColor")}, transparent),
+                url({background_image_url});
+                background-size: cover;
+                background-color: {read_config_val( "backgroundColor")};
+                color: {read_config_val( "textColor")} !important;
+                font-family: {read_config_val( "font")};
+            }}
+        </style>
+        '''
+    st.markdown(css, unsafe_allow_html=True)
 
 # Sets the page width, title, and buttons for home, search, settings
 # To be used at the start of any page
@@ -104,15 +120,6 @@ def page_initialization(user_data_dict:dict):
     
     css = f'''
         <style>
-            .stApp {{
-                background-image: linear-gradient(to top, {read_config_val( "textColor")}, transparent),
-                url({user_data_dict["backgroundImageURL"]});
-                background-size: cover;
-                background-color: {read_config_val( "backgroundColor")};
-                color: {read_config_val( "textColor")} !important;
-                font-family: {read_config_val( "font")};
-
-            }}
             .stApp > header {{
                 background-color: transparent;
             }}
@@ -195,6 +202,7 @@ def page_initialization(user_data_dict:dict):
     st.set_page_config(layout="wide")
     if user_data_dict["backgroundImageFlag"] is True:
         st.markdown(css, unsafe_allow_html=True)
+        apply_background_image(user_data_dict["backgroundImageURL"])
     st_yled.init()
     st_yled.title(_("Memorabiliacs"), text_alignment="center", width="stretch")
     with st.container(horizontal=True, vertical_alignment="top"):
