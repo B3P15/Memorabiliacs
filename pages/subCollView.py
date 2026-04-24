@@ -40,7 +40,7 @@ else:
 
     background = subRef.get().to_dict().get("settings").get("background")
     if background != "":
-        gfuncs.apply_background_image(background)
+        gfuncs.apply_background_image(background, user_data_dict["gradientBool"])
 
     if st.button("Back"):
         backEnd.set_sub_collection("")
