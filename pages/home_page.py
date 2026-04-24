@@ -38,12 +38,9 @@ else:
     removedCollections = []
     user_lang = user_data_dict.get('language', 'en')
     set_language(user_lang)
-    print(gfuncs.conf_file)
-    with open(gfuncs.conf_file, "r") as f:
-        config_lines = f.readlines()
-        print(config_lines)
-        #f.write("[theme]\nbase=\"dark\"\nbackgroundColor=\"#1a1a1a\"\ntextColor=\"#dddddd\"\nfont=\"Roboto:https://fonts.cdnfonts.com/css/roboto\"\n[client]\nshowSidebarNavigation=false")
-    gfuncs.db_settings_to_config(user_data_dict)
+    gfuncs.db_settings_to_session_state(user_data_dict)
+    print("Session state after db settings to session state:", st.session_state)
+    #gfuncs.db_settings_to_config(user_data_dict)
     st_yled.init()
     gfuncs.page_initialization(user_data_dict)
     # st_yled.init(css_path=backEnd.CURR_THEME)
@@ -56,10 +53,10 @@ else:
     st.space("small")
     #st_yled.init(css_path=backEnd.CURR_THEME)
     st_yled.init()
-
-    st_yled.subheader(f"{_('Your Collections')}", text_alignment="center")
-    st_yled.subheader(f"{_('Hello')}, {st.session_state.user_info['email'].split('@')[0]}!", text_alignment="center", font_size=20)
-    # DEGUB:{st.session_state.user_info}
+    with st.container( horizontal_alignment="center"):
+        st_yled.text(f"{_('Your Collections')}", text_alignment="center", font_size="1.75rem")
+        st_yled.text(f"{_('Hello')}, {st.session_state.user_info['email'].split('@')[0]}!", text_alignment="center", font_size="1.25rem")
+        # DEGUB:{st.session_state.user_info}
     st.space("small")
 
     # Center section for collections
@@ -136,12 +133,12 @@ else:
                         if gfuncs.removeCheck:
                             if st.checkbox(" ", key=f"remove_{collInfo[0]}", width="content"):
                                 removedCollections.append(doc['id'])
-                    with st_yled.image_card_one(title=f"{collInfo[0]}", image_path=gfuncs.THUMNAIL_URLS[collInfo[1]], text=f"**{_('Type')}: {collInfo[1]}**", background_color=gfuncs.read_config_val(gfuncs.conf_file, "backgroundColor"), width=250, height=350, border_style="solid", border_color=gfuncs.read_config_val(gfuncs.conf_file, "textColor"), border_width=1):
-                        if st_yled.button(_("View Collection"), border_width=5, key=f"{collInfo[0]}_link", width="stretch"):
+                    with st_yled.image_card_one(title=f"{collInfo[0]}", image_path=gfuncs.THUMNAIL_URLS[collInfo[1]], text=f"**{_('Type')}: {collInfo[1]}**", background_color=gfuncs.read_config_val( "backgroundColor"), width=275, height=350, border_style="solid", border_color=gfuncs.read_config_val( "textColor"), border_width=1):
+                        if st_yled.button(_("View Collection"), key=f"{collInfo[0]}_link", width="stretch"):
                             backEnd.set_collection(doc['id'])
                             st.switch_page(gfuncs.collection_page)
                         st_yled.space("small")
-                        if st_yled.button(_("Edit"), border_width=5, key=f"edit_{collInfo[0]}", width="stretch"):
+                        if st_yled.button(_("Edit"), key=f"edit_{collInfo[0]}", width="stretch"):
                             edit_collection(doc)
 
                     st.space("medium")
@@ -165,7 +162,7 @@ else:
 
     with st.sidebar:
         st.space("small")
-        st.title(_("All Collections:"))
+        st.header(_("All Collections:"))
         for coll in fullCollections:
             if st.button(f"{coll.split("_")[0]}", type="tertiary"):
                 backEnd.set_collection(coll)

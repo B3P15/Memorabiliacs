@@ -51,25 +51,25 @@ def update_config_val(conf:str, var:str, new:str) -> None:
         f.writelines(config_lines)
 
 
-# A check to not adjust "theme" in config file (should be in database)
-def update_settings(conf:str, diction:dict) -> None:
+# A check to not adjust "theme" in the session state (should be in database)
+def update_settings( diction:dict) -> None:
     for setting in diction:
         if setting != "theme":
-            update_config_val(conf, setting, diction[setting])
+            #update_config_val(conf, setting, diction[setting])
+            st.session_state[setting] = diction[setting]
 
 
-# Opens config file and reads the value of a specified variable
-def read_config_val(conf:str, var:str) -> str:
-    result_list = []
-    with open(conf, "r") as f:
-        config_lines = f.readlines()
-        for line in config_lines:
-            if var in line:
-                result_list = line.split('"')
-    if not result_list:
-        raise ValueError(f"Variable {var} not found in config file.")
-    return result_list[1]
+# checks session state and reads the value of a specified variable
+def read_config_val(var:str) -> str:
+    return st.session_state.get(var, "")
 
+def db_settings_to_session_state(user_data_dict:dict):
+    st.session_state["backgroundImageURL"] = user_data_dict.get("backgroundImageURL", "")
+    st.session_state["backgroundImageFlag"] = user_data_dict.get("backgroundImageFlag", False)
+    st.session_state["base"] = user_data_dict.get("base", "dark")
+    st.session_state["backgroundColor"] = user_data_dict.get("backgroundColor", "#1a1a1a")
+    st.session_state["textColor"] = user_data_dict.get("textColor", "#dddddd")
+    st.session_state["font"] = user_data_dict.get("font", "Roboto:https://fonts.cdnfonts.com/css/roboto")
 
 # Updates config data to match database data
 def db_settings_to_config(user_data_dict:dict):
@@ -80,7 +80,7 @@ def db_settings_to_config(user_data_dict:dict):
     config_data = []
     db_data = []
     for var in variables_to_update:
-        config_data.append(read_config_val(conf_file, var))
+        config_data.append(read_config_val( var))
         db_data.append(user_data_dict[var])
 
 
@@ -105,9 +105,12 @@ def page_initialization(user_data_dict:dict):
     css = f'''
         <style>
             .stApp {{
-                background-image: linear-gradient(to top, {read_config_val(conf_file, "textColor")}, transparent),
+                background-image: linear-gradient(to top, {read_config_val( "textColor")}, transparent),
                 url({user_data_dict["backgroundImageURL"]});
                 background-size: cover;
+                background-color: {read_config_val( "backgroundColor")};
+                color: {read_config_val( "textColor")} !important;
+                font-family: {read_config_val( "font")};
 
             }}
             .stApp > header {{
@@ -119,15 +122,60 @@ def page_initialization(user_data_dict:dict):
             }}
 
             .stPageLink {{
-                color: {read_config_val(conf_file, "textColor")};
-                background-color: {read_config_val(conf_file, "backgroundColor")};
+                color: {read_config_val( "textColor")};
+                background-color: {read_config_val( "backgroundColor")};
             }}
 
             .stHeading {{
-                color: {read_config_val(conf_file, "textColor")};
-                background-color: {read_config_val(conf_file, "backgroundColor")};
                 border-radius: 15px;
-                width: 20%;
+            }}
+
+            # .stElementContainer:has(.stHeading > h1) {{
+
+            # }}
+
+            [data-testid="stHeadingWithActionElements"]:has(h1) {{
+                padding-left:20%;
+                padding-right:25%;
+            }}
+
+            .stSidebar {{
+                color: {read_config_val( "textColor")} !important;
+                background-color: {read_config_val( "backgroundColor")};
+            }}
+
+            h1 {{
+                color: {read_config_val( "textColor")};
+                background-color: {read_config_val( "backgroundColor")};
+                border-radius: 15px;
+            }}
+
+            .stText{{
+                background-color: {read_config_val( "backgroundColor")};
+                border-radius: 15px;
+                font-family: {read_config_val( "font")};
+                width: 250px;
+                font-weight: bolder;
+            }}
+
+            .stText span{{
+                color: {read_config_val( "textColor")} !important;
+            }}
+
+            .stElementContainer:has(.stText) {{
+                padding-left:40%;
+                padding-right:40%;
+            }}
+
+            p {{
+                color: {read_config_val( "textColor")};
+            }}
+
+            button {{
+                background-color: {read_config_val( "backgroundColor")} !important;
+                font-family: {read_config_val( "font")};
+                border: 2px solid {read_config_val( "textColor")} !important;
+                border-radius: 15px;
             }}
         </style>
         '''
@@ -148,8 +196,7 @@ def page_initialization(user_data_dict:dict):
     if user_data_dict["backgroundImageFlag"] is True:
         st.markdown(css, unsafe_allow_html=True)
     st_yled.init()
-    st_yled.title(_("Memorabiliacs"), text_alignment="center")
-
+    st_yled.title(_("Memorabiliacs"), text_alignment="center", width="stretch")
     with st.container(horizontal=True, vertical_alignment="top"):
         with st.container(horizontal_alignment="left", vertical_alignment="top"):
             if st_yled.button(_("Home"), key="home_button"):

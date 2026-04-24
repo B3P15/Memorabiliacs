@@ -190,8 +190,8 @@ else:
                                     else:
                                         st.info(_("No image available for this item."))
                                     with st_yled.badge_card_one(title=upc_result.get('name', _('No title')), text=f"\n**UPC: {upc_result.get('ean', '')}**", badge_text=_("UPC Result"), badge_color="primary",
-                                                        background_color=gfuncs.read_config_val(gfuncs.conf_file, "backgroundColor"), card_shadow=True, height="content", width=400, text_font_size=17, title_font_size=30, title_font_weight="bold", 
-                                                        border_style="solid", border_color=gfuncs.read_config_val(gfuncs.conf_file, "textColor"), border_width=1):
+                                                        background_color=gfuncs.read_config_val( "backgroundColor"), card_shadow=True, height="content", width=400, text_font_size=17, title_font_size=30, title_font_weight="bold", 
+                                                        border_style="solid", border_color=gfuncs.read_config_val( "textColor"), border_width=1):
                                         if upc_result["description"]:
                                             st.write(f"{_('Description')}: {upc_result['description']}")
                                         # if upc_result["publisher"]:
@@ -240,10 +240,10 @@ else:
                                 if item.get("image"):
                                     with innercols[1]:
                                         st.image(item["image"], width="stretch")
-                                with st_yled.badge_card_one(title=item.get('name', _('No name')), background_color=gfuncs.read_config_val(gfuncs.conf_file, "backgroundColor"), 
+                                with st_yled.badge_card_one(title=item.get('name', _('No name')), background_color=gfuncs.read_config_val( "backgroundColor"), 
                                                     card_shadow=True, badge_text=_("Pokemon Card"), badge_color="primary", text=f"\r\n**ID: {item.get('id', '')}**",
                                                     height=300, width=400, text_font_size=17, title_font_size=30, title_font_weight="bold", 
-                                                    border_style="solid", border_color=gfuncs.read_config_val(gfuncs.conf_file, "textColor"), border_width=1):
+                                                    border_style="solid", border_color=gfuncs.read_config_val( "textColor"), border_width=1):
                                     st_yled.write(f"**{_('HP')}: {item.get('hp', 'N/A')}**")
                                     st_yled.write(f"**{_('Flavortext')}: {item.get('flavorText', 'N/A')}**")
                                     if backEnd.CURR_COLL:
@@ -285,8 +285,8 @@ else:
                                     with innercols[1]:
                                         st.image(item["image"], width="stretch")
                                 with st_yled.badge_card_one(title=item.get('name', _('No title')), text=f"\n**ID: {item.get('id', '')}**", badge_text=_("Movie"), badge_color="primary",
-                                                    background_color=gfuncs.read_config_val(gfuncs.conf_file, "backgroundColor"), card_shadow=True, height=300, width=400, text_font_size=17, title_font_size=30, title_font_weight="bold", 
-                                                    border_style="solid", border_color=gfuncs.read_config_val(gfuncs.conf_file, "textColor"), border_width=1):
+                                                    background_color=gfuncs.read_config_val( "backgroundColor"), card_shadow=True, height=300, width=400, text_font_size=17, title_font_size=30, title_font_weight="bold", 
+                                                    border_style="solid", border_color=gfuncs.read_config_val( "textColor"), border_width=1):
                                     if item.get('overview'):
                                         st_yled.write(f"{_('Description')}: {item['overview']}")
                                     if item.get('director'):
@@ -322,9 +322,9 @@ else:
                                 if item.get("image"):
                                     with innercols[1]:
                                         st.image(item["image"], width="stretch")
-                                with st_yled.badge_card_one(title=item.get('name', _('No name')), background_color=gfuncs.read_config_val(gfuncs.conf_file, "backgroundColor"),
+                                with st_yled.badge_card_one(title=item.get('name', _('No name')), background_color=gfuncs.read_config_val( "backgroundColor"),
                                                     card_shadow=True, badge_text=_("Lego Set"), badge_color="primary", text=f"\n**ID: {item.get('id', '')}**",
-                                                    height=300, width=400, text_font_size=17, title_font_size=30, title_font_weight="bold", border_style="solid", border_color=gfuncs.read_config_val(gfuncs.conf_file, "textColor"), border_width=1):
+                                                    height=300, width=400, text_font_size=17, title_font_size=30, title_font_weight="bold", border_style="solid", border_color=gfuncs.read_config_val( "textColor"), border_width=1):
                                     if item.get('num_parts'):
                                         st.write(f"{_('Part Count')}: {item['num_parts']}")
                                     if item.get('year'):
@@ -355,9 +355,9 @@ else:
                                 if item.get("image"):
                                     with innercols[1]:
                                         st.image(item["image"], width="stretch")
-                                with st_yled.badge_card_one(title=item.get('name', _('No name')), background_color=gfuncs.read_config_val(gfuncs.conf_file, "backgroundColor"),
+                                with st_yled.badge_card_one(title=item.get('name', _('No name')), background_color=gfuncs.read_config_val( "backgroundColor"),
                                                     card_shadow=True, badge_text=_("Lego Minifig"), badge_color="primary", text=f"\n**ID: {item.get('id', '')}**",
-                                                    height=300, width=400, text_font_size=17, title_font_size=30, title_font_weight="bold", border_style="solid", border_color=gfuncs.read_config_val(gfuncs.conf_file, "textColor"), border_width=1):
+                                                    height=300, width=400, text_font_size=17, title_font_size=30, title_font_weight="bold", border_style="solid", border_color=gfuncs.read_config_val( "textColor"), border_width=1):
                                     if item.get('minifig_number'):
                                         st.write(f"{_('Minifig ID')}: {item['minifig_number']}")
                                 st.space("small")
@@ -399,9 +399,9 @@ else:
                                 if item["image"]:
                                     with innercols[1]:
                                         st.image(item["image"], width="stretch")
-                                with st_yled.badge_card_one(title=item.get('name', _('No name')), background_color=gfuncs.read_config_val(gfuncs.conf_file, "backgroundColor"), 
+                                with st_yled.badge_card_one(title=item.get('name', _('No name')), background_color=gfuncs.read_config_val( "backgroundColor"), 
                                                     card_shadow=True, badge_text=_("DBZ Card"), badge_color="primary", text=f"\n**{_('ID')}: {item.get('id', '')}**",
-                                                    height=300, width=400, text_font_size=17, title_font_size=30, title_font_weight="bold", border_style="solid", border_color=gfuncs.read_config_val(gfuncs.conf_file, "textColor"), border_width=1):
+                                                    height=300, width=400, text_font_size=17, title_font_size=30, title_font_weight="bold", border_style="solid", border_color=gfuncs.read_config_val( "textColor"), border_width=1):
                                     st_yled.write(f"**{_('Power')}: {item.get('power', 'N/A')}**")
                                     if backEnd.CURR_COLL:
                                         st_yled.button(_("Add to {collection} Collection").format(collection=backEnd.CURR_COLL.split('_')[0]), key=f"add_{item['id']}", on_click=add_dbz_button, kwargs={"item_id": item['id'], "Cardname": item['name']})
@@ -449,10 +449,10 @@ else:
                                     if item.get("image"):
                                         with innercols[1]:
                                             st.image(item["image"], width="stretch")
-                                    with st_yled.badge_card_one(title=item.get('name', _('No name')), background_color=gfuncs.read_config_val(gfuncs.conf_file, "backgroundColor"), 
+                                    with st_yled.badge_card_one(title=item.get('name', _('No name')), background_color=gfuncs.read_config_val( "backgroundColor"), 
                                                         card_shadow=True, badge_text=_("Pokemon Card"), badge_color="primary", text=f"\r\n**ID: {item.get('id', '')}**",
                                                         height=300, width=400, text_font_size=17, title_font_size=30, title_font_weight="bold", 
-                                                        border_style="solid", border_color=gfuncs.read_config_val(gfuncs.conf_file, "textColor"), border_width=1):
+                                                        border_style="solid", border_color=gfuncs.read_config_val( "textColor"), border_width=1):
                                         st_yled.write(f"**{_('HP')}: {item.get('hp', 'N/A')}**")
                                         st_yled.write(f"**{_('Flavortext')}: {item.get('flavorText', 'N/A')}**")
                                         if backEnd.CURR_COLL:
@@ -494,8 +494,8 @@ else:
                                     with innercols[1]:
                                         st.image(item["image"], width="stretch")
                                 with st_yled.badge_card_one(title=item.get('name', _('No title')), text=f"\n**ID: {item.get('id', '')}**", badge_text=_("Movie"), badge_color="primary",
-                                                    background_color=gfuncs.read_config_val(gfuncs.conf_file, "backgroundColor"), card_shadow=True, height=300, width=400, text_font_size=17, title_font_size=30, title_font_weight="bold", 
-                                                    border_style="solid", border_color=gfuncs.read_config_val(gfuncs.conf_file, "textColor"), border_width=1):
+                                                    background_color=gfuncs.read_config_val( "backgroundColor"), card_shadow=True, height=300, width=400, text_font_size=17, title_font_size=30, title_font_weight="bold", 
+                                                    border_style="solid", border_color=gfuncs.read_config_val( "textColor"), border_width=1):
                                     if item.get('overview'):
                                         st_yled.write(f"{_('Description')}: {item['overview']}")
                                     if item.get('director'):
@@ -542,9 +542,9 @@ else:
                                     innercols = st.columns([0.5,4,0.5])
                                     with innercols[1]:
                                         st.image(gfuncs.get_image_from_URL(item["image"]), width="stretch")
-                                with st_yled.badge_card_one(title=item.get('name', _('No name')), background_color=gfuncs.read_config_val(gfuncs.conf_file, "backgroundColor"), 
+                                with st_yled.badge_card_one(title=item.get('name', _('No name')), background_color=gfuncs.read_config_val( "backgroundColor"), 
                                                     card_shadow=True, badge_text=_("One Piece Card"), badge_color="primary", text=f"\n**ID: {item.get('id', '')}**",
-                                                    height=300, width=400, text_font_size=17, title_font_size=30, title_font_weight="bold", border_style="solid", border_color=gfuncs.read_config_val(gfuncs.conf_file, "textColor"), border_width=1):
+                                                    height=300, width=400, text_font_size=17, title_font_size=30, title_font_weight="bold", border_style="solid", border_color=gfuncs.read_config_val( "textColor"), border_width=1):
                                     st_yled.write(f"**{_('Type')}: {item.get('type', 'N/A')}**")
                                     st_yled.write(f"**{_('Rarity')}: {item.get('rarity', 'N/A')}**")
                                     if backEnd.CURR_COLL:
