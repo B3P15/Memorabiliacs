@@ -5,7 +5,6 @@ from BackendMethods.translations import _
 from BackendMethods.translations import set_language
 import st_yled
 import os
-from streamlit_javascript import st_javascript
 # Connects to db
 try:
     db = backEnd.get_firestore_client()
