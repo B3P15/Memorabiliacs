@@ -51,7 +51,7 @@ else:
     #st_yled.init(css_path=backEnd.CURR_THEME)
     st_yled.init()
 
-    if gfuncs.background_image_flag:
+    if user_data_dict["backgroundImageFlag"]:
         subheader_color = gfuncs.read_config_val(gfuncs.conf_file, "backgroundColor")
     else:
         subheader_color = gfuncs.read_config_val(gfuncs.conf_file, "textColor")
@@ -168,15 +168,6 @@ else:
                 remove_collections()
             else:
                 st.rerun()
-        if st.button(_("Toggle Background Image")):
-            if gfuncs.background_image_flag is True:
-                gfuncs.background_image_flag = False
-                gfuncs.sleep(0.25)
-                st.rerun()
-            else:
-                gfuncs.background_image_flag = True
-                gfuncs.sleep(0.25)
-                st.rerun()
 
     with st.sidebar:
         st.space("small")
@@ -185,3 +176,6 @@ else:
             if st.button(f"{coll.split("_")[0]}", type="tertiary"):
                 backEnd.set_collection(coll)
                 st.switch_page(gfuncs.collection_page)
+        st.space(500)
+        if st.button(icon=":material/settings:", label=_("Settings")):
+            st.switch_page("pages/settings.py")

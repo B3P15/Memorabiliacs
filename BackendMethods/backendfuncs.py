@@ -65,12 +65,15 @@ def get_collection_types():
     types = db.collections()
     for doc in types:
         if doc.id != "Users":
+# ----------------------------------------
             if doc.id == "Custom":
                 res.insert(0, doc.id)
+# ----------------------------------------
             else:
                 res.append(doc.id)
     return res
 
+# --------------------------------------------------------------------------------------------------------------------------------------------
 @st.cache_data(ttl=3600)  # Cache for 1 hour
 def get_template_types():
     """Fetch collection types, cached globally."""
@@ -88,7 +91,7 @@ def get_template_types():
         return typelist
     else:
         return tlist[1::]
-    
+# ------------------------------------------------------------------------------------------------------------------------------------------
 
 @st.cache_data(ttl=3600)
 def type_fields(coll_type: str):
@@ -263,12 +266,14 @@ def get_collection_items(collection_name: str):
     # print(f'collectionData = {collectionData}')
     coll_type = CURR_COLL.split("_")[1]
     user_id = st.session_state.user_info['localId']
+# ----------------------------------------------------------------------------------------------------------------
     if coll_type != "Custom":
         for id in collectionData:
             items[id] = {'info' : (collectionData[id].get('ref')).get().to_dict(),
                         'notes' : collectionData[id].get('notes')
                         }
         return items
+# -------------------------------------------------------------------------------------------------------------------
     else:
         if collectionData == {}:
             return items
@@ -338,6 +343,7 @@ def create_collection(collection_name: str, collection_type: str, db):
     db.collection('Users').document(user_id).collection('Collections').document(fullName).set(baseInfo)
     get_user_collections.clear(user_id)
 
+# ------------------------------------------------------------------------------------------------------------------------------------------------------
 def create_custom_collection(collection_name: str, collection_type: str, db):
     """Create a custom collection of items in the database with the specified name and type.
 
@@ -380,7 +386,7 @@ def create_custom_collection(collection_name: str, collection_type: str, db):
     db.collection('Custom').document(fullName).set(baseInfo)
     db.collection('Users').document(user_id).collection('Collections').document(fullName).set(baseInfo)
     get_user_collections.clear(user_id)
-
+# -------------------------------------------------------------------------------------------------------------------------------------------------------
 
 def rename_collection(collection_name:str, new_collection:str, db):
     """Renames a collection, by use of creating a new collection and moving the data

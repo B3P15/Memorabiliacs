@@ -62,10 +62,12 @@ else:
         field_text = ""
         print(f'views= {views}')
         with st_yled.badge_card_one(title=items[item]['info']["Name"], text=field_text, badge_text="Attributes", width="stretch", badge_color="primary", background_color=gfuncs.read_config_val(gfuncs.conf_file, "backgroundColor"), card_shadow=True, border_style="solid", border_color=gfuncs.read_config_val(gfuncs.conf_file, "textColor"), border_width=1):
+# --------------------------------------------------------------------------------------------------------------------------------------------------------
             if coll_type == 'Custom':
                 for key in items[item]['info'].keys():
                     if key not in ("Name", "Image"): 
                         st.write(f"**{key}**: **{items[item]['info'][key]}**")
+# ----------------------------------------------------------------------------------------------------------------------------------------------------------
             else:
                 for key in items[item]['info'].keys():
                     if key not in ("Name", "Image"):
@@ -74,6 +76,7 @@ else:
             if st.button(_("Remove From Collection")):
                 backEnd.delete_reference(item, db)
       
+#  -----------------------------------------------------DOWN---------------------------------------------------------------------------------------------
     @st.dialog("Template Info")
     def createCustomTemplate():
         template = ["Image"]
@@ -108,7 +111,7 @@ else:
                 if attribute != "":
                     attributes[template[i]] = attribute
                 if attribute == "":
-                    attributes[template[i]] = "blank"
+                    attributes[template[i]] = gfuncs.THUMNAIL_URLS["Custom"]
             if st_yled.button(_("Create"), key="CreateKey"):
                 new_item_id = db.collection('Custom').document(backEnd.CURR_COLL)
                 db.collection('Custom').document(backEnd.CURR_COLL).update({
@@ -123,7 +126,8 @@ else:
                 st.session_state.createCustomItemPopup = False
                 backEnd.get_collection_items.clear(backEnd.CURR_COLL)
                 st.rerun()
-
+# -----------------------------------------------------UP UP UP UP-------------------------------------------------------------------------------------------------
+                
     st.space("small")
     st.subheader(backEnd.CURR_COLL.split("_")[0], text_alignment="center")
     if st.button("", icon=":material/settings:", type="tertiary"):
@@ -137,6 +141,7 @@ else:
     if view_mode == _("grid"):
             with st.container(horizontal=True, horizontal_alignment="center", width="stretch"):
                 cols = st.columns(3, width="stretch")  # grid view
+# -------------------------------- I don't think this really does anything? ------------------------------------------------------------------------------
                 if coll_type == "Custom" and items == None:
                     pass
                 else:
@@ -144,6 +149,7 @@ else:
                         # Make custom item list match format of normal item list
                         item_list = db.collection('Custom').document(backEnd.CURR_COLL).get().to_dict()['items']
                         print(f'item lisit = {item_list}')
+# ----------------------------------------------------------------------------------------------------------------------------------------------------------------
                     for i, key in enumerate(items.keys()):
                         col = cols[i % 3]
                         curr_item = items[key]
@@ -174,8 +180,7 @@ else:
             for key in items.keys():
                 curr_item = items[key]
                 with cols[1].container(horizontal_alignment="center"):
-                    st_yled.subheader(f"{curr_item['info'].get('Name')}", text_alignment="center")
-
+                    st_yled.subheader(f"{curr_item['info'].get('Name')}", text_alignment="center")                 
                     if backEnd.CURR_COLL.split("_")[1] == "Custom":
                         if curr_item["info"]["image"] is not None:
                             st.image(curr_item["info"]["image"], width=200)
@@ -206,7 +211,7 @@ else:
         #  Translate string 
         # Change create custom to load a value into the templates map called "no custom template" which will be removed/ovewritten
         #  after the creation of the user's first template.
-
+# ----------------------------------------------------------------------------------------------------------------------------------------------------------------------
         if coll_type == "Custom":
             types = backEnd.get_template_types()
             print(f"Types = {types}")     
@@ -222,4 +227,4 @@ else:
                 createCustomItem(template)
         else:    
             st.page_link(page="pages/search.py", label=_("Add to Collection"), query_params=collection)  
-        
+# ------------------------------------------------------------------------------------------------------------------------------------------------------

@@ -82,20 +82,21 @@ def db_settings_to_config(user_data_dict:dict):
     if config_data != db_data:
         st.rerun()
 
-background_image = 'https://pbs.twimg.com/media/F9pQLNmXYAAKAn4.jpg'
-background_image_flag = False
-
-
 
 # Sets the page width, title, and buttons for home, search, settings
 # To be used at the start of any page
 def page_initialization(user_data_dict:dict):
+    is_test_mode = os.getenv("STREAMLIT_TEST_MODE", "false").lower() == "true"
+    # Check if running in test mode (AppTest sets a marker)
+    if is_test_mode:
+        user_data_dict = {"backgroundImageURL": "https://i.ytimg.com/vi/DE6wyfsTfFI/maxresdefault.jpg",
+                          "backgroundImageFlag": False}
     
     css = f'''
         <style>
             .stApp {{
                 background-image: linear-gradient(to top, {read_config_val(conf_file, "textColor")}, transparent),
-                url({background_image});
+                url({'background_image'});
                 background-size: cover;
 
             }}
@@ -107,7 +108,7 @@ def page_initialization(user_data_dict:dict):
 
     st.set_page_config(layout="wide")
     st_yled.init()
-    if background_image_flag is True:
+    if user_data_dict["backgroundImageFlag"] is True:
         st.markdown(css, unsafe_allow_html=True)
 
     st_yled.title(_("Memorabiliacs"), text_alignment="center")
