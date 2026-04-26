@@ -168,7 +168,6 @@ else:
         st.space(500)
         if st.button(icon=":material/settings:", label=_("Settings")):
             st.switch_page("pages/settings.py")
-        st.markdown(f"""<img id="Marty" src="app/static/Marty2.png" style="width:100px;height:100px;background:{gfuncs.read_config_val('backgroundColor')};position:relative;z-index:999;" />""", unsafe_allow_html=True)
-    gfuncs.apply_marty_animation()
+        gfuncs.apply_marty_animation()
 
 
